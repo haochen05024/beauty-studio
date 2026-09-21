@@ -483,6 +483,21 @@
         socialPreview: "assets/images/brand/social-preview.jpg"
       },
 
+      // v55 · Media slots. Keep every visual role in one place so the future
+      // admin panel can replace images without changing page structure.
+      mediaSlots: {
+        hero: { src: "https://images.unsplash.com/photo-1754799670380-17640d939e32?auto=format&fit=crop&fm=jpg&q=82&w=1600", alt: "Soft pink manicure detail", crop: "center" },
+        studio: { src: "https://images.unsplash.com/photo-1637777304873-68c6edca55e9?auto=format&fit=crop&fm=jpg&q=82&w=1600", alt: "Warm beauty studio interior", crop: "center" },
+        services: {
+          gel: { src: "https://images.unsplash.com/photo-1754799670380-17640d939e32?auto=format&fit=crop&fm=jpg&q=82&w=1200", alt: "Gel manicure", crop: "center" },
+          art: { src: "https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&fm=jpg&q=82&w=1200", alt: "Custom nail art", crop: "center" },
+          extensions: { src: "https://images.unsplash.com/photo-1772322586649-fc11154e76b9?auto=format&fit=crop&fm=jpg&q=82&w=1200", alt: "Nail extensions", crop: "center" }
+        },
+        contact: { src: "assets/images/brand/contact.jpg", alt: "Beauty Studio contact detail", crop: "center" },
+        owner: { src: "assets/images/brand/owner.jpg", alt: "Studio founder portrait", crop: "center" },
+        socialPreview: { src: "assets/images/brand/social-preview.jpg", alt: "Beauty Studio social preview", crop: "center" }
+      },
+
       // Social/account image template for future profile cards and sharing.
       accountImages: {
         facebook: "assets/images/accounts/facebook.jpg",
@@ -574,6 +589,35 @@
     })();
   </script>
 
+  <script>
+    // v55 · Media system bridge. The future admin panel can update mediaSlots
+    // and the customer site will apply the new assets without HTML rewrites.
+    (() => {
+      const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+      const slots = cfg.mediaSlots || {};
+      const setBackground = (selector, item) => {
+        if (!item || !item.src) return;
+        document.querySelectorAll(selector).forEach(el => {
+          el.style.backgroundImage = `url("${item.src.replace(/"/g, '\\"')}")`;
+          if (item.crop) el.style.backgroundPosition = item.crop;
+          if (item.alt) el.setAttribute('aria-label', item.alt);
+        });
+      };
+      setBackground('.hero-art', slots.hero);
+      setBackground('.about-art', slots.studio);
+      setBackground('.service-photo.photo-blush', slots.services && slots.services.gel);
+      setBackground('.service-photo.photo-rose', slots.services && slots.services.art);
+      setBackground('.service-photo.photo-nude', slots.services && slots.services.extensions);
+
+      // Preload only the main brand visuals. Gallery images remain lazy-loaded.
+      [slots.hero, slots.studio].forEach(item => {
+        if (!item || !item.src || !/^https?:/i.test(item.src)) return;
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = item.src;
+      });
+    })();
+  </script>
   <script src="assets/js/app.js"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
 </body>
 </html>
