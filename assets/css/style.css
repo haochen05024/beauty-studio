@@ -1295,3 +1295,44 @@ body.modal-open .install-modal{overscroll-behavior:contain}
 .booking-time-label small { opacity: .72; }
 .date-choice:disabled { opacity: .42; cursor: not-allowed; }
 .time-grid .booking-closed-note { grid-column: 1 / -1; padding: 14px 16px; border: 1px solid var(--line, rgba(0,0,0,.1)); border-radius: 14px; font-size: .82rem; color: var(--muted, #777); background: var(--surface-soft, rgba(255,255,255,.5)); }
+
+
+/* v38 — custom booking date + dynamic time progression */
+.date-custom-choice {
+  position: relative;
+}
+.date-custom-choice.is-custom-selected span {
+  color: var(--ink, #2b2421);
+}
+.date-custom-choice.is-custom-selected small {
+  color: var(--muted, #7c6e67);
+}
+.booking-date-picker {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.time-grid button.selected,
+.time-grid button.active {
+  border-color: var(--accent, #c58f7a);
+  background: #f5e8e1;
+}
+.booking-closed-note {
+  grid-column: 1 / -1;
+  padding: 18px;
+  border: 1px solid rgba(120, 95, 84, .16);
+  border-radius: 16px;
+  color: var(--muted, #7c6e67);
+  background: rgba(255,255,255,.45);
+  text-align: center;
+}
+@media (max-width: 640px) {
+  .date-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .date-custom-choice span {
+    white-space: nowrap;
+  }
+}

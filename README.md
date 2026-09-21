@@ -1,29 +1,12 @@
-# Beauty Studio v36 — Content & Account Template
+# Beauty Studio v38 — Booking Date & Time Fix
 
-This customer-facing patch prepares the site for future real studio content.
+Overwrite only:
+- index.html
+- assets/css/style.css
+- assets/js/app.js
 
-## Main content hub
-Edit `window.BEAUTY_STUDIO_CONTENT` in `index.html` for now.
-
-### Account templates
-- social.instagram
-- social.facebook
-- social.tiktok
-- social.whatsapp
-- social.telegram
-
-### Brand media slots
-- media.hero
-- media.studio
-- media.ownerPortrait
-- media.qrContact
-- media.socialPreview
-
-### Account image slots
-`assets/images/accounts/`
-
-### Gallery images
-`assets/images/gallery/`
-
-These are placeholders only. No real personal/account information is included.
-Later, the separate admin site can manage these fields without changing the customer site layout.
+Changes:
+- Selecting a generated time now correctly advances Booking from Step 2 to Step 3.
+- The third date card is now “Choose date” and opens a native date picker.
+- Custom dates respect bookingRules workingDays and advanceDays.
+- Existing booking/PWA/customer UI is preserved.

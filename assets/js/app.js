@@ -1697,3 +1697,121 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshFromSelectedDate();
   }
 })();
+
+
+/* v38 — booking date picker + dynamic time progression
+   Fixes v37 dynamic time buttons not advancing to step 3.
+*/
+(function () {
+  const modal = document.getElementById("bookingModal");
+  if (!modal) return;
+
+  const steps = [...modal.querySelectorAll(".booking-step")];
+  const dots = [...modal.querySelectorAll("[data-progress]")];
+  const fill = document.getElementById("progressFill");
+  const dateButtons = [...modal.querySelectorAll(".date-choice")];
+  const customDateButton = modal.querySelector("[data-date-custom]");
+  const customDateInput = document.getElementById("customBookingDate");
+  const summaryDate = document.getElementById("summaryDate");
+  const summaryTime = document.getElementById("summaryTime");
+  const readyNote = document.getElementById("bookingReadyNote");
+
+  const studio = window.BEAUTY_STUDIO_CONTENT || {};
+  const rules = studio.bookingRules || {};
+  const workingDays = Array.isArray(rules.workingDays) && rules.workingDays.length
+    ? rules.workingDays.map(Number) : [1,2,3,4,5,6];
+  const advanceDays = Math.max(0, Number(rules.advanceDays) || 30);
+  const closedMessage = rules.closedMessage || "The Studio is closed on this day.";
+
+  function setStep(step) {
+    steps.forEach(s => s.classList.toggle("active", Number(s.dataset.step) === step));
+    dots.forEach(d => d.classList.toggle("current", Number(d.dataset.progress) === step));
+    if (fill) fill.style.width = `${step / 3 * 100}%`;
+  }
+
+  function localDateFromIso(iso) {
+    const [y,m,d] = iso.split("-").map(Number);
+    const date = new Date(y, m - 1, d, 12, 0, 0);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function isoFromDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,"0");
+    const d = String(date.getDate()).padStart(2,"0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function formatCustomDate(date) {
+    return date.toLocaleDateString(undefined, {
+      weekday: "short", month: "short", day: "numeric"
+    });
+  }
+
+  function selectDateButton(button, label, iso) {
+    dateButtons.forEach(x => x.classList.remove("active"));
+    button.classList.add("active");
+    button.dataset.date = label;
+    button.dataset.isoDate = iso;
+    if (summaryDate) summaryDate.textContent = label;
+  }
+
+  // The third date card is an actual date picker instead of a fixed weekday.
+  if (customDateButton && customDateInput) {
+    customDateButton.addEventListener("click", () => {
+      const now = new Date();
+      const todayIso = isoFromDate(now);
+      const max = new Date(now);
+      max.setDate(max.getDate() + advanceDays);
+      customDateInput.min = todayIso;
+      customDateInput.max = isoFromDate(max);
+
+      if (typeof customDateInput.showPicker === "function") {
+        try { customDateInput.showPicker(); } catch (_) { customDateInput.click(); }
+      } else {
+        customDateInput.click();
+      }
+    });
+
+    customDateInput.addEventListener("change", () => {
+      const iso = customDateInput.value;
+      const date = localDateFromIso(iso);
+      if (!date) return;
+
+      const day = date.getDay() === 0 ? 7 : date.getDay();
+      if (!workingDays.includes(day)) {
+        customDateButton.classList.remove("is-custom-selected");
+        if (readyNote) readyNote.textContent = closedMessage;
+        return;
+      }
+
+      customDateButton.classList.add("is-custom-selected");
+      const label = formatCustomDate(date);
+      const span = customDateButton.querySelector("span");
+      const small = customDateButton.querySelector("small");
+      if (span) span.textContent = "Selected";
+      if (small) small.textContent = label;
+      selectDateButton(customDateButton, label, iso);
+      if (readyNote) readyNote.textContent = "Date selected. Pick an available time to continue.";
+    });
+  }
+
+  // v37 rebuilds .time-grid dynamically, so listen at the container level.
+  const timeGrid = modal.querySelector(".time-grid");
+  if (timeGrid) {
+    timeGrid.addEventListener("click", event => {
+      const button = event.target.closest("button[data-time]");
+      if (!button || button.disabled) return;
+
+      timeGrid.querySelectorAll("button").forEach(x => x.classList.remove("selected", "active"));
+      button.classList.add("selected", "active");
+
+      const time = button.dataset.time || button.textContent.trim();
+      if (summaryTime) summaryTime.textContent = time;
+
+      // This is the missing transition in v37.
+      setStep(3);
+      if (readyNote) readyNote.textContent = "Everything is selected. Add your contact details and send the request.";
+    });
+  }
+})();
