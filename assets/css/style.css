@@ -1394,3 +1394,47 @@ body.modal-open .install-modal{overscroll-behavior:contain}
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 }
+
+
+/* v43 — temporary visual photography layer
+   Replace these remote Unsplash URLs from the future admin/media library. */
+.hero-art{
+  background-image:
+    linear-gradient(145deg,rgba(239,229,223,.78),rgba(189,162,152,.72)),
+    url("https://images.unsplash.com/photo-1754799670380-17640d939e32?auto=format&fit=crop&fm=jpg&q=82&w=1600");
+  background-size:cover;
+  background-position:center;
+}
+.about-art{
+  background-image:
+    linear-gradient(145deg,rgba(239,229,223,.38),rgba(126,99,89,.22)),
+    url("https://images.unsplash.com/photo-1637777304873-68c6edca55e9?auto=format&fit=crop&fm=jpg&q=82&w=1600");
+  background-size:cover;
+  background-position:center;
+}
+.service-photo.photo-blush{
+  background-image:
+    linear-gradient(145deg,rgba(247,235,230,.18),rgba(124,91,82,.10)),
+    url("https://images.unsplash.com/photo-1754799670380-17640d939e32?auto=format&fit=crop&fm=jpg&q=82&w=1200");
+  background-size:cover;
+  background-position:center;
+}
+.service-photo.photo-rose{
+  background-image:
+    linear-gradient(145deg,rgba(247,235,230,.12),rgba(124,91,82,.08)),
+    url("https://images.unsplash.com/photo-1772322586649-fc11154e76b9?auto=format&fit=crop&fm=jpg&q=82&w=1200");
+  background-size:cover;
+  background-position:center;
+}
+.service-photo.photo-nude{
+  background-image:
+    linear-gradient(145deg,rgba(247,235,230,.12),rgba(124,91,82,.08)),
+    url("https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&fm=jpg&q=82&w=1200");
+  background-size:cover;
+  background-position:center;
+}
+.gallery-photo{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .45s ease,filter .45s ease;
+}
+.work-item:hover .gallery-photo{transform:scale(1.035);filter:saturate(1.04)}
