@@ -2014,3 +2014,124 @@ body.modal-open .install-modal{overscroll-behavior:contain}
  .premium-contact .contact-social-links b{font-size:7px}
  .contact-visual strong{font-size:27px}
 }
+
+/* v53 · whole-site premium final polish */
+:root{
+  --bg:#fbf7f3;
+  --surface:#f3e9e3;
+  --surface-2:#eee1da;
+  --ink:#2b2522;
+  --muted:#776b64;
+  --line:#ded1ca;
+  --accent:#b77d69;
+  --accent-soft:#e8d3ca;
+  --white:#fffdfb;
+}
+html{scroll-padding-top:82px}
+body{background:var(--bg);color:var(--ink)}
+::selection{background:#e5cfc5;color:#2b2522}
+
+/* Header: one consistent premium language */
+.site-header{height:82px;background:rgba(251,247,243,.94);border-bottom-color:rgba(62,45,38,.09);box-shadow:0 8px 30px rgba(60,43,35,.025)}
+.site-header.scrolled{box-shadow:0 12px 34px rgba(60,43,35,.07)}
+.desktop-nav a{position:relative;padding:7px 0;color:#5d534d}
+.desktop-nav a:after{content:"";position:absolute;left:0;right:100%;bottom:1px;height:1px;background:var(--accent);transition:right .25s ease}
+.desktop-nav a:hover:after,.desktop-nav a.active:after{right:0}
+.header-book{border:1px solid rgba(73,55,47,.24);border-radius:999px;padding:9px 16px;transition:.2s;background:rgba(255,253,251,.65)}
+.header-book:hover{background:var(--ink);color:#fff;transform:translateY(-1px)}
+
+/* Consistent section rhythm */
+.section{position:relative}
+.section-heading{margin-bottom:42px}
+.section-heading .eyebrow{margin-bottom:14px}
+.section-heading>p{color:#7b6e67}
+.trust-strip{background:#fbf7f3;color:#887a72}
+
+/* Services */
+.premium-services{background:linear-gradient(180deg,#fbf7f3 0%,#f7eee9 100%)}
+.premium-services .service-card{border-color:rgba(83,62,53,.10);box-shadow:0 12px 34px rgba(68,49,42,.045)}
+.premium-services .service-card:hover{box-shadow:0 26px 58px rgba(68,49,42,.11)}
+.premium-services .service-info{background:rgba(255,253,251,.34)}
+.premium-services .service-bottom{color:#71635c}
+
+/* Gallery: cleaner image-to-caption separation */
+#work{background:#fffaf7}
+.gallery-intro{border-bottom:1px solid rgba(83,62,53,.10);margin-bottom:28px}
+.gallery-toolbar{padding-top:2px}
+.filters button{position:relative}
+.filters button:after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:1px;background:var(--accent);transition:right .25s ease}
+.filters button.active:after{right:0}
+.work-item>div:last-child{padding:12px 4px 3px}
+.work-item>div:last-child strong{font-family:var(--serif);font-size:14px;font-weight:400}
+.work-item>div:last-child span{font-size:9px;letter-spacing:.04em}
+
+/* About */
+.about{box-shadow:inset 0 1px rgba(255,255,255,.03)}
+.about-copy .eyebrow{letter-spacing:.22em}
+.values div{min-width:115px}
+
+/* Booking: make the entry point feel like a branded appointment */
+.booking{background:linear-gradient(135deg,#eadcd4 0%,#f5ebe6 55%,#ead9d1 100%)}
+.booking-copy h2{letter-spacing:-.055em}
+.booking-panel{border:1px solid rgba(81,60,51,.10);box-shadow:0 28px 70px rgba(66,47,39,.10)}
+.booking-editorial-bar{border-color:rgba(81,60,51,.09)}
+.booking-step{border-color:rgba(81,60,51,.11)}
+.booking-step.active{box-shadow:0 12px 30px rgba(70,50,42,.06)}
+
+/* Install */
+.install-section{border-top:1px solid rgba(83,62,53,.08);border-bottom:1px solid rgba(83,62,53,.08)}
+.device-card{border-color:rgba(83,62,53,.10)!important;box-shadow:0 10px 28px rgba(68,49,42,.045)}
+.device-card:hover{box-shadow:0 18px 40px rgba(68,49,42,.08)!important}
+
+/* Contact */
+.premium-contact{border-top:1px solid rgba(83,62,53,.08)}
+.premium-contact .contact-social-links a{transition:transform .22s ease,box-shadow .22s ease,background .22s ease,border-color .22s ease}
+.contact-visual{filter:saturate(.92)}
+
+/* Footer: quiet, structured finish */
+footer{background:#2e2825;color:#f8f0eb;border-top:1px solid rgba(255,255,255,.06)}
+footer small{color:#a99a92}
+footer p{color:#d9cbc4}
+
+/* Floating help button */
+.help-widget,.support-widget{box-shadow:0 16px 40px rgba(47,34,29,.16)}
+
+/* Modal consistency */
+.modal-panel{border:1px solid rgba(83,62,53,.08);box-shadow:0 38px 100px rgba(30,20,15,.28)}
+.modal-close{box-shadow:0 6px 18px rgba(30,20,15,.08)}
+.detail-modal .button-dark,.booking-panel .button-dark{box-shadow:0 12px 28px rgba(39,30,26,.14)}
+
+/* Global focus treatment */
+:where(a,button,input,select,textarea):focus-visible{outline:2px solid rgba(183,125,105,.75);outline-offset:3px}
+
+@media(max-width:900px){
+  .site-header{height:74px}
+  html{scroll-padding-top:74px}
+  .section-heading{margin-bottom:34px}
+  .premium-services .service-grid{gap:14px}
+  .about-copy{padding-top:64px;padding-bottom:64px}
+}
+@media(max-width:800px){
+  .site-header{padding:0 16px}
+  .brand{gap:9px}
+  .brand-mark{width:35px;height:35px}
+  .brand strong{font-size:15px}
+  .hero{min-height:auto;padding-top:58px;padding-bottom:64px}
+  .trust-strip{padding:12px 16px;line-height:1.6}
+  .section{padding-top:66px;padding-bottom:72px}
+  .premium-services .service-card h3{font-size:27px}
+  #work{padding-top:68px}
+  .work-grid{gap:10px}
+  .about-art{min-height:350px}
+  .booking{padding-top:64px;padding-bottom:72px}
+  .install-section{padding-top:64px;padding-bottom:76px}
+  .premium-contact{padding-top:62px}
+}
+@media(max-width:420px){
+  .hero{padding-top:48px}
+  h1{font-size:50px}
+  h2{font-size:41px}
+  .section{padding-left:17px;padding-right:17px}
+  .promo{margin-left:17px;margin-right:17px}
+  .premium-contact .contact-social-links a{min-height:62px}
+}
