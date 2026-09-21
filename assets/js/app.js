@@ -699,3 +699,22 @@ document.addEventListener("DOMContentLoaded", () => {
     option?.click();
   });
 })();
+
+/* v19 — subtle About reveal */
+(() => {
+  const about=document.getElementById("about");
+  if(!about) return;
+  const items=about.querySelectorAll(".about-signature,.studio-philosophy,.values>div,.about-art");
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add("story-visible");
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:.12});
+  items.forEach((el,i)=>{
+    el.style.setProperty("--story-delay",`${Math.min(i*70,280)}ms`);
+    io.observe(el);
+  });
+})();

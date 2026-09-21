@@ -808,3 +808,30 @@ body{overflow-x:hidden}
   .work-service-match strong{font-size:12px}
   .work-service-match button{font-size:7px}
 }
+
+/* v19 — About / studio brand story */
+.about{isolation:isolate}
+.about-signature{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:17px 0 0;padding-top:15px;border-top:1px solid rgba(78,58,50,.10)}
+.about-signature span{font:italic 17px var(--serif);color:#81665b}
+.about-signature i{font:normal 7px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:#aa978e}
+.studio-philosophy{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:start;margin:28px 0 18px;padding:17px 18px;border-left:2px solid #c89582;background:rgba(250,244,240,.65)}
+.studio-philosophy>span{font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:#9c8176;padding-top:2px}
+.studio-philosophy p{margin:0;max-width:430px;font:italic 15px/1.55 var(--serif);color:#67534b}
+.values{position:relative}
+.values:before{content:"";position:absolute;left:0;right:0;top:-10px;height:1px;background:rgba(78,58,50,.07)}
+.value-number{font:24px var(--serif);color:rgba(115,86,75,.35)}
+.studio-card{box-shadow:0 20px 55px rgba(72,51,43,.09)}
+@media(max-width:800px){
+  .about-signature{margin-top:14px;padding-top:12px}
+  .about-signature span{font-size:15px}
+  .about-signature i{font-size:6px}
+  .studio-philosophy{grid-template-columns:1fr;gap:6px;margin:22px 0 16px;padding:14px 15px}
+  .studio-philosophy p{font-size:14px;line-height:1.55}
+  .values:before{top:-7px}
+}
+
+.about-signature,.studio-philosophy,.values>div,.about-art{opacity:0;transform:translateY(10px);transition:opacity .6s ease var(--story-delay),transform .6s ease var(--story-delay)}
+.about-signature.story-visible,.studio-philosophy.story-visible,.values>div.story-visible,.about-art.story-visible{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  .about-signature,.studio-philosophy,.values>div,.about-art{opacity:1;transform:none;transition:none}
+}
