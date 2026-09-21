@@ -183,8 +183,8 @@
     <p class="eyebrow">06 · Your Studio</p>
     <h2>Keep Beauty Studio<br><em>close to you.</em></h2>
     <p class="install-lead">Add Beauty Studio to your device for quick access to your favorite styles, services and appointments.</p>
-    <div class="install-actions">
-      <button class="install-main" id="installMain" type="button"><span class="install-icon">↓</span><span><strong>Add to Home Screen</strong><small>Install Beauty Studio</small></span><b>→</b></button>
+    <div class="install-actions" id="installActions">
+      <button class="install-main" id="installMain" type="button" aria-haspopup="dialog"><span class="install-icon">↓</span><span><strong>Add to Home Screen</strong><small id="installMainSub">Install Beauty Studio</small></span><b>→</b></button>
       <span class="install-status" id="installStatus">Available on supported devices</span>
     </div>
   </div>
@@ -195,6 +195,29 @@
     <div class="device-card"><span class="device-icon">⊞</span><strong>Windows</strong><small>Chrome / Edge</small></div>
   </div>
 </section>
+
+<!-- Device-aware install guide -->
+<div class="install-modal" id="installModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
+  <div class="install-modal-backdrop" data-close-install></div>
+  <div class="install-modal-card" role="document">
+    <button class="install-modal-close" type="button" aria-label="Close" data-close-install>×</button>
+    <div class="install-modal-head">
+      <p class="eyebrow" id="installModalEyebrow">YOUR DEVICE</p>
+      <h3 id="installModalTitle">Add Beauty Studio<br><em>to your home screen.</em></h3>
+      <p id="installModalIntro">Follow the steps for your device. Once Beauty Studio is added, this button will disappear.</p>
+    </div>
+    <div class="install-guide" id="installGuide">
+      <article class="install-step"><span>1</span><div><strong id="installStep1Title">Open the browser menu</strong><p id="installStep1Text">Open the sharing or browser menu on your device.</p></div></article>
+      <article class="install-step"><span>2</span><div><strong id="installStep2Title">Choose Add to Home Screen</strong><p id="installStep2Text">Select the option to add Beauty Studio.</p></div></article>
+      <article class="install-step"><span>3</span><div><strong id="installStep3Title">You're ready</strong><p id="installStep3Text">Beauty Studio will appear as an app on your device.</p></div></article>
+    </div>
+    <div class="install-modal-note" id="installModalNote">✦ You can open Beauty Studio from your home screen anytime.</div>
+    <div class="install-modal-actions">
+      <button class="button button-dark" id="installModalAction" type="button">I've added it</button>
+      <button class="install-modal-secondary" type="button" data-close-install>Maybe later</button>
+    </div>
+  </div>
+</div>
 
 <section class="booking" id="booking">
   <div>

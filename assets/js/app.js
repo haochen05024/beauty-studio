@@ -24,53 +24,201 @@ document.addEventListener("DOMContentLoaded", () => {
   let deferredPrompt = null;
   const installBtn = document.getElementById("installBtn");
   const installMain = document.getElementById("installMain");
-  const hint = document.getElementById("installHint");
+  const installActions = document.getElementById("installActions");
+  const installStatus = document.getElementById("installStatus");
+  const installMainSub = document.getElementById("installMainSub");
+  const modal = document.getElementById("installModal");
+  const modalTitle = document.getElementById("installModalTitle");
+  const modalEyebrow = document.getElementById("installModalEyebrow");
+  const modalIntro = document.getElementById("installModalIntro");
+  const modalAction = document.getElementById("installModalAction");
+  const stepTitles = [1,2,3].map(i => document.getElementById(`installStep${i}Title`));
+  const stepTexts = [1,2,3].map(i => document.getElementById(`installStep${i}Text`));
 
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isMac = /macintosh/i.test(navigator.userAgent);
-  const isAndroid = /android/i.test(navigator.userAgent);
+  const ua = navigator.userAgent || "";
+  const platform = navigator.platform || "";
+  const isIOS = /iphone|ipad|ipod/i.test(ua) || (platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(ua);
+  const isMac = /macintosh|mac os x/i.test(ua) && !isIOS;
+  const isWindows = /windows/i.test(ua);
+  const isStandalone = () =>
+    window.matchMedia?.("(display-mode: standalone)")?.matches ||
+    window.navigator.standalone === true ||
+    document.referrer.startsWith("android-app://");
 
-  window.addEventListener("beforeinstallprompt", event => {
-    event.preventDefault();
-    deferredPrompt = event;
-    if (installBtn) {
-      installBtn.hidden = false;
-      installBtn.textContent = "Install";
+  const alreadyInstalledKey = "beauty-studio-installed-v24";
+
+  const hideInstall = (message = "Beauty Studio is on your device") => {
+    if (installActions) installActions.classList.add("install-complete");
+    if (installMain) {
+      installMain.hidden = true;
+      installMain.setAttribute("aria-hidden", "true");
     }
-    if (installMain) installMain.textContent = "Install Beauty Studio →";
-  });
+    if (installBtn) installBtn.hidden = true;
+    if (installStatus) {
+      installStatus.textContent = message;
+      installStatus.classList.add("is-complete");
+    }
+    try { localStorage.setItem(alreadyInstalledKey, "1"); } catch (_) {}
+  };
 
-  const openInstall = async () => {
+  const isMarkedInstalled = () => {
+    try { return localStorage.getItem(alreadyInstalledKey) === "1"; } catch (_) { return false; }
+  };
+
+  const closeInstall = () => {
+    if (!modal) return;
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+  };
+
+  const setGuide = (device) => {
+    const guides = {
+      iphone: {
+        label: "iPHONE · SAFARI",
+        title: "Add Beauty Studio<br><em>to your iPhone.</em>",
+        intro: "Use Safari to add Beauty Studio to your Home Screen. After you finish, tap “I've added it”.",
+        steps: [
+          ["Tap the Share button", "In Safari, tap the Share icon at the bottom of the screen."],
+          ["Choose Add to Home Screen", "Scroll down in the Share sheet and tap “Add to Home Screen”."],
+          ["Tap Add", "Confirm the name, then tap “Add”. Beauty Studio will appear on your Home Screen."]
+        ],
+        note: "Tip · If you don't see the option, make sure this page is open in Safari."
+      },
+      android: {
+        label: "ANDROID · CHROME",
+        title: "Add Beauty Studio<br><em>to your Android.</em>",
+        intro: "Chrome can install Beauty Studio directly when installation is available on your device.",
+        steps: [
+          ["Open the Chrome menu", "Tap the three dots ⋮ in the top-right corner."],
+          ["Choose Install app", "Tap “Install app” or “Add to Home screen”, depending on your Chrome version."],
+          ["Confirm Install", "Confirm the prompt. Beauty Studio will be added to your device."]
+        ],
+        note: "Tip · If an Install prompt appears, you can use it directly instead of the menu."
+      },
+      mac: {
+        label: "MAC · SAFARI / CHROME",
+        title: "Add Beauty Studio<br><em>to your Mac.</em>",
+        intro: "Install Beauty Studio from your browser so it can open like an app from your Dock or Applications.",
+        steps: [
+          ["Open the browser install menu", "Safari: use File → Add to Dock. Chrome: use the install icon in the address bar or ⋮ menu."],
+          ["Confirm the install", "Follow the browser's confirmation prompt to add Beauty Studio."],
+          ["Open Beauty Studio", "Launch it from your Dock, Applications, or installed apps."]
+        ],
+        note: "Tip · Chrome may show an install icon at the right side of the address bar."
+      },
+      windows: {
+        label: "WINDOWS · CHROME / EDGE",
+        title: "Add Beauty Studio<br><em>to your Windows PC.</em>",
+        intro: "Install Beauty Studio from Chrome or Edge for quick access from your desktop or Start menu.",
+        steps: [
+          ["Open the install option", "Chrome: click the install icon in the address bar or ⋮. Edge: use Apps → Install this site as an app."],
+          ["Confirm Install", "Follow the browser prompt and confirm the installation."],
+          ["You're ready", "Beauty Studio will be available from your Start menu and installed apps."]
+        ],
+        note: "Tip · The exact menu wording can vary slightly by browser version."
+      },
+      desktop: {
+        label: "YOUR DEVICE",
+        title: "Add Beauty Studio<br><em>to your device.</em>",
+        intro: "Open your browser's Install or Add to Home Screen option to save Beauty Studio for quick access.",
+        steps: [
+          ["Open the browser menu", "Look for an Install, Add to Home Screen, or Add to Dock option."],
+          ["Confirm", "Follow the browser's installation prompt."],
+          ["You're ready", "Open Beauty Studio from your installed apps or Home Screen."]
+        ],
+        note: "Tip · The available option depends on your browser and device."
+      }
+    };
+
+    const guide = guides[device] || guides.desktop;
+    if (modalEyebrow) modalEyebrow.textContent = guide.label;
+    if (modalTitle) modalTitle.innerHTML = guide.title;
+    if (modalIntro) modalIntro.textContent = guide.intro;
+    guide.steps.forEach((step, index) => {
+      if (stepTitles[index]) stepTitles[index].textContent = step[0];
+      if (stepTexts[index]) stepTexts[index].textContent = step[1];
+    });
+    const note = document.getElementById("installModalNote");
+    if (note) note.textContent = guide.note;
+  };
+
+  const detectDevice = () => {
+    if (isIOS) return "iphone";
+    if (isAndroid) return "android";
+    if (isMac) return "mac";
+    if (isWindows) return "windows";
+    return "desktop";
+  };
+
+  const openInstallGuide = async () => {
+    if (isStandalone()) {
+      hideInstall();
+      return;
+    }
+
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const result = await deferredPrompt.userChoice;
       deferredPrompt = null;
-      if (installBtn) installBtn.hidden = true;
+      if (result?.outcome === "accepted") {
+        hideInstall("Beauty Studio has been added");
+      }
       return;
     }
 
-    if (isIOS) {
-      hint.textContent = "iPhone / iPad · Safari → Share → Add to Home Screen";
-      return;
+    setGuide(detectDevice());
+    if (modal) {
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
     }
-    if (isMac) {
-      hint.textContent = "Mac · Safari: File → Add to Dock · Chrome/Edge: use Install in the address bar";
-      return;
-    }
-    if (isAndroid) {
-      hint.textContent = "Android · Chrome: menu ⋮ → Install app / Add to Home screen";
-      return;
-    }
-    hint.textContent = "Desktop · use your browser’s Install option from the address bar or menu";
   };
 
-  installBtn?.addEventListener("click", openInstall);
-  installMain?.addEventListener("click", openInstall);
+  // The device cards are now informational shortcuts to the same guide.
+  document.querySelectorAll(".device-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const name = (card.querySelector("strong")?.textContent || "").toLowerCase();
+      const device = name.includes("iphone") ? "iphone" : name.includes("android") ? "android" : name.includes("mac") ? "mac" : name.includes("windows") ? "windows" : "desktop";
+      setGuide(device);
+      modal?.classList.add("open");
+      modal?.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    });
+  });
+
+  window.addEventListener("beforeinstallprompt", event => {
+    event.preventDefault();
+    deferredPrompt = event;
+    if (installBtn) installBtn.hidden = false;
+    if (installMainSub) installMainSub.textContent = "Install Beauty Studio";
+    if (installStatus) installStatus.textContent = "Ready to install on this device";
+  });
 
   window.addEventListener("appinstalled", () => {
-    if (installBtn) installBtn.hidden = true;
-    if (hint) hint.textContent = "Beauty Studio has been added to your device.";
+    deferredPrompt = null;
+    hideInstall("Beauty Studio has been added");
+    closeInstall();
   });
+
+  installBtn?.addEventListener("click", openInstallGuide);
+  installMain?.addEventListener("click", openInstallGuide);
+
+  document.querySelectorAll("[data-close-install]").forEach(el => el.addEventListener("click", closeInstall));
+  modalAction?.addEventListener("click", () => {
+    hideInstall("Beauty Studio has been added");
+    closeInstall();
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeInstall();
+  });
+
+  // If the page is opened as an installed app, or the user previously confirmed installation, hide the CTA.
+  if (isStandalone() || isMarkedInstalled()) {
+    hideInstall();
+  }
 })();
 
 (() => {

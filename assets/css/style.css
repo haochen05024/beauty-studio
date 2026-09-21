@@ -1069,3 +1069,55 @@ img{max-width:100%;height:auto}
     transition-duration:.01ms!important;
   }
 }
+
+/* v24 · device-aware install guide */
+.install-actions{align-items:center}
+.install-actions.install-complete{min-height:22px}
+.install-status.is-complete{color:#6f625b}
+.install-main[hidden]{display:none!important}
+.device-card{cursor:pointer;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.device-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(60,40,32,.09);border-color:rgba(185,135,114,.3)}
+.install-modal{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;padding:24px}
+.install-modal.open{display:flex}
+.install-modal-backdrop{position:absolute;inset:0;background:rgba(35,27,24,.42);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.install-modal-card{position:relative;z-index:1;width:min(720px,100%);max-height:min(780px,calc(100vh - 48px));overflow:auto;background:#fffaf7;border:1px solid rgba(120,94,84,.14);border-radius:28px;padding:clamp(28px,5vw,44px);box-shadow:0 30px 90px rgba(40,30,25,.2);animation:installModalIn .28s ease both}
+.install-modal-close{position:absolute;right:20px;top:18px;width:38px;height:38px;border:0;border-radius:50%;background:#f1e6e0;color:#332925;font-size:25px;line-height:1;cursor:pointer}
+.install-modal-head{max-width:610px;padding-right:38px}
+.install-modal-head .eyebrow{margin-bottom:12px}
+.install-modal-head h3{font:400 clamp(30px,5vw,48px)/.98 var(--serif);letter-spacing:-.03em;margin:0 0 16px;color:var(--ink)}
+.install-modal-head h3 em{color:var(--accent);font-style:italic}
+.install-modal-head>p:last-child{max-width:580px;color:#6d615b;font-size:13px;line-height:1.75;margin:0}
+.install-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:30px 0 18px}
+.install-step{min-height:190px;padding:18px;border:1px solid rgba(120,94,84,.12);border-radius:19px;background:rgba(255,255,255,.7);display:flex;flex-direction:column;gap:18px}
+.install-step>span{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#ead9d0;color:#795e51;font-size:11px;font-weight:700}
+.install-step strong{display:block;font:400 17px/1.15 var(--serif);margin-bottom:9px;color:var(--ink)}
+.install-step p{margin:0;color:#766861;font-size:11px;line-height:1.65}
+.install-modal-note{padding:14px 16px;border-radius:15px;background:#f3e8e2;color:#6d5e56;font-size:10px;line-height:1.55}
+.install-modal-actions{display:flex;align-items:center;gap:14px;margin-top:18px}
+.install-modal-actions .button{min-height:46px;padding-inline:22px}
+.install-modal-secondary{border:0;background:transparent;color:#7a6c65;font-size:11px;cursor:pointer;padding:10px}
+.install-modal-secondary:hover{text-decoration:underline}
+body.modal-open .install-modal{overscroll-behavior:contain}
+@keyframes installModalIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+
+@media (max-width:700px){
+  .install-modal{padding:12px}
+  .install-modal-card{max-height:calc(100vh - 24px);border-radius:23px;padding:25px 18px 18px}
+  .install-modal-close{right:12px;top:11px}
+  .install-modal-head{padding-right:38px}
+  .install-modal-head h3{font-size:31px}
+  .install-modal-head>p:last-child{font-size:11px;line-height:1.65}
+  .install-guide{grid-template-columns:1fr;gap:8px;margin:22px 0 12px}
+  .install-step{min-height:0;padding:14px;display:grid;grid-template-columns:31px 1fr;gap:12px;align-items:start}
+  .install-step strong{font-size:15px;margin-bottom:5px}
+  .install-step p{font-size:10px;line-height:1.55}
+  .install-modal-note{font-size:9px}
+  .install-modal-actions{flex-direction:column;align-items:stretch;gap:5px}
+  .install-modal-actions .button{width:100%}
+  .install-modal-secondary{width:100%}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .install-modal-card{animation:none}
+  .device-card{transition:none}
+}
