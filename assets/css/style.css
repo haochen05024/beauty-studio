@@ -1897,3 +1897,46 @@ body.modal-open .install-modal{overscroll-behavior:contain}
   .contact-signoff{align-items:flex-start;gap:10px;flex-direction:column}
   .contact-signoff em{font-size:17px}
 }
+
+/* v51 · contact palette refinement */
+[data-contact-section]{
+  background:linear-gradient(180deg,#f8f0ec 0%,#f2e6e0 100%);
+}
+[data-contact-section] .eyebrow{color:#9a786b}
+[data-contact-section] h2{color:#302823}
+[data-contact-section] h2 em{color:#a66f5f}
+[data-contact-section] .contact-status{
+  background:rgba(255,253,251,.78);
+  border-color:rgba(110,79,67,.12);
+}
+[data-contact-section] .contact-details p{color:#6f625b}
+[data-contact-section] .contact-details strong{color:#3b302b}
+.contact-social-row{
+  position:relative;
+  margin-left:clamp(-20px,-2vw,-10px);
+  margin-right:clamp(-20px,-2vw,-10px);
+  padding:30px clamp(20px,3vw,38px) 28px;
+  border-top:1px solid rgba(96,68,57,.14);
+  border-bottom:1px solid rgba(96,68,57,.10);
+  background:linear-gradient(135deg,#e9d7cf 0%,#f0e1da 100%);
+  border-radius:22px;
+}
+.contact-social-label{color:#8c6d61}
+.contact-social-links{border-left:1px solid rgba(76,53,45,.12)}
+.contact-social-links a{
+  color:#332925;
+  border-right-color:rgba(76,53,45,.12);
+}
+.contact-social-links a:hover{background:rgba(255,255,255,.28)}
+.contact-social-links small{color:#8a756c}
+.contact-social-links b{color:#a66f5f}
+.contact-signoff{
+  color:#806f67;
+  border-top-color:rgba(76,53,45,.12);
+}
+.contact-signoff em{color:#a77f70}
+@media(max-width:800px){
+  .contact-social-row{margin-left:0;margin-right:0;padding:24px 18px 22px;border-radius:18px}
+  .contact-social-links{border-left:0}
+  .contact-social-links a{border-left-color:rgba(76,53,45,.12);border-bottom-color:rgba(76,53,45,.12)}
+}
