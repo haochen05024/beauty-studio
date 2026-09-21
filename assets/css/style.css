@@ -1940,3 +1940,77 @@ body.modal-open .install-modal{overscroll-behavior:contain}
   .contact-social-links{border-left:0}
   .contact-social-links a{border-left-color:rgba(76,53,45,.12);border-bottom-color:rgba(76,53,45,.12)}
 }
+
+
+/* v52 · premium contact redesign */
+.premium-contact{
+  position:relative;
+  overflow:hidden;
+  grid-template-columns:minmax(0,1fr) minmax(420px,.95fr);
+  gap:clamp(42px,6vw,92px);
+  padding-top:clamp(78px,9vw,118px);
+  padding-bottom:0;
+  background:
+    radial-gradient(circle at 92% 18%,rgba(208,158,139,.16),transparent 30%),
+    linear-gradient(135deg,#fbf4f0 0%,#f5e9e3 100%);
+}
+.premium-contact:before{content:"";position:absolute;right:-90px;top:-120px;width:360px;height:360px;border-radius:50%;border:1px solid rgba(166,111,95,.10);pointer-events:none}
+.contact-intro{position:relative;z-index:1}
+.contact-intro h2{font-size:clamp(60px,7.2vw,104px);line-height:.88;letter-spacing:-.065em;margin:20px 0 24px}
+.contact-lead{max-width:390px;font-size:14px;line-height:1.75;color:#786961;margin:0 0 34px}
+.contact-details{width:100%;max-width:520px;justify-self:start;min-width:0}
+.contact-details p{position:relative;display:grid;grid-template-columns:110px 1fr auto;align-items:center;gap:16px;margin:0;padding:19px 0;border-bottom:1px solid rgba(96,68,57,.14);font-size:12px;color:#766760}
+.contact-details strong{font-size:8px;letter-spacing:.18em;color:#3b302b}
+.contact-details span{font-size:13px;color:#6f625b}
+.contact-details b{font-size:8px;font-weight:600;letter-spacing:.04em;color:#a66f5f;white-space:nowrap}
+.contact-side{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px}
+.premium-status{display:flex;align-items:center;gap:16px;padding:22px 24px;border:1px solid rgba(110,79,67,.12);border-radius:22px;background:rgba(255,253,251,.72);box-shadow:0 18px 45px rgba(94,66,54,.05);min-height:104px}
+.premium-status .status-dot{flex:0 0 42px;width:42px;height:42px;border-radius:50%;background:#ead5cc;position:relative}
+.premium-status .status-dot:after{content:"";position:absolute;inset:13px;border-radius:50%;background:#b47b68}
+.premium-status strong{display:block;font:400 22px var(--serif);color:#40332d;margin-bottom:6px}
+.premium-status small{display:block;font-size:8px;line-height:1.6;color:#8a766e}
+.premium-contact .contact-social-row{margin:0;padding:0;border:0;background:transparent;display:block}
+.premium-contact .contact-social-label{display:flex;align-items:center;gap:12px;color:#735f56;padding:0 0 10px;font-size:8px}
+.premium-contact .contact-social-label:after{content:"";height:1px;flex:1;background:rgba(96,68,57,.13)}
+.premium-contact .contact-social-links{display:grid;grid-template-columns:1fr;border:0;gap:9px}
+.premium-contact .contact-social-links a{display:grid;grid-template-columns:38px 1fr auto;grid-template-rows:auto auto;column-gap:12px;align-items:center;min-height:68px;padding:10px 15px;border:1px solid rgba(96,68,57,.12);border-radius:15px;background:rgba(255,253,251,.68);color:#3b302b;box-shadow:0 8px 22px rgba(94,66,54,.035)}
+.premium-contact .contact-social-links a:hover{background:#fffaf7;transform:translateX(3px);box-shadow:0 12px 28px rgba(94,66,54,.07)}
+.premium-contact .contact-social-links i{grid-row:1 / span 2;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#efe0d9;color:#9f6958;font:17px var(--serif);font-style:normal}
+.premium-contact .contact-social-links span{font:400 17px var(--serif);line-height:1.1}
+.premium-contact .contact-social-links small{margin-top:3px;font-size:7.5px;letter-spacing:.08em;color:#8c7770;text-transform:uppercase}
+.premium-contact .contact-social-links b{position:static;grid-column:3;grid-row:1 / span 2;color:#a66f5f;font-size:8px;font-weight:600;white-space:nowrap}
+.contact-visual{position:relative;min-height:230px;border-radius:24px;overflow:hidden;background-image:linear-gradient(180deg,rgba(51,37,31,.02),rgba(51,37,31,.54)),url('https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&fm=jpg&q=82&w=1200');background-size:cover;background-position:center;box-shadow:0 18px 45px rgba(72,48,39,.10)}
+.contact-visual>div{position:absolute;left:22px;bottom:20px;color:#fff;text-shadow:0 2px 16px rgba(38,25,20,.25)}
+.contact-visual span{display:block;font-size:7px;letter-spacing:.24em;opacity:.72;margin-bottom:8px}
+.contact-visual strong{display:block;font:italic 400 30px/1.02 var(--serif);letter-spacing:-.025em}
+.contact-visual>small{position:absolute;right:20px;bottom:20px;font-size:7px;letter-spacing:.2em;color:rgba(255,255,255,.72)}
+.premium-contact .contact-signoff{grid-column:1 / -1;margin:34px -clamp(20px,7vw,110px) 0;padding:23px clamp(20px,7vw,110px) 28px;border-top:1px solid rgba(96,68,57,.13);display:grid;grid-template-columns:1fr 1fr auto;gap:20px;align-items:center;color:#806f67;background:rgba(255,253,251,.35)}
+.premium-contact .contact-signoff span{font-size:8px;letter-spacing:.2em;color:#4b3a33}
+.premium-contact .contact-signoff em{font:italic 18px var(--serif);color:#a77f70}
+.premium-contact .contact-signoff small{font-size:8px;color:#8b7770;justify-self:end}
+@media(max-width:900px){
+ .premium-contact{grid-template-columns:1fr;gap:38px}
+ .contact-side{max-width:620px;width:100%}
+ .contact-intro h2{font-size:70px}
+}
+@media(max-width:800px){
+ .premium-contact{padding-top:68px;padding-bottom:0}
+ .contact-intro h2{font-size:58px;margin-top:17px}
+ .contact-lead{font-size:13px;margin-bottom:27px}
+ .contact-details p{grid-template-columns:78px 1fr;gap:7px 12px;padding:17px 0}
+ .contact-details b{grid-column:2;justify-self:start;margin-top:2px}
+ .premium-status{padding:18px;border-radius:18px;min-height:90px}
+ .premium-status .status-dot{flex-basis:36px;width:36px;height:36px}
+ .premium-status .status-dot:after{inset:11px}
+ .premium-status strong{font-size:19px}
+ .contact-visual{min-height:210px;border-radius:19px}
+ .premium-contact .contact-signoff{margin:30px -20px 0;padding:20px;grid-template-columns:1fr;gap:8px}
+ .premium-contact .contact-signoff small{justify-self:start}
+}
+@media(max-width:420px){
+ .premium-contact .contact-social-links a{grid-template-columns:34px 1fr auto;padding:9px 12px;min-height:64px}
+ .premium-contact .contact-social-links i{width:34px;height:34px;border-radius:10px}
+ .premium-contact .contact-social-links span{font-size:16px}
+ .premium-contact .contact-social-links b{font-size:7px}
+ .contact-visual strong{font-size:27px}
+}
