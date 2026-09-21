@@ -512,3 +512,85 @@ document.addEventListener("DOMContentLoaded", () => {
     if(fill) fill.style.width="33.333%";
   });
 })();
+
+/* v13 — unified booking state + final confirmation preview */
+(() => {
+  const state = { service:"—", price:"—", duration:"—", date:"—", time:"—", inspiration:"—" };
+  const q = id => document.getElementById(id);
+
+  function sync(){
+    q("summaryService") && (q("summaryService").textContent=state.service);
+    q("summaryPrice") && (q("summaryPrice").textContent=state.price);
+    q("summaryDuration") && (q("summaryDuration").textContent=state.duration);
+    q("summaryDate") && (q("summaryDate").textContent=state.date);
+    q("summaryTime") && (q("summaryTime").textContent=state.time);
+    if(q("summaryInspiration")) q("summaryInspiration").textContent=state.inspiration;
+    if(q("bookingSelectionNote")){
+      const parts=[];
+      if(state.service!=="—") parts.push(state.service);
+      if(state.date!=="—") parts.push(state.date);
+      if(state.time!=="—") parts.push(state.time);
+      q("bookingSelectionNote").textContent = parts.length ? parts.join(" · ") : "Booking details update as you choose.";
+    }
+    q("finalService") && (q("finalService").textContent=state.service);
+    q("finalPrice") && (q("finalPrice").textContent=state.price);
+    q("finalDuration") && (q("finalDuration").textContent=state.duration);
+    q("finalDate") && (q("finalDate").textContent=state.date);
+    q("finalTime") && (q("finalTime").textContent=state.time);
+    q("finalInspiration") && (q("finalInspiration").textContent=state.inspiration);
+  }
+
+  document.querySelectorAll("[data-service-choice]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const key=btn.dataset.serviceKey;
+      const map={
+        gel:["Gel Manicure","From 00 MMK","60 min"],
+        art:["Custom Nail Art","From 00 MMK","90 min"],
+        extensions:["Extensions","From 00 MMK","120 min"]
+      };
+      if(map[key]) [state.service,state.price,state.duration]=map[key];
+      sync();
+    });
+  });
+
+  document.querySelectorAll(".date-choice").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      state.date=btn.dataset.date || btn.textContent.trim();
+      sync();
+    });
+  });
+
+  document.querySelectorAll(".time-choice").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      state.time=btn.dataset.time || btn.textContent.trim();
+      sync();
+    });
+  });
+
+  const originalSetInspiration = window.__beautyStudioSetInspiration;
+  window.__beautyStudioSetInspiration = (name)=>{
+    state.inspiration=name || "—";
+    sync();
+    if(typeof originalSetInspiration==="function") originalSetInspiration(name);
+  };
+
+  // Catch the existing v12 booking inspiration flow without replacing it.
+  document.querySelectorAll(".work-card").forEach(card=>{
+    card.addEventListener("click",()=>{
+      const key=card.dataset.styleKey;
+      const names={"soft-blush":"Soft Blush","rose-chrome":"Rose Chrome","modern-line":"Modern Line","tiny-flower":"Tiny Flower"};
+      if(key) { state.inspiration=names[key] || key.replaceAll("-"," "); sync(); }
+    });
+  });
+
+  const completeButton = document.querySelector('[data-booking-complete], .booking-submit');
+  completeButton?.addEventListener("click",()=>{
+    sync();
+    const card=q("finalBookingCard");
+    if(card) card.hidden=false;
+    const ref=q("finalBookingRef");
+    if(ref) ref.textContent="PREVIEW · "+Math.random().toString(36).slice(2,8).toUpperCase();
+  });
+
+  sync();
+})();

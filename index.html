@@ -237,7 +237,7 @@
       <div class="time-grid"><button>10:00</button><button>11:30</button><button>13:00</button><button>14:30</button><button>16:00</button><button>17:30</button></div>
     </div>
     <div class="booking-step" data-step="3">
-      <h3>Your details</h3>
+      <h3>Your details</h3><p class="step-hint">We’ll use these details to confirm your appointment.</p>
       <div class="booking-inspiration" id="bookingInspiration" hidden>
         <span>Inspiration</span><strong id="summaryInspiration">—</strong>
       </div>
@@ -245,15 +245,28 @@
         <div><span>Service</span><strong id="summaryService">—</strong></div>
         <div><span>Price</span><strong id="summaryPrice">—</strong></div>
         <div><span>Duration</span><strong id="summaryDuration">—</strong></div>
-        <div><span>Date</span><strong id="summaryDate">Today</strong></div>
+        <div><span>Date</span><strong id="summaryDate">—</strong></div>
         <div><span>Time</span><strong id="summaryTime">—</strong></div>
+      </div>
+      <div class="booking-selection-note" id="bookingSelectionNote">
+        <span>Booking details update as you choose.</span>
       </div>
       <label>Name<input id="guestName" type="text" placeholder="Your name"></label>
       <label>Phone<input id="guestPhone" type="tel" placeholder="+95 ..."></label>
       <button class="button button-dark confirm-booking" id="confirmBooking" type="button">Confirm request <span>→</span></button>
       <small class="booking-note">This is a customer-side preview. Online confirmation will be connected to the Studio system later.</small>
     </div>
-    <div class="booking-complete" id="bookingComplete">
+    <div class="final-booking-card" id="finalBookingCard" hidden>
+        <div class="final-booking-head"><span>Appointment request</span><small id="finalBookingRef">PREVIEW</small></div>
+        <div class="final-booking-title"><h4 id="finalService">—</h4><span id="finalPrice">—</span></div>
+        <div class="final-booking-grid">
+          <div><small>Date</small><strong id="finalDate">—</strong></div>
+          <div><small>Time</small><strong id="finalTime">—</strong></div>
+          <div><small>Duration</small><strong id="finalDuration">—</strong></div>
+          <div><small>Inspiration</small><strong id="finalInspiration">—</strong></div>
+        </div>
+      </div>
+      <div class="booking-complete" id="bookingComplete">
       <div class="complete-mark">✓</div><h3>Request received.</h3><p>Your appointment request is ready. The Studio will confirm the final time with you.</p><button class="button button-dark" data-close-booking>Done</button>
     </div>
   </div>
