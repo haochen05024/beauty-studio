@@ -50,18 +50,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (isIOS) {
-      hint.textContent = "iPhone / iPad: open the Share menu in Safari, then choose “Add to Home Screen”.";
+      hint.textContent = "iPhone / iPad · Safari → Share → Add to Home Screen";
       return;
     }
     if (isMac) {
-      hint.textContent = "Mac: in Safari choose File → Add to Dock. In supported Chromium browsers, use the Install icon in the address bar.";
+      hint.textContent = "Mac · Safari: File → Add to Dock · Chrome/Edge: use Install in the address bar";
       return;
     }
     if (isAndroid) {
-      hint.textContent = "Android: open your browser menu ⋮ and choose “Install app” or “Add to Home screen”.";
+      hint.textContent = "Android · Chrome: menu ⋮ → Install app / Add to Home screen";
       return;
     }
-    hint.textContent = "Desktop: use your browser’s Install / Add to Home Screen option, usually from the address bar or browser menu.";
+    hint.textContent = "Desktop · use your browser’s Install option from the address bar or menu";
   };
 
   installBtn?.addEventListener("click", openInstall);

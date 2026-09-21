@@ -599,3 +599,149 @@ body{overflow-x:hidden}
   .mobile-bar .mobile-book{font-size:7.5px}
   .mobile-bar a{font-size:6.5px}
 }
+
+/* v16 — install section + bottom navigation mobile hardening */
+@media (max-width:800px){
+  /* Install: never allow the CTA/status pair to create horizontal overflow. */
+  .install-section{
+    padding:58px 18px 62px;
+    gap:24px;
+    overflow:hidden;
+  }
+  .install-copy{
+    width:100%;
+    max-width:none;
+  }
+  .install-copy .eyebrow{margin-bottom:13px}
+  .install-copy h2{
+    font-size:clamp(38px,10.5vw,48px);
+    line-height:.96;
+    margin-bottom:16px;
+  }
+  .install-lead{
+    width:100%;
+    max-width:360px;
+    font-size:11px!important;
+    line-height:1.7!important;
+    margin-bottom:18px!important;
+  }
+  .install-actions{
+    width:100%;
+    max-width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch!important;
+    gap:9px;
+  }
+  .install-main{
+    width:100%;
+    min-height:56px;
+    box-sizing:border-box;
+    padding:9px 12px;
+    border-radius:16px;
+    display:grid;
+    grid-template-columns:36px minmax(0,1fr) auto;
+    align-items:center;
+    gap:10px;
+  }
+  .install-main .install-icon{
+    width:34px;
+    height:34px;
+    margin:0;
+  }
+  .install-main span:nth-child(2){
+    min-width:0;
+  }
+  .install-main strong{
+    font-size:10px;
+    white-space:nowrap;
+  }
+  .install-main small{
+    font-size:7px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .install-main b{
+    margin:0;
+    font-size:15px;
+  }
+  .install-status{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    padding:9px 11px;
+    border:1px solid rgba(120,94,84,.10);
+    border-radius:11px;
+    background:rgba(255,253,251,.52);
+    font-size:8px;
+    line-height:1.55;
+    color:#887a73;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+
+  .device-cards{
+    width:100%;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+  .device-card{
+    min-width:0;
+    min-height:92px;
+    padding:12px;
+    border-radius:15px;
+  }
+  .device-card strong{font-size:13px}
+  .device-card small{font-size:7px}
+
+  /* Bottom bar: exactly five columns, no wrapping and no accidental second row. */
+  .mobile-bar{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.18fr)!important;
+    grid-template-rows:1fr!important;
+    grid-auto-flow:column!important;
+    align-items:stretch;
+    width:100%;
+    min-width:0;
+    height:64px;
+    box-sizing:border-box;
+    padding:0 4px env(safe-area-inset-bottom)!important;
+    overflow:hidden;
+  }
+  .mobile-bar a,
+  .mobile-bar .mobile-book{
+    grid-row:1!important;
+    min-width:0!important;
+    min-height:0!important;
+    width:auto!important;
+    max-width:100%!important;
+    margin:7px 2px!important;
+    padding:0 2px!important;
+    box-sizing:border-box;
+    display:grid!important;
+    place-items:center!important;
+    align-content:center;
+    white-space:nowrap!important;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    border-radius:14px!important;
+    font-size:7px!important;
+    line-height:1!important;
+  }
+  .mobile-bar .mobile-book{
+    font-size:8px!important;
+    letter-spacing:.06em!important;
+    box-shadow:0 6px 15px rgba(35,25,21,.13);
+  }
+}
+
+@media(max-width:390px){
+  .install-section{padding-inline:16px}
+  .install-main{grid-template-columns:34px minmax(0,1fr) auto;gap:8px}
+  .install-main strong{font-size:9.5px}
+  .install-main small{font-size:6.5px}
+  .mobile-bar{grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.1fr)!important}
+  .mobile-bar a{font-size:6.5px!important}
+  .mobile-bar .mobile-book{font-size:7.5px!important}
+}
