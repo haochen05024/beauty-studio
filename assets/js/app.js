@@ -341,3 +341,34 @@ document.addEventListener("DOMContentLoaded", () => {
   menu.querySelectorAll("[data-close-menu], nav a").forEach(el => el.addEventListener("click", closeMenu));
   document.addEventListener("keydown", e => { if(e.key === "Escape") closeMenu(); });
 })();
+
+(() => {
+  const buttons = [...document.querySelectorAll(".filters button")];
+  const items = [...document.querySelectorAll(".work-item")];
+  const count = document.getElementById("galleryCount");
+  if (!buttons.length || !items.length) return;
+
+  const updateCount = filter => {
+    const visible = items.filter(item => filter === "all" || item.dataset.category === filter).length;
+    if (count) count.textContent = `${visible} ${visible === 1 ? "style" : "styles"}`;
+  };
+
+  buttons.forEach(button => {
+    button.addEventListener("click", () => {
+      const filter = button.dataset.filter || "all";
+      buttons.forEach(b => b.classList.toggle("active", b === button));
+      items.forEach(item => {
+        const show = filter === "all" || item.dataset.category === filter;
+        item.classList.toggle("hidden", !show);
+        if (show) {
+          item.animate(
+            [{opacity:.35,transform:"translateY(8px)"},{opacity:1,transform:"translateY(0)"}],
+            {duration:280,easing:"ease-out"}
+          );
+        }
+      });
+      updateCount(filter);
+    });
+  });
+  updateCount("all");
+})();
