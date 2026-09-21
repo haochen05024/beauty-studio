@@ -1232,3 +1232,62 @@ document.addEventListener("DOMContentLoaded", () => {
     if (ogSite) ogSite.content = cfg.studioName;
   }
 })();
+
+
+/* v31 — photo-ready gallery system
+   Add a real image path to gallery[].image (for example
+   assets/images/gallery/soft-pearl.jpg). Empty image values keep the
+   existing editorial artwork, so the site remains launch-ready before
+   real photos are available.
+*/
+(() => {
+  const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+  const gallery = Array.isArray(cfg.gallery) ? cfg.gallery : [];
+  const items = [...document.querySelectorAll('.work-item')];
+  const modalArt = document.getElementById('modalArt');
+
+  const applyImage = (item, data) => {
+    if (!item || !data?.image) return;
+    const art = item.querySelector('.work-art');
+    if (!art) return;
+
+    art.classList.add('has-photo');
+    art.style.removeProperty('background-image');
+    art.querySelectorAll('.gallery-photo').forEach(img => img.remove());
+
+    const img = document.createElement('img');
+    img.className = 'gallery-photo';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.alt = data.alt || data.title || 'Beauty Studio nail design';
+    img.src = data.image;
+    img.addEventListener('error', () => {
+      img.remove();
+      art.classList.remove('has-photo');
+    }, { once: true });
+    art.appendChild(img);
+  };
+
+  gallery.forEach((data, index) => applyImage(items[index], data));
+
+  // The detail modal uses the same source image when one is available.
+  document.querySelectorAll('.work-trigger').forEach((item, index) => {
+    item.addEventListener('click', () => {
+      const data = gallery[index];
+      if (!modalArt || !data?.image) return;
+
+      modalArt.className = 'modal-art has-photo';
+      modalArt.querySelectorAll('.gallery-modal-photo').forEach(img => img.remove());
+
+      const img = document.createElement('img');
+      img.className = 'gallery-modal-photo';
+      img.alt = data.alt || data.title || 'Beauty Studio nail design';
+      img.src = data.image;
+      img.addEventListener('error', () => {
+        modalArt.className = 'modal-art';
+        img.remove();
+      }, { once: true });
+      modalArt.appendChild(img);
+    }, true);
+  });
+})();
