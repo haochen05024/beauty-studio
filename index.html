@@ -95,18 +95,36 @@
 
 
 <section class="install-section" id="install">
-  <div>
+  <div class="install-copy">
     <p class="eyebrow">06 · Your Studio</p>
     <h2>Keep Beauty Studio<br><em>close to you.</em></h2>
+    <p class="install-lead">Add Beauty Studio to your device for quick access to your favorite styles, services and appointments.</p>
+    <div class="install-actions">
+      <button class="install-main" id="installMain" type="button"><span class="install-icon">↓</span><span><strong>Add to Home Screen</strong><small>Install Beauty Studio</small></span><b>→</b></button>
+      <span class="install-status" id="installStatus">Available on supported devices</span>
+    </div>
   </div>
-  <div class="install-copy">
-    <p>Add Beauty Studio to your device for a faster, app-like experience. Your browser will show the appropriate install option for your device.</p>
-    <button class="button button-dark install-main" id="installMain" type="button">Add to Home Screen <span>→</span></button>
-    <small id="installHint">Works on supported browsers. You can also use your browser’s Add to Home Screen / Install option.</small>
+  <div class="device-cards">
+    <div class="device-card active"><span class="device-icon">●</span><strong>iPhone</strong><small>Safari</small></div>
+    <div class="device-card"><span class="device-icon">●</span><strong>Android</strong><small>Chrome</small></div>
+    <div class="device-card"><span class="device-icon">▣</span><strong>Mac</strong><small>Safari / Chrome</small></div>
+    <div class="device-card"><span class="device-icon">⊞</span><strong>Windows</strong><small>Chrome / Edge</small></div>
   </div>
 </section>
 
-<section class="booking" id="booking"><div><p class="eyebrow">04 · Appointments</p><h2>Ready for your<br><em>next set?</em></h2></div><div class="booking-copy"><p>Choose a service, find a convenient time and let us take care of the details.</p><a class="button button-dark" href="#">Start booking <span>→</span></a><small>Online booking will be connected here.</small></div></section>
+<section class="booking" id="booking">
+  <div>
+    <p class="eyebrow">04 · Appointments</p>
+    <h2>Ready for your<br><em>next set?</em></h2>
+  </div>
+  <div class="booking-copy">
+    <p>Choose your service, find a convenient time and let us take care of the details.</p>
+    <button class="button button-dark start-booking" id="startBooking" type="button">Start booking <span>→</span></button>
+    <div class="booking-benefits">
+      <span>♡ Personal care</span><span>◷ Flexible time</span><span>✦ Easy booking</span>
+    </div>
+  </div>
+</section>
 
 <section class="section contact" id="contact"><div><p class="eyebrow">05 · Find Us</p><h2>Come say<br><em>hello.</em></h2></div><div class="contact-details"><p><strong>Location</strong><br>Studio address will appear here</p><p><strong>Hours</strong><br>Mon — Sat · 10:00 — 19:00</p><p><strong>Contact</strong><br>+95 9 XXX XXX XXX</p></div></section>
 </main>
@@ -144,6 +162,41 @@
   </div>
 </div>
 
+<div class="booking-modal" id="bookingModal" aria-hidden="true">
+  <div class="booking-backdrop" data-close-booking></div>
+  <div class="booking-panel" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+    <button class="modal-close" type="button" aria-label="Close" data-close-booking>×</button>
+    <div class="booking-head">
+      <p class="eyebrow">Appointments</p>
+      <h2 id="bookingTitle">Book your<br><em>moment.</em></h2>
+      <div class="steps"><span class="current">1</span><i></i><span>2</span><i></i><span>3</span></div>
+    </div>
+    <div class="booking-step active" data-step="1">
+      <h3>Choose a service</h3>
+      <div class="booking-options">
+        <button data-service-choice="Gel Manicure"><span>Gel Manicure</span><small>From 00 MMK · 60 min</small><b>→</b></button>
+        <button data-service-choice="Custom Nail Art"><span>Custom Nail Art</span><small>From 00 MMK · 90 min</small><b>→</b></button>
+        <button data-service-choice="Extensions"><span>Extensions</span><small>From 00 MMK · 120 min</small><b>→</b></button>
+      </div>
+    </div>
+    <div class="booking-step" data-step="2">
+      <h3>Choose a time</h3>
+      <div class="date-row"><button class="date-choice active">Today<small>—</small></button><button class="date-choice">Tomorrow<small>—</small></button><button class="date-choice">Sat<small>—</small></button></div>
+      <div class="time-grid"><button>10:00</button><button>11:30</button><button>13:00</button><button>14:30</button><button>16:00</button><button>17:30</button></div>
+    </div>
+    <div class="booking-step" data-step="3">
+      <h3>Your details</h3>
+      <div class="booking-summary"><span>Service</span><strong id="summaryService">—</strong><span>Time</span><strong id="summaryTime">—</strong></div>
+      <label>Name<input id="guestName" type="text" placeholder="Your name"></label>
+      <label>Phone<input id="guestPhone" type="tel" placeholder="+95 ..."></label>
+      <button class="button button-dark confirm-booking" id="confirmBooking" type="button">Confirm request <span>→</span></button>
+      <small class="booking-note">This is a customer-side preview. Online confirmation will be connected to the Studio system later.</small>
+    </div>
+    <div class="booking-complete" id="bookingComplete">
+      <div class="complete-mark">✓</div><h3>Request received.</h3><p>Your appointment request is ready. The Studio will confirm the final time with you.</p><button class="button button-dark" data-close-booking>Done</button>
+    </div>
+  </div>
+</div>
 <footer><div class="footer-brand"><strong>Beauty Studio</strong><span>NAILS &amp; BEAUTY</span></div><p>Made for beautiful little moments.</p><small>© 2026 Beauty Studio</small></footer>
 <div class="mobile-bar"><a href="#home">Home</a><a href="#services">Services</a><a href="#work">Gallery</a><a href="#install">Install</a><a href="#booking" class="mobile-book">Book</a></div>
 <script src="assets/js/app.js"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>

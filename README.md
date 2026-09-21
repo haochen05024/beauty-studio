@@ -1,18 +1,17 @@
-# Beauty Studio — Customer Homepage v5
+# Beauty Studio — Customer Homepage v6
 
 Customer-facing website only.
 
-### v5 additions
-- Interactive work gallery details
-- Full-screen work preview modal
-- Service detail modal
-- Service feature list
-- Mobile-friendly detail experience
-- Book-this-style / choose-this-service entry points
+### v6
+- Refined Add to Home Screen / Install component
+- Device-aware install presentation
+- Customer appointment flow preview
+- Service selection
+- Date selection
+- Time selection
+- Customer details
+- Confirmation state
+- No backend or admin exposed
 
-### Architecture
-Customer: `beauty-studio`
-Future Admin: separate `beauty-studio-admin`
-API: Cloudflare Worker
-Database: D1
-Media: R2
+Future backend remains separate:
+`beauty-studio-admin` + Cloudflare Worker + D1 + R2.

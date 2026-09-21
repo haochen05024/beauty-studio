@@ -141,3 +141,65 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") closeAll();
   });
 })();
+
+(() => {
+  const bookingModal = document.getElementById("bookingModal");
+  const startBooking = document.getElementById("startBooking");
+  const serviceChoices = document.querySelectorAll("[data-service-choice]");
+  const timeChoices = document.querySelectorAll(".time-grid button");
+  const steps = [...document.querySelectorAll(".booking-step")];
+  const stepDots = [...document.querySelectorAll(".steps span")];
+  let selectedService = "";
+  let selectedTime = "";
+
+  const closeBooking = () => {
+    bookingModal?.classList.remove("open");
+    bookingModal?.setAttribute("aria-hidden","true");
+    document.body.classList.remove("modal-open");
+  };
+  const openBooking = () => {
+    bookingModal?.classList.add("open");
+    bookingModal?.setAttribute("aria-hidden","false");
+    document.body.classList.add("modal-open");
+  };
+  const goStep = (n) => {
+    steps.forEach((s,i)=>s.classList.toggle("active",i===n-1));
+    stepDots.forEach((d,i)=>d.classList.toggle("current",i===n-1));
+  };
+
+  startBooking?.addEventListener("click", openBooking);
+  document.querySelectorAll("[data-close-booking]").forEach(x=>x.addEventListener("click", closeBooking));
+
+  serviceChoices.forEach(btn => btn.addEventListener("click", () => {
+    selectedService = btn.dataset.serviceChoice;
+    document.getElementById("summaryService").textContent = selectedService;
+    goStep(2);
+  }));
+
+  timeChoices.forEach(btn => btn.addEventListener("click", () => {
+    timeChoices.forEach(x=>x.classList.remove("active"));
+    btn.classList.add("active");
+    selectedTime = btn.textContent.trim();
+    document.getElementById("summaryTime").textContent = selectedTime;
+    goStep(3);
+  }));
+
+  document.querySelectorAll(".date-choice").forEach(btn => btn.addEventListener("click",()=>{
+    document.querySelectorAll(".date-choice").forEach(x=>x.classList.remove("active"));
+    btn.classList.add("active");
+  }));
+
+  document.getElementById("confirmBooking")?.addEventListener("click",()=>{
+    const name = document.getElementById("guestName").value.trim();
+    if (!name) {
+      document.getElementById("guestName").focus();
+      return;
+    }
+    document.querySelectorAll(".booking-step").forEach(x=>x.style.display="none");
+    document.getElementById("bookingComplete").classList.add("show");
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeBooking();
+  });
+})();
