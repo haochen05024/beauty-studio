@@ -1,8 +1,17 @@
-# Beauty Studio v29 — Booking Confidence
+# Beauty Studio v30 — Content Hub
 
-Changed files only:
-- index.html
-- assets/css/style.css
-- assets/js/app.js
+Customer-side update only. No backend/admin connection.
 
-Focus: customer-side booking form confidence, inline validation, accessible field states, and clearer readiness messaging. No backend/API changes.
+Changed files:
+- `index.html`
+- `assets/js/app.js`
+
+The real studio content can now be updated from the `window.BEAUTY_STUDIO_CONTENT` block near the bottom of `index.html`.
+
+Update there when ready:
+- studio name / tagline
+- city / address / hours / phone / Instagram
+- services, prices, durations and service details
+- gallery titles, categories, descriptions and recommended services
+
+The current placeholder content is intentionally unchanged visually.

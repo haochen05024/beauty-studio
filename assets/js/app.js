@@ -1117,3 +1117,118 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   updateReady();
 })();
+
+/* v30 — customer content hub: one place for real studio content */
+(() => {
+  const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+  const services = cfg.services || {};
+  const gallery = Array.isArray(cfg.gallery) ? cfg.gallery : [];
+
+  const setText = (selector, value) => {
+    if (value === undefined || value === null || value === "") return;
+    document.querySelectorAll(selector).forEach(el => { el.textContent = value; });
+  };
+
+  // Brand / contact / footer copy.
+  setText(".brand strong", cfg.studioName);
+  setText(".brand small", cfg.tagline);
+  setText(".mobile-menu .eyebrow", cfg.studioName);
+  setText(".footer-brand strong", cfg.studioName);
+  setText(".footer-brand span", cfg.tagline);
+  setText("[data-studio-address]", cfg.address);
+  setText("[data-studio-hours]", cfg.hours);
+  setText("[data-studio-phone]", cfg.phone);
+  setText("[data-studio-name]", cfg.studioName);
+  setText("[data-studio-city]", cfg.city);
+
+  document.querySelectorAll(".contact-details p").forEach(p => {
+    const label = p.querySelector("strong")?.textContent?.trim().toLowerCase();
+    if (label === "location" && cfg.address) p.innerHTML = `<strong>Location</strong><br>${cfg.address}`;
+    if (label === "hours" && cfg.hours) p.innerHTML = `<strong>Hours</strong><br>${cfg.hours}`;
+    if (label === "contact" && cfg.phone) p.innerHTML = `<strong>Contact</strong><br>${cfg.phone}`;
+  });
+
+  document.querySelectorAll("[data-studio-phone-link]").forEach(el => {
+    if (cfg.phone) {
+      el.href = `tel:${cfg.phone.replace(/[^\d+]/g, "")}`;
+      el.textContent = cfg.phone;
+    }
+  });
+
+  // Service cards + booking choices are driven from the same data.
+  document.querySelectorAll(".service-card[data-service]").forEach(card => {
+    const key = card.dataset.service;
+    const s = services[key];
+    if (!s) return;
+    card.querySelector(".service-photo > span")?.replaceChildren(document.createTextNode(s.number || ""));
+    card.querySelector(".service-photo > small")?.replaceChildren(document.createTextNode(s.durationShort || s.duration || ""));
+    const kicker = card.querySelector(".service-kicker span:first-child");
+    const number = card.querySelector(".service-kicker span:last-child");
+    if (kicker) kicker.textContent = s.kicker || "Service";
+    if (number) number.textContent = s.number || "";
+    const title = card.querySelector("h3");
+    const desc = card.querySelector(".service-info > p");
+    const meta = card.querySelectorAll(".service-meta span");
+    const tags = card.querySelector(".service-bottom > span");
+    if (title) title.textContent = s.title;
+    if (desc) desc.textContent = s.description;
+    if (meta[0]) meta[0].textContent = s.price;
+    if (meta[1]) meta[1].textContent = s.duration;
+    if (tags) tags.textContent = s.tags || "";
+  });
+
+  document.querySelectorAll("[data-service-choice]").forEach(btn => {
+    const key = btn.dataset.serviceKey;
+    const s = services[key];
+    if (!s) return;
+    btn.dataset.serviceChoice = s.title;
+    const title = btn.querySelector("span");
+    const meta = btn.querySelector("small");
+    if (title) title.textContent = s.title;
+    if (meta) meta.textContent = `${s.price} · ${s.duration}`;
+  });
+
+  // Keep service modal content in sync with the same source of truth.
+  document.querySelectorAll(".service-trigger[data-service]").forEach(card => {
+    card.addEventListener("click", () => {
+      const s = services[card.dataset.service];
+      if (!s) return;
+      const art = document.getElementById("serviceModalArt");
+      if (art) art.className = `service-modal-art ${s.art || ""}`;
+      setText("#serviceModalNumber", s.number);
+      setText("#serviceModalDuration", s.durationShort || s.duration);
+      setText("#serviceModalTitle", s.title);
+      setText("#serviceModalPrice", s.price);
+      setText("#serviceModalDurationText", s.duration);
+      setText("#serviceModalDescription", s.description);
+      const points = document.getElementById("servicePoints");
+      if (points) points.innerHTML = (s.points || []).map(point => `<li>${point}</li>`).join("");
+    });
+  });
+
+  // Gallery cards use the current CSS artwork but get their real content from the hub.
+  const workItems = [...document.querySelectorAll(".work-item")];
+  gallery.forEach((item, index) => {
+    const card = workItems[index];
+    if (!card) return;
+    card.dataset.title = item.title || "Beauty Style";
+    card.dataset.style = item.style || "";
+    card.dataset.description = item.description || "";
+    card.dataset.category = item.category || "simple";
+    card.dataset.recommendedService = item.recommendedService || "art";
+    card.dataset.styleName = item.styleName || item.title || "Beauty Style";
+    const strong = card.querySelector("div:last-child strong");
+    const span = card.querySelector("div:last-child span");
+    if (strong) strong.textContent = item.title || "Beauty Style";
+    if (span) span.textContent = item.style || "";
+  });
+
+  // Update basic document metadata without requiring a second HTML edit.
+  if (cfg.studioName) {
+    document.title = `${cfg.studioName} · Nails & Beauty`;
+    const description = document.querySelector('meta[name="description"]');
+    if (description) description.content = `${cfg.studioName} — thoughtful nail care, custom nail art and private appointments, made with care.`;
+    const ogSite = document.querySelector('meta[property="og:site_name"]');
+    if (ogSite) ogSite.content = cfg.studioName;
+  }
+})();

@@ -344,16 +344,47 @@
 <footer><div class="footer-brand"><strong>Beauty Studio</strong><span>NAILS &amp; BEAUTY</span></div><p>Made for beautiful little moments.</p><small>© 2026 Beauty Studio</small></footer>
 <div class="mobile-bar"><a href="#home">Home</a><a href="#services">Services</a><a href="#work">Gallery</a><a href="#install">Install</a><a href="#booking" class="mobile-book">Book</a></div>
 
-  <!-- Beauty Studio content settings: replace these values when the real studio opens. -->
+  <!-- Beauty Studio content hub. Update this one block when the real studio opens. -->
   <script>
     window.BEAUTY_STUDIO_CONTENT = {
       studioName: "Beauty Studio",
+      tagline: "NAILS & BEAUTY",
       city: "Your City",
       address: "Studio address coming soon",
       hours: "By appointment",
       phone: "+00 000 000 000",
       instagram: "",
-      bookingMessage: "Appointments are confirmed after your request is reviewed."
+      bookingMessage: "Appointments are confirmed after your request is reviewed.",
+      services: {
+        gel: {
+          number: "01", kicker: "Everyday", title: "Gel Manicure",
+          description: "Clean, polished and long-lasting nails for everyday elegance.",
+          price: "From 00 MMK", duration: "60 min", durationShort: "60 MIN",
+          tags: "Shape · Prep · Gel", art: "photo-blush",
+          points: ["Nail preparation & shaping", "Gel color application", "Clean finish & care"]
+        },
+        art: {
+          number: "02", kicker: "Signature", title: "Custom Nail Art",
+          description: "Your idea, your colors, your little details — made just for you.",
+          price: "From 00 MMK", duration: "90 min", durationShort: "90 MIN",
+          tags: "Base · Design · Detail", art: "photo-rose",
+          points: ["Base manicure included", "Custom color & detail", "Design consultation"]
+        },
+        extensions: {
+          number: "03", kicker: "Length", title: "Extensions",
+          description: "Beautiful shape and length designed around your natural style.",
+          price: "From 00 MMK", duration: "120 min", durationShort: "120 MIN",
+          tags: "Shape · Length · Finish", art: "photo-nude",
+          points: ["Shape consultation", "Extension application", "Finish & aftercare guidance"]
+        }
+      },
+      gallery: [
+        { title: "Soft Pearl", style: "Elegant · Gel", category: "elegant", description: "A soft, clean finish with a delicate pearl glow — made for everyday elegance.", recommendedService: "gel", styleName: "Soft Pearl" },
+        { title: "Milky Nude", style: "Simple · Gel", category: "simple", description: "A timeless milky nude look that keeps things clean, natural and polished.", recommendedService: "gel", styleName: "Milky Nude" },
+        { title: "Rose Chrome", style: "Trendy · Art", category: "trendy", description: "A soft rose base with a reflective finish for a modern statement.", recommendedService: "art", styleName: "Rose Chrome" },
+        { title: "Little Hearts", style: "Cute · Art", category: "cute", description: "A playful little heart detail for a sweet, personal finish.", recommendedService: "art", styleName: "Little Hearts" },
+        { title: "Quiet Luxury", style: "Elegant · Extensions", category: "elegant", description: "Long, refined shapes with subtle color and a clean luxury finish.", recommendedService: "extensions", styleName: "Quiet Luxury" }
+      ]
     };
   </script>
 
