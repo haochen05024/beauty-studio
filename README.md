@@ -1,12 +1,8 @@
-# Beauty Studio v38 — Booking Date & Time Fix
+# Beauty Studio v39 — Custom Booking Calendar
 
 Overwrite only:
 - index.html
 - assets/css/style.css
 - assets/js/app.js
 
-Changes:
-- Selecting a generated time now correctly advances Booking from Step 2 to Step 3.
-- The third date card is now “Choose date” and opens a native date picker.
-- Custom dates respect bookingRules workingDays and advanceDays.
-- Existing booking/PWA/customer UI is preserved.
+v39 replaces the browser-native date picker with an in-site Beauty Studio calendar. It keeps the existing booking rules, working days, advance booking window, and step-3 transition.

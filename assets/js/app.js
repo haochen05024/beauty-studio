@@ -1815,3 +1815,138 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 })();
+
+/* v39 — custom in-site calendar for the booking date picker */
+(function () {
+  const modal = document.getElementById("bookingModal");
+  const trigger = modal?.querySelector("[data-date-custom]");
+  if (!modal || !trigger) return;
+
+  const studio = window.BEAUTY_STUDIO_CONTENT || {};
+  const rules = studio.bookingRules || {};
+  const workingDays = Array.isArray(rules.workingDays) && rules.workingDays.length
+    ? rules.workingDays.map(Number) : [1,2,3,4,5,6];
+  const advanceDays = Math.max(0, Number(rules.advanceDays) || 30);
+  const customInput = document.getElementById("customBookingDate");
+  const summaryDate = document.getElementById("summaryDate");
+  const note = document.getElementById("bookingReadyNote");
+
+  function iso(date) {
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+  }
+  function startToday() { const d = new Date(); d.setHours(12,0,0,0); return d; }
+  function maxDate() { const d = startToday(); d.setDate(d.getDate() + advanceDays); return d; }
+  function parseIso(value) { const [y,m,d] = value.split("-").map(Number); return new Date(y,m-1,d,12); }
+  function sameDay(a,b) { return iso(a) === iso(b); }
+  function monthLabel(date) { return date.toLocaleDateString(undefined,{month:"long",year:"numeric"}); }
+  function selectedLabel(date) { return date.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); }
+
+  let view = startToday();
+  let selected = null;
+  const min = startToday();
+  const max = maxDate();
+
+  const overlay = document.createElement("div");
+  overlay.className = "bs-calendar-overlay";
+  overlay.setAttribute("aria-hidden","true");
+  overlay.innerHTML = `
+    <div class="bs-calendar" role="dialog" aria-modal="true" aria-labelledby="bsCalendarTitle">
+      <div class="bs-calendar-head">
+        <div>
+          <span class="bs-calendar-kicker">Choose your date</span>
+          <h3 class="bs-calendar-title" id="bsCalendarTitle"></h3>
+        </div>
+        <button class="bs-calendar-close" type="button" aria-label="Close date picker">×</button>
+      </div>
+      <div class="bs-calendar-body">
+        <div class="bs-calendar-nav" style="justify-content:flex-end;margin-bottom:12px">
+          <button type="button" data-cal-prev aria-label="Previous month">‹</button>
+          <button type="button" data-cal-next aria-label="Next month">›</button>
+        </div>
+        <div class="bs-calendar-week" aria-hidden="true">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="bs-calendar-grid" role="grid"></div>
+        <div class="bs-calendar-footer">
+          <span class="bs-calendar-note">Choose a working day within the available booking window.</span>
+          <button class="bs-calendar-cancel" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const title = overlay.querySelector(".bs-calendar-title");
+  const grid = overlay.querySelector(".bs-calendar-grid");
+  const prev = overlay.querySelector("[data-cal-prev]");
+  const next = overlay.querySelector("[data-cal-next]");
+  const close = overlay.querySelector(".bs-calendar-close");
+  const cancel = overlay.querySelector(".bs-calendar-cancel");
+
+  function render() {
+    title.textContent = monthLabel(view);
+    grid.innerHTML = "";
+    const first = new Date(view.getFullYear(),view.getMonth(),1,12);
+    const last = new Date(view.getFullYear(),view.getMonth()+1,0,12);
+    const leading = first.getDay();
+    const cells = Math.ceil((leading + last.getDate()) / 7) * 7;
+    for (let i=0;i<cells;i++) {
+      const d = new Date(view.getFullYear(),view.getMonth(),i-leading+1,12);
+      const button = document.createElement("button");
+      button.type="button";
+      button.className="bs-calendar-day";
+      button.textContent=d.getDate();
+      button.setAttribute("aria-label", d.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"}));
+      if (d.getMonth() !== view.getMonth()) button.classList.add("is-outside");
+      const inRange = d >= min && d <= max;
+      const day = d.getDay() === 0 ? 7 : d.getDay();
+      const openDay = workingDays.includes(day);
+      if (!openDay) button.classList.add("is-closed");
+      if (sameDay(d,min)) button.classList.add("is-today");
+      if (selected && sameDay(d,selected)) button.classList.add("is-selected");
+      button.disabled = !inRange || !openDay;
+      button.addEventListener("click",()=>choose(d));
+      grid.appendChild(button);
+    }
+    const monthStart = new Date(view.getFullYear(),view.getMonth(),1,12);
+    const monthEnd = new Date(view.getFullYear(),view.getMonth(),last.getDate(),12);
+    prev.disabled = monthEnd < min;
+    next.disabled = monthStart > new Date(max.getFullYear(),max.getMonth(),1,12);
+  }
+
+  function open() {
+    const current = customInput?.value;
+    selected = current ? parseIso(current) : null;
+    view = selected ? new Date(selected.getFullYear(),selected.getMonth(),1,12) : new Date(min.getFullYear(),min.getMonth(),1,12);
+    render();
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden","false");
+    close.focus();
+  }
+  function hide() {
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden","true");
+    trigger.focus();
+  }
+  function choose(date) {
+    selected = new Date(date);
+    const value = iso(selected);
+    if (customInput) customInput.value = value;
+    const span = trigger.querySelector("span");
+    const small = trigger.querySelector("small");
+    if (span) span.textContent = "Selected";
+    if (small) small.textContent = selectedLabel(selected);
+    trigger.classList.add("is-custom-selected","active");
+    modal.querySelectorAll(".date-choice").forEach(x => { if (x !== trigger) x.classList.remove("active"); });
+    if (summaryDate) summaryDate.textContent = selectedLabel(selected);
+    if (note) note.textContent = "Date selected. Pick an available time to continue.";
+    hide();
+  }
+
+  trigger.addEventListener("click", event => { event.preventDefault(); open(); });
+  prev.addEventListener("click",()=>{ view.setMonth(view.getMonth()-1); render(); });
+  next.addEventListener("click",()=>{ view.setMonth(view.getMonth()+1); render(); });
+  close.addEventListener("click",hide);
+  cancel.addEventListener("click",hide);
+  overlay.addEventListener("click",e=>{ if(e.target===overlay) hide(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape" && overlay.classList.contains("open")) hide(); });
+})();

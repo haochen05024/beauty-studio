@@ -1336,3 +1336,38 @@ body.modal-open .install-modal{overscroll-behavior:contain}
     white-space: nowrap;
   }
 }
+
+/* v39 — Beauty Studio custom calendar */
+.bs-calendar-overlay{position:fixed;inset:0;z-index:260;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(42,32,28,.34);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.bs-calendar-overlay.open{display:flex}
+.bs-calendar{width:min(390px,calc(100vw - 28px));border:1px solid rgba(72,52,44,.10);border-radius:24px;background:#fffdfa;box-shadow:0 30px 90px rgba(47,34,28,.24);overflow:hidden}
+.bs-calendar-head{display:flex;align-items:flex-start;justify-content:space-between;padding:22px 22px 15px;border-bottom:1px solid var(--line,#e9ddd6)}
+.bs-calendar-kicker{display:block;margin-bottom:5px;color:#a08070;font:700 9px var(--sans);letter-spacing:.18em;text-transform:uppercase}
+.bs-calendar-title{margin:0;font:500 28px/1.05 var(--serif);letter-spacing:-.03em;color:var(--ink,#2d2522)}
+.bs-calendar-close{width:34px;height:34px;border:1px solid var(--line,#e9ddd6);border-radius:50%;background:#fff;color:var(--ink,#2d2522);font-size:20px;line-height:1;cursor:pointer}
+.bs-calendar-nav{display:flex;gap:7px}
+.bs-calendar-nav button{width:34px;height:34px;border:1px solid var(--line,#e9ddd6);border-radius:50%;background:#fbf6f2;color:var(--ink,#2d2522);cursor:pointer;font-size:16px}
+.bs-calendar-nav button:disabled{opacity:.3;cursor:not-allowed}
+.bs-calendar-body{padding:17px 20px 20px}
+.bs-calendar-week{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:8px;color:#9a8980;font:700 9px var(--sans);letter-spacing:.12em;text-align:center;text-transform:uppercase}
+.bs-calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.bs-calendar-day{position:relative;aspect-ratio:1;border:0;border-radius:12px;background:transparent;color:var(--ink,#2d2522);font:500 13px var(--sans);cursor:pointer}
+.bs-calendar-day:hover:not(:disabled){background:#f5ebe6}
+.bs-calendar-day:disabled{color:#c9bdb6;cursor:not-allowed}
+.bs-calendar-day.is-outside{color:#d7cec8}
+.bs-calendar-day.is-closed{color:#c8bbb4;background:rgba(242,235,230,.55)}
+.bs-calendar-day.is-today::after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--accent,#b98470);transform:translateX(-50%)}
+.bs-calendar-day.is-selected{background:var(--ink,#2d2522);color:#fffdfa;box-shadow:0 7px 18px rgba(47,34,28,.14)}
+.bs-calendar-day.is-selected::after{background:#fffdfa}
+.bs-calendar-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;border-top:1px solid var(--line,#e9ddd6)}
+.bs-calendar-note{color:#94857c;font-size:9px;line-height:1.45}
+.bs-calendar-cancel{border:0;background:transparent;color:var(--ink,#2d2522);font:700 10px var(--sans);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+@media(max-width:640px){
+  .bs-calendar-overlay{align-items:flex-end;padding:10px}
+  .bs-calendar{width:100%;border-radius:22px;margin-bottom:env(safe-area-inset-bottom)}
+  .bs-calendar-head{padding:19px 18px 14px}
+  .bs-calendar-body{padding:14px 15px 17px}
+  .bs-calendar-grid{gap:4px}
+  .bs-calendar-day{border-radius:11px;font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){.bs-calendar-day{transition:none}}
