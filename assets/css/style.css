@@ -783,3 +783,28 @@ body{overflow-x:hidden}
   .studio-card i{margin-top:13px;font-size:11px}
   .values>div:hover{transform:none;background:transparent}
 }
+
+/* v18 — gallery portfolio experience */
+.gallery-intro{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:-8px 0 22px;padding-bottom:16px;border-bottom:1px solid rgba(75,55,47,.09)}
+.gallery-intro span{font:italic 18px var(--serif);color:#765d53}
+.gallery-intro p{margin:0;max-width:330px;font-size:9px;line-height:1.65;color:#9a8981;text-align:right}
+.work-detail-tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 16px}
+.work-detail-tags span{padding:6px 9px;border-radius:99px;background:#f4e9e4;font-size:7px;letter-spacing:.10em;text-transform:uppercase;color:#846b60}
+.work-service-match{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px;padding:12px 13px;border:1px solid rgba(80,60,52,.10);border-radius:13px;background:#fffaf7}
+.work-service-match span{display:block;font-size:7px;text-transform:uppercase;letter-spacing:.12em;color:#a08d84;margin-bottom:4px}
+.work-service-match strong{font:500 13px var(--serif);color:#594840}
+.work-service-match button{flex:0 0 auto;border:0;background:none;font:500 8px var(--sans);text-transform:uppercase;letter-spacing:.10em;color:#795d52;cursor:pointer}
+.work-service-match i{font-style:normal;margin-left:4px}
+.work-service-match button:hover{transform:translateX(2px)}
+@media(max-width:800px){
+  .gallery-intro{display:block;margin:-3px 0 18px;padding-bottom:13px}
+  .gallery-intro span{font-size:17px}
+  .gallery-intro p{margin-top:5px;max-width:100%;text-align:left;font-size:9px}
+  .work-detail-tags{margin-top:10px;margin-bottom:13px}
+  .work-service-match{align-items:flex-start}
+  .work-service-match button{padding-top:3px}
+}
+@media(max-width:390px){
+  .work-service-match strong{font-size:12px}
+  .work-service-match button{font-size:7px}
+}

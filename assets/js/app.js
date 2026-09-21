@@ -639,3 +639,63 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("scroll",onScroll,{passive:true});
   onScroll();
 })();
+
+/* v18 — gallery metadata + recommended service */
+(() => {
+  const modal = document.getElementById("workModal");
+  const tags = document.getElementById("workDetailTags");
+  const recommended = document.getElementById("workRecommendedService");
+  const useService = document.getElementById("workChooseService");
+  const book = document.getElementById("bookWorkStyleButton");
+
+  const serviceKey = {
+    "Gel Manicure":"gel",
+    "Custom Nail Art":"art",
+    "Extensions":"extensions"
+  };
+  let activeServiceKey = "";
+
+  document.querySelectorAll(".work-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const name = card.dataset.styleName || "Studio Style";
+      const category = card.dataset.category || "Style";
+      const service = card.dataset.recommendedService || "Custom Nail Art";
+      activeServiceKey = serviceKey[service] || "art";
+
+      if(tags){
+        tags.innerHTML="";
+        [category,name].forEach(label=>{
+          const s=document.createElement("span");
+          s.textContent=label;
+          tags.appendChild(s);
+        });
+      }
+      if(recommended) recommended.textContent=service;
+      if(book) book.dataset.recommendedService=activeServiceKey;
+    });
+  });
+
+  useService?.addEventListener("click",()=>{
+    const key=activeServiceKey || "art";
+    const option=document.querySelector(`[data-service-choice][data-service-key="${key}"]`);
+    option?.click();
+    if(modal){
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden","true");
+    }
+    const booking=document.getElementById("bookingModal");
+    booking?.classList.add("open");
+    booking?.setAttribute("aria-hidden","false");
+    document.body.classList.add("modal-open");
+    document.querySelectorAll(".booking-step").forEach(x=>x.classList.toggle("active",x.dataset.step==="2"));
+    document.querySelectorAll(".steps span").forEach((x,i)=>x.classList.toggle("current",i===1));
+    const fill=document.getElementById("progressFill");
+    if(fill) fill.style.width="66.666%";
+  });
+
+  book?.addEventListener("click",()=>{
+    const key=book.dataset.recommendedService || "art";
+    const option=document.querySelector(`[data-service-choice][data-service-key="${key}"]`);
+    option?.click();
+  });
+})();
