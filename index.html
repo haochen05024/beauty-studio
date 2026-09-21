@@ -303,7 +303,7 @@
         </button>
         <input id="customBookingDate" class="booking-date-picker" type="text" readonly aria-label="Choose appointment date" hidden>
       </div>
-      <div class="booking-time-label"><span>Available times</span><small>Preview · based on studio hours & service duration</small></div>
+      <div class="booking-time-label"><span>Available times</span><small>Preview · live availability will connect later</small></div>
       <div class="time-grid" aria-label="Available times">
         <button type="button" data-time="10:00">10:00</button><button type="button" data-time="11:30">11:30</button><button type="button" data-time="13:00">13:00</button><button type="button" data-time="14:30">14:30</button><button type="button" data-time="16:00">16:00</button><button type="button" data-time="17:30">17:30</button>
       </div>
@@ -398,13 +398,7 @@
         openingTime: "10:00",
         closingTime: "18:00",
         slotMinutes: 30,
-        advanceDays: 30,
-        minLeadMinutes: 60,
-        serviceDurations: {
-          gel: 60,
-          art: 90,
-          extensions: 120
-        }
+        advanceDays: 30
       },
 
       // Brand / media template. These paths are ready for the future admin panel.
