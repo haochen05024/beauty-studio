@@ -362,3 +362,20 @@ body{overflow-x:hidden}
   .service-modal-number{left:19px;top:17px}
   .service-modal-duration{right:18px;bottom:17px}
 }
+
+/* v12 — gallery inspiration → booking */
+.work-card{cursor:pointer}
+.work-card .work-info b{display:inline-flex;align-items:center;gap:6px}
+.work-card .work-info b i{font-style:normal;transition:transform .2s ease}
+.work-card:hover .work-info b i{transform:translateX(3px)}
+.style-match-box{display:flex;align-items:center;gap:11px;padding:12px 13px;margin:16px 0 18px;border:1px solid rgba(90,65,55,.10);border-radius:13px;background:#fbf5f1}
+.style-match-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#f1e2db;color:#a87868;font:18px var(--serif)}
+.style-match-box strong{display:block;font:500 13px var(--serif);color:#4f403a}
+.style-match-box small{display:block;margin-top:2px;font-size:9px;line-height:1.5;color:#97877f}
+.booking-inspiration{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;margin-bottom:10px;border:1px solid rgba(90,65,55,.10);border-radius:12px;background:#fbf6f2}
+.booking-inspiration span{font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#9a8981}
+.booking-inspiration strong{font:500 12px var(--serif);color:#5b4840;text-align:right}
+@media(max-width:700px){
+ .style-match-box{margin-top:13px}
+ .booking-inspiration{align-items:flex-start}
+}

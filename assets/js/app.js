@@ -457,3 +457,58 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 })();
+
+/* v12 — gallery style inspiration carried into booking */
+(() => {
+  const workModal = document.getElementById("workModal");
+  const bookWork = document.getElementById("bookWorkStyleButton");
+  const inspirationBox = document.getElementById("bookingInspiration");
+  const inspirationText = document.getElementById("summaryInspiration");
+  let selectedStyle = "";
+
+  const styleNames = {
+    "soft-blush":"Soft Blush",
+    "rose-chrome":"Rose Chrome",
+    "modern-line":"Modern Line",
+    "tiny-flower":"Tiny Flower"
+  };
+
+  function setInspiration(name){
+    selectedStyle = name || "";
+    if (!inspirationText || !inspirationBox) return;
+    if (selectedStyle) {
+      inspirationText.textContent = selectedStyle;
+      inspirationBox.hidden = false;
+    } else {
+      inspirationText.textContent = "—";
+      inspirationBox.hidden = true;
+    }
+  }
+
+  document.querySelectorAll(".work-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const key = card.dataset.styleKey;
+      if (key) {
+        const label = styleNames[key] || key.replaceAll("-"," ");
+        setInspiration(label.replace(/\b\w/g,c=>c.toUpperCase()));
+        if (bookWork) bookWork.dataset.inspiration = label;
+      }
+    });
+  });
+
+  bookWork?.addEventListener("click", () => {
+    const label = bookWork.dataset.inspiration || selectedStyle;
+    setInspiration(label);
+    document.querySelectorAll("[data-service-choice]").forEach(x => x.classList.remove("selected"));
+    workModal?.classList.remove("open");
+    workModal?.setAttribute("aria-hidden","true");
+    document.getElementById("bookingModal")?.classList.add("open");
+    document.getElementById("bookingModal")?.setAttribute("aria-hidden","false");
+    document.body.classList.add("modal-open");
+
+    document.querySelectorAll(".booking-step").forEach(x => x.classList.toggle("active", x.dataset.step === "1"));
+    document.querySelectorAll(".steps span").forEach((x,i) => x.classList.toggle("current", i === 0));
+    const fill=document.getElementById("progressFill");
+    if(fill) fill.style.width="33.333%";
+  });
+})();
