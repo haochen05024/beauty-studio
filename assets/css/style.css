@@ -991,3 +991,52 @@ select:focus-visible{
   .button{min-height:44px}
   .section{padding-left:14px;padding-right:14px}
 }
+
+/* v21 — launch-ready content structure */
+.contact-status{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:0 0 8px;
+  padding:10px 12px;
+  border:1px solid var(--bs-line);
+  border-radius:12px;
+  background:rgba(255,253,250,.68);
+}
+.contact-status .status-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:#b98270;
+  box-shadow:0 0 0 4px #f1e1da;
+  flex:0 0 auto;
+}
+.contact-status strong{
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:.13em;
+  font-weight:500;
+  color:#725b51;
+}
+.contact-status small{
+  margin-left:auto;
+  font-size:8px;
+  color:#9b8b83;
+}
+.contact-details a{
+  transition:color .2s ease;
+}
+.contact-details a:hover{color:#a36f5e}
+[data-contact-section] .contact-details p[data-field] strong{
+  margin-bottom:4px;
+}
+@media(max-width:800px){
+  .contact-status{
+    align-items:flex-start;
+    display:grid;
+    grid-template-columns:6px 1fr;
+    column-gap:9px;
+    row-gap:2px;
+    padding:11px 12px;
+  }
+  .contact-status .status-dot{grid-row:1 / span 2;margin-top:4px}
+  .contact-status small{grid-column:2;margin:0}
+}

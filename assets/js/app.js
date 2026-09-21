@@ -723,3 +723,38 @@ document.addEventListener("DOMContentLoaded", () => {
 (() => {
   document.documentElement.dataset.beautyStudioUi = "v20";
 })();
+
+/* v21 — centralized launch content */
+(() => {
+  const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+  const setText = (selector, value) => {
+    if (!value) return;
+    document.querySelectorAll(selector).forEach(el => el.textContent = value);
+  };
+
+  // Only replace elements explicitly marked for future content.
+  setText("[data-studio-name]", cfg.studioName);
+  setText("[data-studio-city]", cfg.city);
+  setText("[data-studio-address]", cfg.address);
+  setText("[data-studio-hours]", cfg.hours);
+  setText("[data-studio-phone]", cfg.phone);
+
+  document.querySelectorAll("[data-studio-phone-link]").forEach(el => {
+    if (cfg.phone) {
+      el.href = "tel:" + cfg.phone.replace(/[^\d+]/g,"");
+      el.textContent = cfg.phone;
+    }
+  });
+
+  document.querySelectorAll("[data-studio-instagram]").forEach(el => {
+    if (cfg.instagram) {
+      el.href = cfg.instagram;
+      el.hidden = false;
+    } else {
+      el.hidden = true;
+    }
+  });
+
+  const note=document.querySelector(".contact-status small");
+  if(note && cfg.bookingMessage) note.textContent=cfg.bookingMessage;
+})();

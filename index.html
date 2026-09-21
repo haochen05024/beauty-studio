@@ -180,7 +180,8 @@
   </div>
 </section>
 
-<section class="section contact" id="contact"><div><p class="eyebrow">05 · Find Us</p><h2>Come say<br><em>hello.</em></h2></div><div class="contact-details"><p><strong>Location</strong><br>Studio address will appear here</p><p><strong>Hours</strong><br>Mon — Sat · 10:00 — 19:00</p><p><strong>Contact</strong><br>+95 9 XXX XXX XXX</p></div></section>
+<section class="section contact" id="contact" data-contact-section><div><p class="eyebrow">05 · Find Us</p><h2>Come say<br><em>hello.</em></h2></div><div class="contact-status"><span class="status-dot"></span><strong>Studio information</strong><small>Details will be updated when appointments open.</small></div>
+      <div class="contact-details"><p><strong>Location</strong><br>Studio address will appear here</p><p><strong>Hours</strong><br>Mon — Sat · 10:00 — 19:00</p><p><strong>Contact</strong><br>+95 9 XXX XXX XXX</p></div></section>
 <button class="back-top" id="backTop" type="button" aria-label="Back to top">↑</button>
 <a class="mobile-quick-book" id="mobileQuickBook" href="#booking">Book an appointment <span>→</span></a>
 </main>
@@ -281,6 +282,20 @@
 </div>
 <footer><div class="footer-brand"><strong>Beauty Studio</strong><span>NAILS &amp; BEAUTY</span></div><p>Made for beautiful little moments.</p><small>© 2026 Beauty Studio</small></footer>
 <div class="mobile-bar"><a href="#home">Home</a><a href="#services">Services</a><a href="#work">Gallery</a><a href="#install">Install</a><a href="#booking" class="mobile-book">Book</a></div>
-<script src="assets/js/app.js"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
+
+  <!-- Beauty Studio content settings: replace these values when the real studio opens. -->
+  <script>
+    window.BEAUTY_STUDIO_CONTENT = {
+      studioName: "Beauty Studio",
+      city: "Your City",
+      address: "Studio address coming soon",
+      hours: "By appointment",
+      phone: "+00 000 000 000",
+      instagram: "",
+      bookingMessage: "Appointments are confirmed after your request is reviewed."
+    };
+  </script>
+
+  <script src="assets/js/app.js"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
 </body>
 </html>
