@@ -938,3 +938,70 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.dataset.swUpdated = "true";
   });
 })();
+
+/* v28 — dynamic booking dates + explicit time selection */
+(() => {
+  const dateButtons = [...document.querySelectorAll(".date-choice[data-date-offset]")];
+  const timeButtons = [...document.querySelectorAll(".time-grid button[data-time]")];
+  const summaryDate = document.getElementById("summaryDate");
+  const summaryTime = document.getElementById("summaryTime");
+  if (!dateButtons.length && !timeButtons.length) return;
+
+  const pad = n => String(n).padStart(2, "0");
+  const formatDate = date => {
+    const weekday = new Intl.DateTimeFormat(undefined, { weekday: "short" }).format(date);
+    const month = new Intl.DateTimeFormat(undefined, { month: "short" }).format(date);
+    return { weekday, short: `${month} ${date.getDate()}`, iso: `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}` };
+  };
+
+  dateButtons.forEach((button, index) => {
+    const offset = Number(button.dataset.dateOffset || index);
+    const date = new Date();
+    date.setHours(12,0,0,0);
+    date.setDate(date.getDate() + offset);
+    const formatted = formatDate(date);
+    const label = button.querySelector("span");
+    const sub = button.querySelector("small");
+    if (offset === 0) {
+      if (label) label.textContent = "Today";
+    } else if (offset === 1) {
+      if (label) label.textContent = "Tomorrow";
+    } else if (label) {
+      label.textContent = formatted.weekday;
+    }
+    if (sub) sub.textContent = formatted.short;
+    button.dataset.date = formatted.iso;
+    button.setAttribute("aria-label", `${label?.textContent || formatted.weekday}, ${formatted.short}`);
+  });
+
+  const selectDate = button => {
+    dateButtons.forEach(item => {
+      const active = item === button;
+      item.classList.toggle("active", active);
+      item.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    if (summaryDate) {
+      const label = button.querySelector("span")?.textContent || "Date";
+      const sub = button.querySelector("small")?.textContent || "";
+      summaryDate.textContent = sub ? `${label} · ${sub}` : label;
+    }
+  };
+
+  dateButtons.forEach(button => {
+    button.addEventListener("click", () => selectDate(button));
+  });
+  if (dateButtons[0]) selectDate(dateButtons[0]);
+
+  const selectTime = button => {
+    timeButtons.forEach(item => {
+      const active = item === button;
+      item.classList.toggle("selected", active);
+      item.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    if (summaryTime) summaryTime.textContent = button.dataset.time || button.textContent.trim();
+  };
+
+  timeButtons.forEach(button => {
+    button.addEventListener("click", () => selectTime(button));
+  });
+})();

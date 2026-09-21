@@ -294,9 +294,16 @@
       <p class="booking-footnote">The final price can vary with length, design detail and any add-ons.</p>
     </div>
     <div class="booking-step" data-step="2">
-      <h3>Choose a time</h3>
-      <div class="date-row"><button class="date-choice active">Today<small>—</small></button><button class="date-choice">Tomorrow<small>—</small></button><button class="date-choice">Sat<small>—</small></button></div>
-      <div class="time-grid"><button>10:00</button><button>11:30</button><button>13:00</button><button>14:30</button><button>16:00</button><button>17:30</button></div>
+      <div class="step-heading"><div><p class="eyebrow">02</p><h3>Choose a time</h3></div><p class="step-hint">Pick a day first, then a time.</p></div>
+      <div class="date-row" id="bookingDates" aria-label="Available dates">
+        <button class="date-choice active" type="button" data-date-offset="0"><span>Today</span><small>—</small></button>
+        <button class="date-choice" type="button" data-date-offset="1"><span>Tomorrow</span><small>—</small></button>
+        <button class="date-choice" type="button" data-date-offset="2"><span>—</span><small>—</small></button>
+      </div>
+      <div class="booking-time-label"><span>Available times</span><small>Preview · live availability will connect later</small></div>
+      <div class="time-grid" aria-label="Available times">
+        <button type="button" data-time="10:00">10:00</button><button type="button" data-time="11:30">11:30</button><button type="button" data-time="13:00">13:00</button><button type="button" data-time="14:30">14:30</button><button type="button" data-time="16:00">16:00</button><button type="button" data-time="17:30">17:30</button>
+      </div>
     </div>
     <div class="booking-step" data-step="3">
       <h3>Your details</h3><p class="step-hint">We’ll use these details to confirm your appointment.</p>
