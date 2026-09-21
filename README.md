@@ -1,6 +1,15 @@
-# Beauty Studio
+# Beauty Studio — Customer Homepage v2
 
-Customer-facing homepage for Beauty Studio.
+Customer-facing homepage for the `beauty-studio` GitHub Pages project.
 
-Upload the contents of this folder to the `beauty-studio` GitHub repository.
-The site entry point is `index.html`.
+Upload the contents of this folder to the repository root.
+
+Included:
+- Hero / featured style
+- Services
+- Promotions
+- Filterable gallery
+- About Studio
+- Booking entry point
+- Contact
+- Mobile bottom navigation
