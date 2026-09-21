@@ -1043,3 +1043,29 @@ select:focus-visible{
 
 /* v22 — metadata-ready brand surface */
 ::selection{background:#ead8d0;color:#302823}
+
+/* v23 — accessibility + performance polish */
+.skip-link{
+  position:fixed;
+  left:14px;
+  top:10px;
+  z-index:9999;
+  padding:9px 12px;
+  border-radius:10px;
+  background:#302823;
+  color:#fffdfa;
+  font-size:10px;
+  letter-spacing:.06em;
+  transform:translateY(-150%);
+  transition:transform .2s ease;
+}
+.skip-link:focus{transform:translateY(0)}
+img{max-width:100%;height:auto}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "Beauty Studio — Nails & Beauty",
   "short_name": "Beauty Studio",
-  "description": "Beauty Studio — nails, beauty and appointments.",
+  "description": "Thoughtful nail care, custom nail art and private appointments.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

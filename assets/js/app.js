@@ -765,3 +765,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.title = "Beauty Studio · Nails & Beauty";
   }
 })();
+
+/* v23 — resilient service worker update */
+(() => {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    document.documentElement.dataset.swUpdated = "true";
+  });
+})();
