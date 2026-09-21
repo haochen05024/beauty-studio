@@ -1588,3 +1588,112 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 })();
+
+
+/* v37 — business hours + booking date/time rules */
+(function () {
+  const studio = window.BEAUTY_STUDIO_CONTENT || {};
+  const rules = studio.bookingRules || {};
+  const dateButtons = [...document.querySelectorAll(".date-choice")];
+  const timeGrid = document.querySelector(".time-grid");
+  if (!dateButtons.length || !timeGrid) return;
+
+  const workingDays = Array.isArray(rules.workingDays) && rules.workingDays.length
+    ? rules.workingDays.map(Number)
+    : [1,2,3,4,5,6];
+  const slotMinutes = Number(rules.slotMinutes) || 30;
+  const opening = String(rules.openingTime || "10:00");
+  const closing = String(rules.closingTime || "18:00");
+  const advanceDays = Math.max(0, Number(rules.advanceDays) || 30);
+
+  const toMinutes = value => {
+    const [h, m] = String(value).split(":").map(Number);
+    return (h * 60) + m;
+  };
+  const pad = n => String(n).padStart(2, "0");
+  const formatTime = mins => `${pad(Math.floor(mins / 60))}:${pad(mins % 60)}`;
+  const startMinutes = toMinutes(opening);
+  const endMinutes = toMinutes(closing);
+
+  const localDate = offset => {
+    const d = new Date();
+    d.setHours(12, 0, 0, 0);
+    d.setDate(d.getDate() + offset);
+    return d;
+  };
+
+  const formatDate = d => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const weekday = d => d.toLocaleDateString(undefined, { weekday: "short" });
+
+  function makeSlots() {
+    const slots = [];
+    for (let t = startMinutes; t < endMinutes; t += slotMinutes) {
+      if (t + slotMinutes <= endMinutes) slots.push(formatTime(t));
+    }
+    return slots;
+  }
+
+  const allSlots = makeSlots();
+
+  function renderSlots(isWorkingDay) {
+    timeGrid.innerHTML = "";
+    if (!isWorkingDay) {
+      const note = document.createElement("div");
+      note.className = "booking-closed-note";
+      note.textContent = rules.closedMessage || "The Studio is closed on this day.";
+      timeGrid.appendChild(note);
+      return;
+    }
+    allSlots.forEach(time => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.time = time;
+      button.textContent = time;
+      timeGrid.appendChild(button);
+    });
+    timeGrid.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        timeGrid.querySelectorAll("button").forEach(x => x.classList.remove("selected", "active"));
+        btn.classList.add("selected", "active");
+        const event = new CustomEvent("beautyStudioTimeSelected", { detail: { time: btn.dataset.time } });
+        document.dispatchEvent(event);
+      });
+    });
+  }
+
+  dateButtons.forEach((btn, index) => {
+    const offset = Number(btn.dataset.dateOffset ?? index);
+    const d = localDate(offset);
+    const isWorking = workingDays.includes(d.getDay() || 7);
+    const dateLabel = offset === 0 ? "Today" : offset === 1 ? "Tomorrow" : weekday(d);
+    const small = btn.querySelector("small");
+    const span = btn.querySelector("span");
+    if (span) span.textContent = dateLabel;
+    if (small) small.textContent = formatDate(d);
+    btn.dataset.date = `${dateLabel} · ${formatDate(d)}`;
+    btn.dataset.isoDate = d.toISOString().slice(0,10);
+    btn.dataset.working = String(isWorking);
+    btn.disabled = !isWorking || offset > advanceDays;
+    btn.title = btn.disabled ? (rules.closedMessage || "Unavailable") : btn.dataset.date;
+  });
+
+  const refreshFromSelectedDate = () => {
+    const active = document.querySelector(".date-choice.active") || dateButtons.find(b => !b.disabled);
+    if (!active) return;
+    renderSlots(active.dataset.working === "true");
+    if (active.disabled) return;
+  };
+
+  dateButtons.forEach(btn => btn.addEventListener("click", () => {
+    if (btn.disabled) return;
+    setTimeout(refreshFromSelectedDate, 0);
+  }));
+
+  // Replace the initial hard-coded preview times with rule-driven slots.
+  const firstAvailable = dateButtons.find(btn => !btn.disabled);
+  if (firstAvailable) {
+    dateButtons.forEach(x => x.classList.remove("active"));
+    firstAvailable.classList.add("active");
+    refreshFromSelectedDate();
+  }
+})();

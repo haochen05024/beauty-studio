@@ -1289,3 +1289,9 @@ body.modal-open .install-modal{overscroll-behavior:contain}
 }
 @media(prefers-reduced-motion:reduce){.support-fab,.support-card,.support-action{transition:none}}
 @media(display-mode:standalone){.support-fab{bottom:22px}}
+
+
+/* v37 — booking availability states */
+.booking-time-label small { opacity: .72; }
+.date-choice:disabled { opacity: .42; cursor: not-allowed; }
+.time-grid .booking-closed-note { grid-column: 1 / -1; padding: 14px 16px; border: 1px solid var(--line, rgba(0,0,0,.1)); border-radius: 14px; font-size: .82rem; color: var(--muted, #777); background: var(--surface-soft, rgba(255,255,255,.5)); }
