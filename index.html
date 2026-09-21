@@ -268,19 +268,19 @@
     <h2>Come say<br><em>hello.</em></h2>
     <p class="contact-lead">Questions, bookings, or simply a friendly hello — we’re always here for you.</p>
     <div class="contact-details">
-      <p><strong>Location</strong><span>Studio address will appear here</span><b>View on Maps&nbsp; →</b></p>
-      <p><strong>Hours</strong><span>Mon — Sat · 10:00 — 19:00</span><b>See availability&nbsp; →</b></p>
-      <p><strong>Contact</strong><span>+95 9 XXX XXX XXX</span><b>Call studio&nbsp; →</b></p>
+      <p><strong>Location</strong><span id="contactAddress">Studio address will appear here</span><b id="contactMapAction">View on Maps&nbsp; →</b></p>
+      <p><strong>Hours</strong><span id="contactHours">By appointment</span><b>See availability&nbsp; →</b></p>
+      <p><strong>Contact</strong><span id="contactPhone">+00 000 000 000</span><b id="contactCallAction">Call studio&nbsp; →</b></p>
     </div>
   </div>
   <div class="contact-side">
     <div class="contact-status premium-status"><span class="status-dot"></span><div><strong>By appointment only</strong><small>Appointments are confirmed after your request is reviewed.</small></div></div>
     <div class="contact-social-row" aria-label="Studio social channels">
       <span class="contact-social-label">STAY CLOSE</span>
-      <div class="contact-social-links">
-        <a href="#" aria-label="TikTok" onclick="return false"><i>♪</i><span>TikTok</span><small>@yourstudio</small><b>Follow&nbsp; →</b></a>
-        <a href="#" aria-label="WhatsApp" onclick="return false"><i>◔</i><span>WhatsApp</span><small>Message the Studio</small><b>Chat now&nbsp; →</b></a>
-        <a href="#" aria-label="Telegram" onclick="return false"><i>↗</i><span>Telegram</span><small>@yourstudio</small><b>Join&nbsp; →</b></a>
+      <div class="contact-social-links" id="contactSocialLinks">
+        <a href="#" aria-label="TikTok" data-social="tiktok"><i>♪</i><span>TikTok</span><small>@yourstudio</small><b>Follow&nbsp; →</b></a>
+        <a href="#" aria-label="WhatsApp" data-social="whatsapp"><i>◔</i><span>WhatsApp</span><small>Message the Studio</small><b>Chat now&nbsp; →</b></a>
+        <a href="#" aria-label="Telegram" data-social="telegram"><i>↗</i><span>Telegram</span><small>@yourstudio</small><b>Join&nbsp; →</b></a>
       </div>
     </div>
     <div class="contact-visual"><div><span>STUDIO NOTE</span><strong>Good nails.<br>Brighter days.</strong></div><small>BS · 2026</small></div>
@@ -434,7 +434,7 @@
   </div>
 </div>
 
-<footer><div class="footer-brand"><strong>Beauty Studio</strong><span>NAILS &amp; BEAUTY</span></div><p>Made for beautiful little moments.</p><small>© 2026 Beauty Studio</small></footer>
+<footer><div class="footer-brand"><strong id="footerStudioName">Beauty Studio</strong><span>NAILS &amp; BEAUTY</span></div><p>Made for beautiful little moments.</p><small>© 2026 <span id="footerCopyrightName">Beauty Studio</span></small></footer>
 <div class="mobile-bar"><a href="#home">Home</a><a href="#services">Services</a><a href="#work">Gallery</a><a href="#install">Install</a><a href="#booking" class="mobile-book">Book</a></div>
 
   <!-- Beauty Studio content hub. Update this one block when the real studio opens. -->
@@ -533,6 +533,45 @@
         { title: "Quiet Luxury", style: "Elegant · Extensions", category: "elegant", description: "Long, refined shapes with subtle color and a clean luxury finish.", recommendedService: "extensions", styleName: "Quiet Luxury", priceNote: "Extensions", image: "https://images.unsplash.com/photo-1772322586649-fc11154e76b9?auto=format&fit=crop&fm=jpg&q=82&w=1200", alt: "Quiet Luxury nail extensions" }
       ]
     };
+  </script>
+  <script>
+    // v54 · content-ready contact layer. Real studio details can be supplied by the future admin panel.
+    (() => {
+      const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+      const social = cfg.social || {};
+      const text = (id, value) => { const el = document.getElementById(id); if (el && value) el.textContent = value; };
+      text("contactAddress", cfg.address || cfg.city || "Studio address coming soon");
+      text("contactHours", cfg.hours || "By appointment");
+      text("contactPhone", cfg.phone || "+00 000 000 000");
+      text("footerStudioName", cfg.studioName || "Beauty Studio");
+      text("footerCopyrightName", cfg.studioName || "Beauty Studio");
+
+      const mapAction = document.getElementById("contactMapAction");
+      if (mapAction && cfg.mapUrl) {
+        mapAction.innerHTML = `<a href="${cfg.mapUrl}" target="_blank" rel="noopener">View on Maps&nbsp; →</a>`;
+      }
+      const callAction = document.getElementById("contactCallAction");
+      if (callAction && cfg.phone) {
+        const clean = String(cfg.phone).replace(/[^+\d]/g, "");
+        callAction.innerHTML = `<a href="tel:${clean}">Call studio&nbsp; →</a>`;
+      }
+
+      document.querySelectorAll("[data-social]").forEach(link => {
+        const key = link.dataset.social;
+        const item = social[key] || {};
+        const target = item.url || "";
+        const small = link.querySelector("small");
+        if (item.handle && small) small.textContent = item.handle;
+        if (target) {
+          link.href = target;
+          link.target = "_blank";
+          link.rel = "noopener";
+        } else {
+          link.href = "#";
+          link.addEventListener("click", e => e.preventDefault());
+        }
+      });
+    })();
   </script>
 
   <script src="assets/js/app.js"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
