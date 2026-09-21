@@ -1950,3 +1950,95 @@ document.addEventListener("DOMContentLoaded", () => {
   overlay.addEventListener("click",e=>{ if(e.target===overlay) hide(); });
   document.addEventListener("keydown",e=>{ if(e.key==="Escape" && overlay.classList.contains("open")) hide(); });
 })();
+
+/* v41 — smart booking availability */
+(function () {
+  const modal = document.getElementById("bookingModal");
+  const timeGrid = modal?.querySelector(".time-grid");
+  if (!modal || !timeGrid) return;
+
+  const studio = window.BEAUTY_STUDIO_CONTENT || {};
+  const rules = studio.bookingRules || {};
+  const durations = rules.serviceDurations || { gel: 60, art: 90, extensions: 120 };
+  const minLeadMinutes = Math.max(0, Number(rules.minLeadMinutes) || 0);
+  const opening = String(rules.openingTime || "10:00");
+  const closing = String(rules.closingTime || "18:00");
+
+  const minutes = value => {
+    const parts = String(value).split(":").map(Number);
+    return (parts[0] || 0) * 60 + (parts[1] || 0);
+  };
+
+  function serviceDuration() {
+    const selected = modal.querySelector("[data-service-choice].selected");
+    if (!selected) return Number(rules.slotMinutes) || 30;
+    const key = selected.dataset.serviceKey;
+    if (key && Number(durations[key])) return Number(durations[key]);
+    const match = selected.textContent.match(/(\d+)\s*min/i);
+    return match ? Number(match[1]) : (Number(rules.slotMinutes) || 30);
+  }
+
+  function activeDate() {
+    const button = modal.querySelector(".date-choice.active");
+    if (!button?.dataset.isoDate) return null;
+    const [y, m, d] = button.dataset.isoDate.split("-").map(Number);
+    return new Date(y, m - 1, d, 12, 0, 0);
+  }
+
+  function apply() {
+    const buttons = [...timeGrid.querySelectorAll("button[data-time]")];
+    if (!buttons.length) return;
+
+    const duration = serviceDuration();
+    const closingMinutes = minutes(closing);
+    const openingMinutes = minutes(opening);
+    const date = activeDate();
+    const now = new Date();
+
+    const sameDay = date &&
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate();
+
+    const sameDayCutoff = sameDay
+      ? now.getHours() * 60 + now.getMinutes() + minLeadMinutes
+      : -Infinity;
+
+    let count = 0;
+
+    buttons.forEach(button => {
+      const start = minutes(button.dataset.time);
+      const valid =
+        start >= openingMinutes &&
+        start + duration <= closingMinutes &&
+        start >= sameDayCutoff;
+
+      button.hidden = !valid;
+      button.disabled = !valid;
+      if (valid) count++;
+    });
+
+    const oldNote = timeGrid.querySelector(".booking-smart-note");
+    oldNote?.remove();
+
+    if (!count) {
+      const note = document.createElement("div");
+      note.className = "booking-closed-note booking-smart-note";
+      note.textContent = sameDay
+        ? "No times remain today for this service. Please choose another date."
+        : "No available times fit this service on this day.";
+      timeGrid.appendChild(note);
+    }
+  }
+
+  const observer = new MutationObserver(() => queueMicrotask(apply));
+  observer.observe(timeGrid, { childList: true });
+
+  modal.addEventListener("click", event => {
+    if (event.target.closest("[data-service-choice], .date-choice")) {
+      setTimeout(apply, 0);
+    }
+  });
+
+  setTimeout(apply, 150);
+})();

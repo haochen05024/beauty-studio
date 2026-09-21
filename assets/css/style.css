@@ -1371,3 +1371,20 @@ body.modal-open .install-modal{overscroll-behavior:contain}
   .bs-calendar-day{border-radius:11px;font-size:13px}
 }
 @media(prefers-reduced-motion:reduce){.bs-calendar-day{transition:none}}
+
+/* v41 — smart booking availability */
+.time-grid button[hidden] { display: none !important; }
+.time-grid .booking-smart-note {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 4px 0 0;
+}
+@media (max-width: 640px) {
+  .time-grid .booking-smart-note {
+    min-height: 72px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 18px;
+  }
+}
