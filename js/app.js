@@ -53,11 +53,13 @@ document.addEventListener("DOMContentLoaded", () => {
     window.navigator.standalone === true ||
     document.referrer.startsWith("android-app://");
 
-  const alreadyInstalledKey = "beauty-studio-installed-v26";
-
-  const hideInstall = (message = "Beauty Studio is on your device") => {
-    // Hide only the install/tutorial UI. Never touch the browser tab, document title,
-    // or the rest of the customer website.
+  /*
+   * Keep the browser version and installed app separate.
+   * The same origin/storage is shared by both, so a localStorage "installed"
+   * flag would incorrectly hide the install UI from the normal browser tab.
+   * Browser = keep CTA/tutorial. Standalone app = hide tutorial.
+   */
+  const hideInstall = (message = "Beauty Studio is ready on your device") => {
     if (installSection) installSection.classList.add("install-installed");
     if (installActions) installActions.classList.add("install-complete");
     if (installMain) {
@@ -70,11 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
       installStatus.textContent = message;
       installStatus.classList.add("is-complete");
     }
-    try { localStorage.setItem(alreadyInstalledKey, "1"); } catch (_) {}
-  };
-
-  const isMarkedInstalled = () => {
-    try { return localStorage.getItem(alreadyInstalledKey) === "1"; } catch (_) { return false; }
   };
 
   const closeInstall = () => {
@@ -212,7 +209,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("appinstalled", () => {
     deferredPrompt = null;
-    hideInstall("Beauty Studio has been added");
+    // Keep the browser tab and its install CTA/tutorial intact. The installed
+    // standalone app will hide the tutorial when it is opened.
+    if (installStatus) {
+      installStatus.textContent = "Beauty Studio has been added · Open the installed app to continue";
+    }
     closeInstall();
   });
 
@@ -221,7 +222,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll("[data-close-install]").forEach(el => el.addEventListener("click", closeInstall));
   modalAction?.addEventListener("click", () => {
-    hideInstall("Beauty Studio has been added");
+    // Manual browser instructions cannot reliably tell us when the shortcut
+    // was actually created. Closing the guide must not hide the browser CTA.
     closeInstall();
   });
 
@@ -229,8 +231,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (event.key === "Escape") closeInstall();
   });
 
-  // If the page is opened as an installed app, or the user previously confirmed installation, hide the CTA.
-  if (isStandalone() || isMarkedInstalled()) {
+  // Only the installed standalone app hides the installation tutorial.
+  // The normal browser page keeps the CTA, even after installation.
+  if (isStandalone()) {
     hideInstall();
   }
 })();
@@ -933,5 +936,527 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!("serviceWorker" in navigator)) return;
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     document.documentElement.dataset.swUpdated = "true";
+  });
+})();
+
+/* v28 — dynamic booking dates + explicit time selection */
+(() => {
+  const dateButtons = [...document.querySelectorAll(".date-choice[data-date-offset]")];
+  const timeButtons = [...document.querySelectorAll(".time-grid button[data-time]")];
+  const summaryDate = document.getElementById("summaryDate");
+  const summaryTime = document.getElementById("summaryTime");
+  if (!dateButtons.length && !timeButtons.length) return;
+
+  const pad = n => String(n).padStart(2, "0");
+  const formatDate = date => {
+    const weekday = new Intl.DateTimeFormat(undefined, { weekday: "short" }).format(date);
+    const month = new Intl.DateTimeFormat(undefined, { month: "short" }).format(date);
+    return { weekday, short: `${month} ${date.getDate()}`, iso: `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}` };
+  };
+
+  dateButtons.forEach((button, index) => {
+    const offset = Number(button.dataset.dateOffset || index);
+    const date = new Date();
+    date.setHours(12,0,0,0);
+    date.setDate(date.getDate() + offset);
+    const formatted = formatDate(date);
+    const label = button.querySelector("span");
+    const sub = button.querySelector("small");
+    if (offset === 0) {
+      if (label) label.textContent = "Today";
+    } else if (offset === 1) {
+      if (label) label.textContent = "Tomorrow";
+    } else if (label) {
+      label.textContent = formatted.weekday;
+    }
+    if (sub) sub.textContent = formatted.short;
+    button.dataset.date = formatted.iso;
+    button.setAttribute("aria-label", `${label?.textContent || formatted.weekday}, ${formatted.short}`);
+  });
+
+  const selectDate = button => {
+    dateButtons.forEach(item => {
+      const active = item === button;
+      item.classList.toggle("active", active);
+      item.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    if (summaryDate) {
+      const label = button.querySelector("span")?.textContent || "Date";
+      const sub = button.querySelector("small")?.textContent || "";
+      summaryDate.textContent = sub ? `${label} · ${sub}` : label;
+    }
+  };
+
+  dateButtons.forEach(button => {
+    button.addEventListener("click", () => selectDate(button));
+  });
+  if (dateButtons[0]) selectDate(dateButtons[0]);
+
+  const selectTime = button => {
+    timeButtons.forEach(item => {
+      const active = item === button;
+      item.classList.toggle("selected", active);
+      item.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    if (summaryTime) summaryTime.textContent = button.dataset.time || button.textContent.trim();
+  };
+
+  timeButtons.forEach(button => {
+    button.addEventListener("click", () => selectTime(button));
+  });
+})();
+
+/* v29 — booking confidence layer: inline validation, readiness state and clean reset */
+(() => {
+  const modal = document.getElementById("bookingModal");
+  if (!modal) return;
+  const nameInput = document.getElementById("guestName");
+  const phoneInput = document.getElementById("guestPhone");
+  const nameError = document.getElementById("guestNameError");
+  const phoneError = document.getElementById("guestPhoneError");
+  const ready = document.getElementById("bookingReadyNote");
+  const confirm = document.getElementById("confirmBooking");
+  const complete = document.getElementById("bookingComplete");
+  const finalCard = document.getElementById("finalBookingCard");
+  const serviceButtons = [...modal.querySelectorAll("[data-service-choice]")];
+  const dateButtons = [...modal.querySelectorAll(".date-choice")];
+  const timeButtons = [...modal.querySelectorAll(".time-grid button")];
+
+  const get = id => document.getElementById(id)?.textContent?.trim() || "—";
+  const hasService = () => serviceButtons.some(b => b.classList.contains("selected"));
+  const hasDate = () => dateButtons.some(b => b.classList.contains("active"));
+  const hasTime = () => timeButtons.some(b => b.classList.contains("selected") || b.classList.contains("active"));
+
+  function setError(input, errorEl, message){
+    if (!input || !errorEl) return;
+    input.classList.toggle("is-invalid", !!message);
+    input.classList.toggle("is-valid", !message && input.value.trim().length > 0);
+    input.setAttribute("aria-invalid", message ? "true" : "false");
+    errorEl.textContent = message || "";
+  }
+
+  function validateName(show=true){
+    const value = nameInput?.value.trim() || "";
+    const message = value.length < 2 ? "Please enter your name." : "";
+    if (show) setError(nameInput, nameError, message);
+    return !message;
+  }
+
+  function validatePhone(show=true){
+    const value = phoneInput?.value.trim() || "";
+    const digits = value.replace(/\D/g, "");
+    const message = digits.length < 7 ? "Please enter a valid phone number." : "";
+    if (show) setError(phoneInput, phoneError, message);
+    return !message;
+  }
+
+  function updateReady(){
+    if (!ready) return;
+    const baseReady = hasService() && hasDate() && hasTime();
+    ready.classList.toggle("is-ready", baseReady);
+    ready.textContent = baseReady
+      ? "Everything is selected. Add your contact details and send the request."
+      : "Choose your service, date and time to continue.";
+  }
+
+  [nameInput, phoneInput].forEach(input => input?.addEventListener("input", () => {
+    if (input === nameInput) validateName(true);
+    if (input === phoneInput) validatePhone(true);
+    updateReady();
+  }));
+
+  serviceButtons.forEach(b => b.addEventListener("click", () => setTimeout(updateReady, 0)));
+  dateButtons.forEach(b => b.addEventListener("click", () => setTimeout(updateReady, 0)));
+  timeButtons.forEach(b => b.addEventListener("click", () => setTimeout(updateReady, 0)));
+
+  confirm?.addEventListener("click", event => {
+    const okName = validateName(true);
+    const okPhone = validatePhone(true);
+    if (!okName || !okPhone) {
+      event.stopImmediatePropagation();
+      return;
+    }
+    // Keep the existing completion flow, but make the final preview useful.
+    requestAnimationFrame(() => {
+      const ref = document.getElementById("finalBookingRef");
+      const finalService = document.getElementById("finalService");
+      const finalPrice = document.getElementById("finalPrice");
+      const finalDate = document.getElementById("finalDate");
+      const finalTime = document.getElementById("finalTime");
+      if (finalService) finalService.textContent = get("summaryService");
+      if (finalPrice) finalPrice.textContent = get("summaryPrice");
+      if (finalDate) finalDate.textContent = get("summaryDate");
+      if (finalTime) finalTime.textContent = get("summaryTime");
+      if (ref && (!ref.textContent || ref.textContent === "PREVIEW")) {
+        ref.textContent = "PREVIEW · READY";
+      }
+    });
+  }, true);
+
+  const resetBooking = () => {
+    [nameInput, phoneInput].forEach(input => {
+      if (!input) return;
+      input.value = "";
+      input.classList.remove("is-invalid", "is-valid");
+      input.setAttribute("aria-invalid", "false");
+    });
+    if (nameError) nameError.textContent = "";
+    if (phoneError) phoneError.textContent = "";
+    if (ready) {
+      ready.classList.remove("is-ready");
+      ready.textContent = "Choose your service, date and time to continue.";
+    }
+  };
+
+  modal.querySelectorAll("[data-close-booking]").forEach(el => {
+    el.addEventListener("click", () => {
+      setTimeout(() => {
+        if (!modal.classList.contains("open")) resetBooking();
+      }, 30);
+    });
+  });
+  updateReady();
+})();
+
+/* v30 — customer content hub: one place for real studio content */
+(() => {
+  const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+  const services = cfg.services || {};
+  const gallery = Array.isArray(cfg.gallery) ? cfg.gallery : [];
+
+  const setText = (selector, value) => {
+    if (value === undefined || value === null || value === "") return;
+    document.querySelectorAll(selector).forEach(el => { el.textContent = value; });
+  };
+
+  // Brand / contact / footer copy.
+  setText(".brand strong", cfg.studioName);
+  setText(".brand small", cfg.tagline);
+  setText(".mobile-menu .eyebrow", cfg.studioName);
+  setText(".footer-brand strong", cfg.studioName);
+  setText(".footer-brand span", cfg.tagline);
+  setText("[data-studio-address]", cfg.address);
+  setText("[data-studio-hours]", cfg.hours);
+  setText("[data-studio-phone]", cfg.phone);
+  setText("[data-studio-name]", cfg.studioName);
+  setText("[data-studio-city]", cfg.city);
+
+  document.querySelectorAll(".contact-details p").forEach(p => {
+    const label = p.querySelector("strong")?.textContent?.trim().toLowerCase();
+    if (label === "location" && cfg.address) p.innerHTML = `<strong>Location</strong><br>${cfg.address}`;
+    if (label === "hours" && cfg.hours) p.innerHTML = `<strong>Hours</strong><br>${cfg.hours}`;
+    if (label === "contact" && cfg.phone) p.innerHTML = `<strong>Contact</strong><br>${cfg.phone}`;
+  });
+
+  document.querySelectorAll("[data-studio-phone-link]").forEach(el => {
+    if (cfg.phone) {
+      el.href = `tel:${cfg.phone.replace(/[^\d+]/g, "")}`;
+      el.textContent = cfg.phone;
+    }
+  });
+
+  // Service cards + booking choices are driven from the same data.
+  document.querySelectorAll(".service-card[data-service]").forEach(card => {
+    const key = card.dataset.service;
+    const s = services[key];
+    if (!s) return;
+    card.querySelector(".service-photo > span")?.replaceChildren(document.createTextNode(s.number || ""));
+    card.querySelector(".service-photo > small")?.replaceChildren(document.createTextNode(s.durationShort || s.duration || ""));
+    const kicker = card.querySelector(".service-kicker span:first-child");
+    const number = card.querySelector(".service-kicker span:last-child");
+    if (kicker) kicker.textContent = s.kicker || "Service";
+    if (number) number.textContent = s.number || "";
+    const title = card.querySelector("h3");
+    const desc = card.querySelector(".service-info > p");
+    const meta = card.querySelectorAll(".service-meta span");
+    const tags = card.querySelector(".service-bottom > span");
+    if (title) title.textContent = s.title;
+    if (desc) desc.textContent = s.description;
+    if (meta[0]) meta[0].textContent = s.price;
+    if (meta[1]) meta[1].textContent = s.duration;
+    if (tags) tags.textContent = s.tags || "";
+  });
+
+  document.querySelectorAll("[data-service-choice]").forEach(btn => {
+    const key = btn.dataset.serviceKey;
+    const s = services[key];
+    if (!s) return;
+    btn.dataset.serviceChoice = s.title;
+    const title = btn.querySelector("span");
+    const meta = btn.querySelector("small");
+    if (title) title.textContent = s.title;
+    if (meta) meta.textContent = `${s.price} · ${s.duration}`;
+  });
+
+  // Keep service modal content in sync with the same source of truth.
+  document.querySelectorAll(".service-trigger[data-service]").forEach(card => {
+    card.addEventListener("click", () => {
+      const s = services[card.dataset.service];
+      if (!s) return;
+      const art = document.getElementById("serviceModalArt");
+      if (art) art.className = `service-modal-art ${s.art || ""}`;
+      setText("#serviceModalNumber", s.number);
+      setText("#serviceModalDuration", s.durationShort || s.duration);
+      setText("#serviceModalTitle", s.title);
+      setText("#serviceModalPrice", s.price);
+      setText("#serviceModalDurationText", s.duration);
+      setText("#serviceModalDescription", s.description);
+      const points = document.getElementById("servicePoints");
+      if (points) points.innerHTML = (s.points || []).map(point => `<li>${point}</li>`).join("");
+    });
+  });
+
+  // Gallery cards use the current CSS artwork but get their real content from the hub.
+  const workItems = [...document.querySelectorAll(".work-item")];
+  gallery.forEach((item, index) => {
+    const card = workItems[index];
+    if (!card) return;
+    card.dataset.title = item.title || "Beauty Style";
+    card.dataset.style = item.style || "";
+    card.dataset.description = item.description || "";
+    card.dataset.category = item.category || "simple";
+    card.dataset.recommendedService = item.recommendedService || "art";
+    card.dataset.styleName = item.styleName || item.title || "Beauty Style";
+    const strong = card.querySelector("div:last-child strong");
+    const span = card.querySelector("div:last-child span");
+    if (strong) strong.textContent = item.title || "Beauty Style";
+    if (span) span.textContent = item.style || "";
+  });
+
+  // Update basic document metadata without requiring a second HTML edit.
+  if (cfg.studioName) {
+    document.title = `${cfg.studioName} · Nails & Beauty`;
+    const description = document.querySelector('meta[name="description"]');
+    if (description) description.content = `${cfg.studioName} — thoughtful nail care, custom nail art and private appointments, made with care.`;
+    const ogSite = document.querySelector('meta[property="og:site_name"]');
+    if (ogSite) ogSite.content = cfg.studioName;
+  }
+})();
+
+
+/* v31 — photo-ready gallery system
+   Add a real image path to gallery[].image (for example
+   assets/images/gallery/soft-pearl.jpg). Empty image values keep the
+   existing editorial artwork, so the site remains launch-ready before
+   real photos are available.
+*/
+(() => {
+  const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+  const gallery = Array.isArray(cfg.gallery) ? cfg.gallery : [];
+  const items = [...document.querySelectorAll('.work-item')];
+  const modalArt = document.getElementById('modalArt');
+
+  const applyImage = (item, data) => {
+    if (!item || !data?.image) return;
+    const art = item.querySelector('.work-art');
+    if (!art) return;
+
+    art.classList.add('has-photo');
+    art.style.removeProperty('background-image');
+    art.querySelectorAll('.gallery-photo').forEach(img => img.remove());
+
+    const img = document.createElement('img');
+    img.className = 'gallery-photo';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.alt = data.alt || data.title || 'Beauty Studio nail design';
+    img.src = data.image;
+    img.addEventListener('error', () => {
+      img.remove();
+      art.classList.remove('has-photo');
+    }, { once: true });
+    art.appendChild(img);
+  };
+
+  gallery.forEach((data, index) => applyImage(items[index], data));
+
+  // The detail modal uses the same source image when one is available.
+  document.querySelectorAll('.work-trigger').forEach((item, index) => {
+    item.addEventListener('click', () => {
+      const data = gallery[index];
+      if (!modalArt || !data?.image) return;
+
+      modalArt.className = 'modal-art has-photo';
+      modalArt.querySelectorAll('.gallery-modal-photo').forEach(img => img.remove());
+
+      const img = document.createElement('img');
+      img.className = 'gallery-modal-photo';
+      img.alt = data.alt || data.title || 'Beauty Studio nail design';
+      img.src = data.image;
+      img.addEventListener('error', () => {
+        modalArt.className = 'modal-art';
+        img.remove();
+      }, { once: true });
+      modalArt.appendChild(img);
+    }, true);
+  });
+})();
+
+/* v32 — data-first gallery collection
+   Gallery cards are now generated from BEAUTY_STUDIO_CONTENT.gallery.
+   Add another object to the array and the customer gallery grows automatically.
+   No HTML card duplication is required.
+*/
+(() => {
+  const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+  const gallery = Array.isArray(cfg.gallery) ? cfg.gallery : [];
+  const grid = document.getElementById('work-grid');
+  const count = document.getElementById('galleryCount');
+  if (!grid || !gallery.length) return;
+
+  const oldItems = [...grid.querySelectorAll('.work-item')];
+  const artClasses = oldItems.map(item => {
+    const art = item.querySelector('.work-art');
+    return art ? [...art.classList].find(c => /^art-/.test(c)) || 'art-1' : 'art-1';
+  });
+
+  const escapeHTML = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+
+  const createCard = (data, index) => {
+    const card = document.createElement('article');
+    const category = data.category || 'simple';
+    card.className = `work-item work-trigger${index === 0 || index === 4 ? ' tall' : ''}`;
+    if (index === 4) card.classList.add('wide');
+    card.dataset.category = category;
+    card.dataset.title = data.title || 'Beauty Style';
+    card.dataset.style = data.style || '';
+    card.dataset.description = data.description || '';
+    card.dataset.recommendedService = data.recommendedService || 'art';
+    card.dataset.styleName = data.styleName || data.title || 'Beauty Style';
+    card.dataset.priceNote = data.priceNote || '';
+
+    const artClass = artClasses[index] || artClasses[index % Math.max(1, artClasses.length)] || `art-${(index % 5) + 1}`;
+    const photo = data.image ? `<img class="gallery-photo" loading="lazy" decoding="async" src="${escapeHTML(data.image)}" alt="${escapeHTML(data.alt || data.title || 'Beauty Studio nail design')}">` : '';
+    const inner = index % 5 === 0 ? '<div class="fingers"><i></i><i></i><i></i><i></i></div>'
+      : index % 5 === 1 ? '<div class="single-nail"></div>'
+      : index % 5 === 2 ? '<div class="sparkle">✦</div>'
+      : index % 5 === 3 ? '<div class="hearts">♡ ♡</div>'
+      : '<div class="fingers long"><i></i><i></i><i></i><i></i><i></i></div>';
+    card.innerHTML = `<div class="work-art ${artClass}${data.image ? ' has-photo' : ''}">${photo}${data.image ? '' : inner}</div><div><strong>${escapeHTML(data.title || 'Beauty Style')}</strong><span>${escapeHTML(data.style || '')}</span><b class="work-view">View →</b></div>`;
+    return card;
+  };
+
+  grid.replaceChildren(...gallery.map(createCard));
+
+  const updateCount = filter => {
+    const visible = [...grid.querySelectorAll('.work-item')].filter(item => filter === 'all' || item.dataset.category === filter).length;
+    if (count) count.textContent = `${visible} ${visible === 1 ? 'style' : 'styles'}`;
+  };
+
+  // Replace the old direct-click behavior with one delegated handler so newly
+  // added works behave exactly like the original five.
+  grid.addEventListener('click', event => {
+    const item = event.target.closest('.work-item');
+    if (!item) return;
+    const modal = document.getElementById('detailModal');
+    const modalArt = document.getElementById('modalArt');
+    if (!modal || !modalArt) return;
+    const art = item.querySelector('.work-art');
+    const artClass = art ? [...art.classList].find(x => /^art-/.test(x)) : 'art-1';
+    const photo = art?.querySelector('.gallery-photo');
+    modalArt.className = `modal-art ${photo ? 'has-photo' : artClass || 'art-1'}`;
+    modalArt.querySelectorAll('.gallery-modal-photo').forEach(img => img.remove());
+    if (photo) {
+      const img = document.createElement('img');
+      img.className = 'gallery-modal-photo';
+      img.src = photo.currentSrc || photo.src;
+      img.alt = photo.alt;
+      img.addEventListener('error', () => { img.remove(); modalArt.className = `modal-art ${artClass || 'art-1'}`; }, {once:true});
+      modalArt.appendChild(img);
+    }
+    document.getElementById('modalTitle').textContent = item.dataset.title || 'Beauty Style';
+    document.getElementById('modalStyle').textContent = item.dataset.style || '';
+    document.getElementById('modalDescription').textContent = item.dataset.description || '';
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('modal-open');
+  });
+
+  document.querySelectorAll('.filters button').forEach(button => {
+    button.addEventListener('click', () => updateCount(button.dataset.filter || 'all'));
+  });
+  updateCount(document.querySelector('.filters button.active')?.dataset.filter || 'all');
+})();
+
+/* v33 — gallery → booking handoff
+   A work detail now carries its style, recommended service and price note into
+   the customer booking flow. No backend is required yet.
+*/
+(() => {
+  const detailModal = document.getElementById('detailModal');
+  const bookingModal = document.getElementById('bookingModal');
+  const bookingButton = detailModal?.querySelector('.modal-actions a[href="#booking"]');
+  const grid = document.getElementById('work-grid');
+  if (!detailModal || !bookingModal || !bookingButton || !grid) return;
+
+  let activeWork = null;
+
+  const serviceMap = {
+    gel: 'Gel Manicure',
+    art: 'Custom Nail Art',
+    extensions: 'Extensions'
+  };
+
+  const closeDetail = () => {
+    detailModal.classList.remove('open');
+    detailModal.setAttribute('aria-hidden', 'true');
+  };
+
+  const openBookingAtService = () => {
+    if (!activeWork) return;
+
+    const serviceKey = activeWork.dataset.recommendedService || 'art';
+    const serviceChoice = document.querySelector(
+      `[data-service-choice][data-service-key="${CSS.escape(serviceKey)}"]`
+    );
+
+    // Trigger the existing booking state listeners so price, duration and
+    // final confirmation stay synchronized with the selected service.
+    serviceChoice?.click();
+
+    const inspiration = activeWork.dataset.styleName || activeWork.dataset.title || 'Studio Style';
+    const inspirationField = document.getElementById('summaryInspiration');
+    const inspirationBox = document.getElementById('bookingInspiration');
+    if (inspirationField) inspirationField.textContent = inspiration;
+    if (inspirationBox) inspirationBox.hidden = false;
+
+    const note = document.getElementById('bookingSelectionNote');
+    const serviceName = serviceMap[serviceKey] || activeWork.dataset.priceNote || 'Custom Nail Art';
+    if (note) note.textContent = `${serviceName} · ${inspiration}`;
+
+    const finalInspiration = document.getElementById('finalInspiration');
+    if (finalInspiration) finalInspiration.textContent = inspiration;
+
+    closeDetail();
+    bookingModal.classList.add('open');
+    bookingModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+
+    // Service is already chosen, so continue directly to date/time selection.
+    document.querySelectorAll('#bookingModal .booking-step').forEach(step => {
+      step.classList.toggle('active', step.dataset.step === '2');
+      step.style.display = '';
+    });
+    document.querySelectorAll('#bookingModal .steps span').forEach((step, index) => {
+      step.classList.toggle('current', index === 1);
+    });
+    const fill = document.getElementById('progressFill');
+    if (fill) fill.style.width = '66.666%';
+
+    // Keep the URL useful without navigating away from the current page.
+    if (window.location.hash !== '#booking') {
+      history.replaceState(null, '', '#booking');
+    }
+  };
+
+  grid.addEventListener('click', event => {
+    const card = event.target.closest('.work-item');
+    if (!card) return;
+    activeWork = card;
+  });
+
+  bookingButton.addEventListener('click', event => {
+    event.preventDefault();
+    openBookingAtService();
   });
 })();
