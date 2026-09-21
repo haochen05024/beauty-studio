@@ -605,3 +605,11 @@ document.addEventListener("DOMContentLoaded", () => {
   observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
   syncViewportLock();
 })();
+
+/* v15 — mobile navigation is intentionally the single persistent CTA */
+(() => {
+  const quick = document.getElementById("mobileQuickBook");
+  if (quick && window.matchMedia("(max-width: 800px)").matches) {
+    quick.setAttribute("aria-hidden","true");
+  }
+})();

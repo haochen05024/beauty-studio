@@ -522,3 +522,80 @@ body{overflow-x:hidden}
 }
 
 @media(max-width:800px){html.ui-overlay-open{overflow:hidden}body.ui-overlay-open{overflow:hidden}}
+
+/* v15 — mobile bottom navigation cleanup */
+@media(max-width:800px){
+  /* The 5-item bottom bar is the single persistent mobile CTA.
+     Hide the older floating booking pill so it never covers navigation. */
+  .mobile-quick-book{display:none!important}
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+
+  .mobile-bar{
+    height:64px;
+    padding:0 5px env(safe-area-inset-bottom);
+    box-sizing:content-box;
+  }
+  .mobile-bar a{
+    position:relative;
+    min-width:0;
+    padding:0 2px;
+    line-height:1;
+    text-align:center;
+  }
+  .mobile-bar a:not(.mobile-book):after{
+    content:"";
+    position:absolute;
+    left:50%;
+    bottom:8px;
+    width:3px;
+    height:3px;
+    border-radius:50%;
+    background:transparent;
+    transform:translateX(-50%);
+    transition:.2s ease;
+  }
+  .mobile-bar a:hover:after,
+  .mobile-bar a:focus-visible:after{background:#b78674}
+  .mobile-bar .mobile-book{
+    margin:7px 3px;
+    min-height:50px;
+    border-radius:15px;
+    font-size:8px;
+    letter-spacing:.08em;
+    box-shadow:0 7px 18px rgba(35,25,21,.12);
+  }
+
+  /* Contact section: turn the long list into cleaner mobile information rows. */
+  .contact{gap:24px;padding-top:58px;padding-bottom:58px}
+  .contact h2{margin-bottom:2px}
+  .contact-details{
+    display:grid;
+    grid-template-columns:1fr;
+    min-width:0;
+    width:100%;
+  }
+  .contact-details p{
+    margin:0;
+    padding:16px 0;
+    font-size:11px;
+    line-height:1.6;
+  }
+  .contact-details strong{
+    display:block;
+    margin-bottom:3px;
+    font-size:8px;
+  }
+
+  footer{
+    padding:30px 18px calc(28px + env(safe-area-inset-bottom));
+    gap:13px;
+  }
+  footer .footer-brand strong{font-size:19px}
+  footer p{font-size:13px}
+  footer small{font-size:8px}
+}
+
+@media(max-width:390px){
+  .mobile-bar .mobile-book{font-size:7.5px}
+  .mobile-bar a{font-size:6.5px}
+}
