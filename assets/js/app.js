@@ -280,3 +280,41 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 })();
+
+(() => {
+  // v8: subtle customer-side polish. No backend calls.
+  const progress = document.getElementById("pageProgress");
+  const backTop = document.getElementById("backTop");
+  const quickBook = document.getElementById("mobileQuickBook");
+
+  const updateScrollUI = () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+    if (progress) progress.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+    if (backTop) backTop.classList.toggle("show", window.scrollY > 650);
+    if (quickBook) quickBook.classList.toggle("show", window.scrollY > 420);
+  };
+  window.addEventListener("scroll", updateScrollUI, {passive:true});
+  window.addEventListener("resize", updateScrollUI);
+  updateScrollUI();
+
+  backTop?.addEventListener("click", () => window.scrollTo({top:0, behavior:"smooth"}));
+
+  // Reveal major content blocks as the customer scrolls.
+  const candidates = document.querySelectorAll("main > section");
+  candidates.forEach(section => section.classList.add("section-reveal"));
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {threshold:.08});
+    candidates.forEach(section => observer.observe(section));
+  } else {
+    candidates.forEach(section => section.classList.add("is-visible"));
+  }
+})();
