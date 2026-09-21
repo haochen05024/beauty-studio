@@ -316,3 +316,49 @@ body{overflow-x:hidden}
  .work-item>div:last-child{padding:9px 2px}
  .work-view{font-size:8px}
 }
+
+
+/* v11 — service presentation + booking clarity */
+.service-card{position:relative;overflow:hidden;cursor:pointer;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.service-card:hover{transform:translateY(-5px);box-shadow:0 18px 45px rgba(70,50,42,.10)}
+.service-card:focus-within{outline:2px solid rgba(168,116,98,.35);outline-offset:3px}
+.service-photo{position:relative}
+.service-photo>span{position:absolute;left:18px;top:16px}
+.service-photo small{position:absolute;right:17px;bottom:15px;font-size:8px;letter-spacing:.16em;color:rgba(55,42,36,.66)}
+.service-kicker{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;font-size:8px;text-transform:uppercase;letter-spacing:.14em;color:#9a8278}
+.service-kicker span:last-child{opacity:.45}
+.service-info h3{margin-bottom:8px}
+.service-meta{display:flex;gap:8px;align-items:center;margin-top:17px}
+.service-meta span{font-size:9px;letter-spacing:.06em;color:#6d5d55}
+.service-meta span+span{border-left:1px solid rgba(60,45,38,.16);padding-left:9px}
+.service-bottom{align-items:center}
+.service-bottom b{font-weight:500;display:flex;align-items:center;gap:7px}
+.service-bottom b i{font-style:normal;transition:transform .2s ease}
+.service-card:hover .service-bottom b i{transform:translateX(3px)}
+.service-note{margin:28px auto 0;max-width:860px;border:1px solid rgba(80,60,52,.11);border-radius:18px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:rgba(255,253,251,.72)}
+.service-note-mark{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#f3e7e1;font:20px var(--serif);color:#a87868}
+.service-note strong{font:500 14px var(--serif)}
+.service-note p{margin:4px 0 0;font-size:10px;line-height:1.6;color:#887971}
+.text-link{font-size:9px;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;border-bottom:1px solid rgba(50,40,35,.3);padding-bottom:4px}
+.text-link span{margin-left:7px}
+.modal-price-row{display:flex;align-items:baseline;gap:12px;margin:2px 0 14px}
+.modal-price-row strong{font-size:13px;font-weight:600;color:#735b51}
+.modal-price-row span{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#9a8981}
+.service-modal-art{position:relative}
+.service-modal-number{position:absolute;left:24px;top:22px;font:30px var(--serif);color:rgba(255,255,255,.75)}
+.service-modal-duration{position:absolute;right:22px;bottom:21px;font-size:8px;letter-spacing:.16em;color:rgba(255,255,255,.8)}
+.booking-footnote{margin:12px 0 0;font-size:9px;line-height:1.6;color:#978780}
+.step-hint{font-size:9px;color:#988880;margin:7px 0 0}
+.booking-options button{transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.booking-options button:hover{transform:translateY(-1px)}
+.booking-options button.selected{box-shadow:inset 0 0 0 1px var(--accent),0 8px 20px rgba(120,80,65,.06)}
+.booking-summary>div{padding:12px 15px}
+.booking-summary strong{font-size:10px}
+@media(max-width:700px){
+  .service-note{grid-template-columns:auto 1fr}
+  .service-note .text-link{grid-column:2;justify-self:start;margin-top:4px}
+  .service-meta{margin-top:14px}
+  .service-card:hover{transform:none;box-shadow:none}
+  .service-modal-number{left:19px;top:17px}
+  .service-modal-duration{right:18px;bottom:17px}
+}

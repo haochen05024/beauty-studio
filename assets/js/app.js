@@ -372,3 +372,88 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   updateCount("all");
 })();
+
+
+/* v11 — keep service details and booking selection in sync */
+(() => {
+  const modal = document.getElementById("serviceModal");
+  const choose = document.getElementById("chooseServiceButton");
+  const serviceArt = document.getElementById("serviceModalArt");
+  const serviceNumber = document.getElementById("serviceModalNumber");
+  const serviceDuration = document.getElementById("serviceModalDuration");
+  const serviceDurationText = document.getElementById("serviceModalDurationText");
+  const price = document.getElementById("serviceModalPrice");
+  const summaryPrice = document.getElementById("summaryPrice");
+  const summaryDuration = document.getElementById("summaryDuration");
+  const summaryDate = document.getElementById("summaryDate");
+  const bookingModal = document.getElementById("bookingModal");
+
+  const data = {
+    gel: { title:"Gel Manicure", price:"From 00 MMK", duration:"60 min", durationShort:"60 MIN", number:"01", art:"photo-blush" },
+    art: { title:"Custom Nail Art", price:"From 00 MMK", duration:"90 min", durationShort:"90 MIN", number:"02", art:"photo-rose" },
+    extensions: { title:"Extensions", price:"From 00 MMK", duration:"120 min", durationShort:"120 MIN", number:"03", art:"photo-nude" }
+  };
+
+  function selectService(key, openBooking = false) {
+    const s = data[key];
+    if (!s) return;
+    const button = document.querySelector(`[data-service-choice][data-service-key="${key}"]`);
+    document.querySelectorAll("[data-service-choice]").forEach(x => x.classList.remove("selected"));
+    button?.classList.add("selected");
+
+    document.getElementById("summaryService")?.replaceChildren(document.createTextNode(s.title));
+    summaryPrice && (summaryPrice.textContent = s.price);
+    summaryDuration && (summaryDuration.textContent = s.duration);
+    document.querySelectorAll(".booking-step").forEach(x => x.style.display = "");
+    document.getElementById("bookingComplete")?.classList.remove("show");
+
+    if (openBooking && bookingModal) {
+      bookingModal.classList.add("open");
+      bookingModal.setAttribute("aria-hidden","false");
+      document.body.classList.add("modal-open");
+      document.querySelectorAll(".booking-step").forEach(x => x.classList.toggle("active", x.dataset.step === "2"));
+      document.querySelectorAll(".steps span").forEach((x,i) => x.classList.toggle("current", i === 1));
+      document.getElementById("progressFill") && (document.getElementById("progressFill").style.width = "66.666%");
+    }
+  }
+
+  document.querySelectorAll(".service-trigger").forEach(card => {
+    card.addEventListener("click", () => {
+      const key = card.dataset.service;
+      const s = data[key];
+      if (!s) return;
+      serviceArt?.classList.remove("photo-blush","photo-rose","photo-nude");
+      serviceArt?.classList.add(s.art);
+      if (serviceNumber) serviceNumber.textContent = s.number;
+      if (serviceDuration) serviceDuration.textContent = s.durationShort;
+      if (serviceDurationText) serviceDurationText.textContent = s.duration;
+      if (price) price.textContent = s.price;
+      choose?.setAttribute("data-book-service", key);
+    });
+  });
+
+  choose?.addEventListener("click", () => {
+    const key = choose.dataset.bookService || "gel";
+    selectService(key, true);
+    modal?.classList.remove("open");
+    modal?.setAttribute("aria-hidden","true");
+    window.location.hash = "booking";
+  });
+
+  document.querySelectorAll("[data-service-choice]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.serviceKey;
+      if (key) {
+        const s = data[key];
+        if (summaryPrice) summaryPrice.textContent = s.price;
+        if (summaryDuration) summaryDuration.textContent = s.duration;
+      }
+    });
+  });
+
+  document.querySelectorAll(".date-choice").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (summaryDate) summaryDate.textContent = btn.dataset.date || btn.textContent.trim();
+    });
+  });
+})();
