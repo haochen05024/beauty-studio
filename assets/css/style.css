@@ -1253,3 +1253,7 @@ body.modal-open .install-modal{overscroll-behavior:contain}
 @media (prefers-reduced-motion: reduce) {
   .gallery-photo { transition: none; }
 }
+
+/* v32 — gallery collection grows from data without changing the layout system. */
+.work-grid .work-item { min-width: 0; }
+.gallery-photo { object-position: center; }

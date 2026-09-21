@@ -1291,3 +1291,89 @@ document.addEventListener("DOMContentLoaded", () => {
     }, true);
   });
 })();
+
+/* v32 — data-first gallery collection
+   Gallery cards are now generated from BEAUTY_STUDIO_CONTENT.gallery.
+   Add another object to the array and the customer gallery grows automatically.
+   No HTML card duplication is required.
+*/
+(() => {
+  const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+  const gallery = Array.isArray(cfg.gallery) ? cfg.gallery : [];
+  const grid = document.getElementById('work-grid');
+  const count = document.getElementById('galleryCount');
+  if (!grid || !gallery.length) return;
+
+  const oldItems = [...grid.querySelectorAll('.work-item')];
+  const artClasses = oldItems.map(item => {
+    const art = item.querySelector('.work-art');
+    return art ? [...art.classList].find(c => /^art-/.test(c)) || 'art-1' : 'art-1';
+  });
+
+  const escapeHTML = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+
+  const createCard = (data, index) => {
+    const card = document.createElement('article');
+    const category = data.category || 'simple';
+    card.className = `work-item work-trigger${index === 0 || index === 4 ? ' tall' : ''}`;
+    if (index === 4) card.classList.add('wide');
+    card.dataset.category = category;
+    card.dataset.title = data.title || 'Beauty Style';
+    card.dataset.style = data.style || '';
+    card.dataset.description = data.description || '';
+    card.dataset.recommendedService = data.recommendedService || 'art';
+    card.dataset.styleName = data.styleName || data.title || 'Beauty Style';
+    card.dataset.priceNote = data.priceNote || '';
+
+    const artClass = artClasses[index] || artClasses[index % Math.max(1, artClasses.length)] || `art-${(index % 5) + 1}`;
+    const photo = data.image ? `<img class="gallery-photo" loading="lazy" decoding="async" src="${escapeHTML(data.image)}" alt="${escapeHTML(data.alt || data.title || 'Beauty Studio nail design')}">` : '';
+    const inner = index % 5 === 0 ? '<div class="fingers"><i></i><i></i><i></i><i></i></div>'
+      : index % 5 === 1 ? '<div class="single-nail"></div>'
+      : index % 5 === 2 ? '<div class="sparkle">✦</div>'
+      : index % 5 === 3 ? '<div class="hearts">♡ ♡</div>'
+      : '<div class="fingers long"><i></i><i></i><i></i><i></i><i></i></div>';
+    card.innerHTML = `<div class="work-art ${artClass}${data.image ? ' has-photo' : ''}">${photo}${data.image ? '' : inner}</div><div><strong>${escapeHTML(data.title || 'Beauty Style')}</strong><span>${escapeHTML(data.style || '')}</span><b class="work-view">View →</b></div>`;
+    return card;
+  };
+
+  grid.replaceChildren(...gallery.map(createCard));
+
+  const updateCount = filter => {
+    const visible = [...grid.querySelectorAll('.work-item')].filter(item => filter === 'all' || item.dataset.category === filter).length;
+    if (count) count.textContent = `${visible} ${visible === 1 ? 'style' : 'styles'}`;
+  };
+
+  // Replace the old direct-click behavior with one delegated handler so newly
+  // added works behave exactly like the original five.
+  grid.addEventListener('click', event => {
+    const item = event.target.closest('.work-item');
+    if (!item) return;
+    const modal = document.getElementById('detailModal');
+    const modalArt = document.getElementById('modalArt');
+    if (!modal || !modalArt) return;
+    const art = item.querySelector('.work-art');
+    const artClass = art ? [...art.classList].find(x => /^art-/.test(x)) : 'art-1';
+    const photo = art?.querySelector('.gallery-photo');
+    modalArt.className = `modal-art ${photo ? 'has-photo' : artClass || 'art-1'}`;
+    modalArt.querySelectorAll('.gallery-modal-photo').forEach(img => img.remove());
+    if (photo) {
+      const img = document.createElement('img');
+      img.className = 'gallery-modal-photo';
+      img.src = photo.currentSrc || photo.src;
+      img.alt = photo.alt;
+      img.addEventListener('error', () => { img.remove(); modalArt.className = `modal-art ${artClass || 'art-1'}`; }, {once:true});
+      modalArt.appendChild(img);
+    }
+    document.getElementById('modalTitle').textContent = item.dataset.title || 'Beauty Style';
+    document.getElementById('modalStyle').textContent = item.dataset.style || '';
+    document.getElementById('modalDescription').textContent = item.dataset.description || '';
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('modal-open');
+  });
+
+  document.querySelectorAll('.filters button').forEach(button => {
+    button.addEventListener('click', () => updateCount(button.dataset.filter || 'all'));
+  });
+  updateCount(document.querySelector('.filters button.active')?.dataset.filter || 'all');
+})();
