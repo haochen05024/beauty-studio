@@ -264,21 +264,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const services = {
     gel: {
+      number:"01", kicker:"Everyday", duration:"60 MIN", durationText:"60 min",
       title:"Gel Manicure", price:"From 00 MMK",
-      description:"A clean, polished finish designed to stay beautiful through everyday life.",
+      description:"A clean, polished finish designed to stay beautiful through everyday life — simple, refined and easy to wear.",
       art:"photo-blush",
+      caption:"Natural beauty, lasting glow.", photoCount:"Beauty Studio · 01 / 03",
+      highlights:[["Care","Prep & shaping"],["Finish","Clean & polished"],["Feel","Made for you"]],
+      ideal:"Everyday wear",
       points:["Nail preparation & shaping","Gel color application","Clean finish & care"]
     },
     art: {
+      number:"02", kicker:"Signature", duration:"90 MIN", durationText:"90 min",
       title:"Custom Nail Art", price:"From 00 MMK",
-      description:"Bring an idea, a color, or simply a mood. We turn it into a design that feels like yours.",
-      art:"photo-rose",
+      description:"Bring an idea, a color, or simply a mood. We turn it into a design that feels like yours — with thoughtful details from base to finish.",
+      art:"photo-nude",
+      caption:"Your mood, made personal.", photoCount:"Beauty Studio · 02 / 03",
+      highlights:[["Base","Manicure included"],["Design","Color & detail"],["Plan","Design consultation"]],
+      ideal:"Custom looks · creative days",
       points:["Base manicure included","Custom color & detail","Design consultation"]
     },
     extensions: {
+      number:"03", kicker:"Length", duration:"120 MIN", durationText:"120 min",
       title:"Extensions", price:"From 00 MMK",
-      description:"Beautiful length and shape tailored to your hands, with a comfortable, refined finish.",
-      art:"photo-nude",
+      description:"Beautiful length and shape tailored to your hands, with a comfortable, refined finish that feels balanced from every angle.",
+      art:"photo-rose",
+      caption:"Length, shaped beautifully.", photoCount:"Beauty Studio · 03 / 03",
+      highlights:[["Shape","Tailored to you"],["Length","Balanced extension"],["Finish","Refined & clean"]],
+      ideal:"Longer looks · special occasions",
       points:["Shape consultation","Extension application","Finish & aftercare guidance"]
     }
   };
@@ -289,9 +301,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!s) return;
       const art = document.getElementById("serviceModalArt");
       art.className = "service-modal-art " + s.art;
-      document.getElementById("serviceModalTitle").textContent = s.title;
-      document.getElementById("serviceModalPrice").textContent = s.price;
-      document.getElementById("serviceModalDescription").textContent = s.description;
+      const setText = (id, value) => { const el=document.getElementById(id); if(el) el.textContent=value; };
+      setText("serviceModalNumber", s.number);
+      setText("serviceModalDuration", s.duration);
+      setText("serviceModalCaption", s.caption);
+      setText("serviceModalPhotoCount", s.photoCount);
+      setText("serviceModalKicker", s.kicker);
+      setText("serviceModalTitle", s.title);
+      setText("serviceModalPrice", s.price);
+      setText("serviceModalDurationText", s.durationText);
+      setText("serviceModalDescription", s.description);
+      setText("serviceIdealFor", s.ideal);
+      const highlights=document.getElementById("serviceHighlights");
+      if(highlights) highlights.innerHTML=s.highlights.map(x=>`<div><span>✦</span><strong>${x[0]}</strong><small>${x[1]}</small></div>`).join("");
       document.getElementById("servicePoints").innerHTML = s.points.map(x => `<li>${x}</li>`).join("");
       serviceModal.classList.add("open");
       serviceModal.setAttribute("aria-hidden","false");
