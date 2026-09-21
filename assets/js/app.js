@@ -72,3 +72,72 @@ document.addEventListener("DOMContentLoaded", () => {
     if (hint) hint.textContent = "Beauty Studio has been added to your device.";
   });
 })();
+
+(() => {
+  const modal = document.getElementById("detailModal");
+  const serviceModal = document.getElementById("serviceModal");
+  const closeAll = () => {
+    [modal, serviceModal].forEach(m => {
+      if (m) { m.classList.remove("open"); m.setAttribute("aria-hidden","true"); }
+    });
+    document.body.classList.remove("modal-open");
+  };
+
+  document.querySelectorAll(".work-trigger").forEach(item => {
+    item.addEventListener("click", () => {
+      const art = item.querySelector(".work-art");
+      const modalArt = document.getElementById("modalArt");
+      modalArt.className = "modal-art " + [...art.classList].filter(x => x.startsWith("art-"))[0];
+      document.getElementById("modalTitle").textContent = item.dataset.title || "Beauty Style";
+      document.getElementById("modalStyle").textContent = item.dataset.style || "";
+      document.getElementById("modalDescription").textContent = item.dataset.description || "";
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden","false");
+      document.body.classList.add("modal-open");
+    });
+  });
+
+  const services = {
+    gel: {
+      title:"Gel Manicure", price:"From 00 MMK",
+      description:"A clean, polished finish designed to stay beautiful through everyday life.",
+      art:"photo-blush",
+      points:["Nail preparation & shaping","Gel color application","Clean finish & care"]
+    },
+    art: {
+      title:"Custom Nail Art", price:"From 00 MMK",
+      description:"Bring an idea, a color, or simply a mood. We turn it into a design that feels like yours.",
+      art:"photo-rose",
+      points:["Base manicure included","Custom color & detail","Design consultation"]
+    },
+    extensions: {
+      title:"Extensions", price:"From 00 MMK",
+      description:"Beautiful length and shape tailored to your hands, with a comfortable, refined finish.",
+      art:"photo-nude",
+      points:["Shape consultation","Extension application","Finish & aftercare guidance"]
+    }
+  };
+
+  document.querySelectorAll(".service-trigger").forEach(item => {
+    item.addEventListener("click", () => {
+      const s = services[item.dataset.service];
+      if (!s) return;
+      const art = document.getElementById("serviceModalArt");
+      art.className = "service-modal-art " + s.art;
+      document.getElementById("serviceModalTitle").textContent = s.title;
+      document.getElementById("serviceModalPrice").textContent = s.price;
+      document.getElementById("serviceModalDescription").textContent = s.description;
+      document.getElementById("servicePoints").innerHTML = s.points.map(x => `<li>${x}</li>`).join("");
+      serviceModal.classList.add("open");
+      serviceModal.setAttribute("aria-hidden","false");
+      document.body.classList.add("modal-open");
+    });
+  });
+
+  document.querySelectorAll("[data-close-modal],[data-close-service]").forEach(el => {
+    el.addEventListener("click", closeAll);
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeAll();
+  });
+})();

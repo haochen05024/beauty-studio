@@ -55,9 +55,18 @@
 <section class="section services" id="services">
   <div class="section-heading"><div><p class="eyebrow">01 · Services</p><h2>Choose your<br><em>moment.</em></h2></div><p>Simple services, carefully finished and tailored to your style.</p></div>
   <div class="service-grid">
-    <article class="service-card"><div class="service-photo photo-blush"><span>01</span></div><div class="service-info"><h3>Gel Manicure</h3><p>Clean, polished and long-lasting nails for everyday elegance.</p><div class="service-bottom"><span>From 00 MMK</span><b>→</b></div></div></article>
-    <article class="service-card featured"><div class="service-photo photo-rose"><span>02</span></div><div class="service-info"><h3>Custom Nail Art</h3><p>Your idea, your colors, your little details — made just for you.</p><div class="service-bottom"><span>From 00 MMK</span><b>→</b></div></div></article>
-    <article class="service-card"><div class="service-photo photo-nude"><span>03</span></div><div class="service-info"><h3>Extensions</h3><p>Beautiful shape and length designed around your natural style.</p><div class="service-bottom"><span>From 00 MMK</span><b>→</b></div></div></article>
+    <article class="service-card service-trigger" data-service="gel">
+<div class="service-photo photo-blush"><span>01</span></div>
+<div class="service-info"><h3>Gel Manicure</h3><p>Clean, polished and long-lasting nails for everyday elegance.</p>
+<div class="service-bottom"><span>From 00 MMK</span><b>View details →</b></div></div></article>
+    <article class="service-card featured service-trigger" data-service="art">
+<div class="service-photo photo-rose"><span>02</span></div>
+<div class="service-info"><h3>Custom Nail Art</h3><p>Your idea, your colors, your little details — made just for you.</p>
+<div class="service-bottom"><span>From 00 MMK</span><b>View details →</b></div></div></article>
+    <article class="service-card service-trigger" data-service="extensions">
+<div class="service-photo photo-nude"><span>03</span></div>
+<div class="service-info"><h3>Extensions</h3><p>Beautiful shape and length designed around your natural style.</p>
+<div class="service-bottom"><span>From 00 MMK</span><b>View details →</b></div></div></article>
   </div>
   <a class="center-link" href="#booking">View all services <span>→</span></a>
 </section>
@@ -71,11 +80,11 @@
   <div class="section-heading compact"><div><p class="eyebrow">02 · Our Work</p><h2>Real nails.<br><em>Real happiness.</em></h2></div><a class="text-link" href="#work-grid">View all work <span>↗</span></a></div>
   <div class="filters"><button class="active" data-filter="all">All</button><button data-filter="simple">Simple</button><button data-filter="elegant">Elegant</button><button data-filter="trendy">Trendy</button><button data-filter="cute">Cute</button></div>
   <div class="work-grid" id="work-grid">
-    <article class="work-item tall" data-category="elegant"><div class="work-art art-1"><div class="fingers"><i></i><i></i><i></i><i></i></div></div><div><strong>Soft Pearl</strong><span>Elegant · Gel</span></div></article>
-    <article class="work-item" data-category="simple"><div class="work-art art-2"><div class="single-nail"></div></div><div><strong>Milky Nude</strong><span>Simple · Gel</span></div></article>
-    <article class="work-item" data-category="trendy"><div class="work-art art-3"><div class="sparkle">✦</div></div><div><strong>Rose Chrome</strong><span>Trendy · Art</span></div></article>
-    <article class="work-item" data-category="cute"><div class="work-art art-4"><div class="hearts">♡ ♡</div></div><div><strong>Little Hearts</strong><span>Cute · Art</span></div></article>
-    <article class="work-item wide" data-category="elegant"><div class="work-art art-5"><div class="fingers long"><i></i><i></i><i></i><i></i><i></i></div></div><div><strong>Quiet Luxury</strong><span>Elegant · Extensions</span></div></article>
+    <article class="work-item work-trigger tall" data-category="elegant" data-title="Soft Pearl" data-style="Elegant · Gel" data-description="A soft, clean finish with a delicate pearl glow — made for everyday elegance."><div class="work-art art-1"><div class="fingers"><i></i><i></i><i></i><i></i></div></div><div><strong>Soft Pearl</strong><span>Elegant · Gel</span></div></article>
+    <article class="work-item work-trigger" data-category="simple" data-title="Milky Nude" data-style="Simple · Gel" data-description="A timeless milky nude look that keeps things clean, natural and polished."><div class="work-art art-2"><div class="single-nail"></div></div><div><strong>Milky Nude</strong><span>Simple · Gel</span></div></article>
+    <article class="work-item work-trigger" data-category="trendy" data-title="Rose Chrome" data-style="Trendy · Art" data-description="A soft rose base with a reflective finish for a modern statement."><div class="work-art art-3"><div class="sparkle">✦</div></div><div><strong>Rose Chrome</strong><span>Trendy · Art</span></div></article>
+    <article class="work-item work-trigger" data-category="cute" data-title="Little Hearts" data-style="Cute · Art" data-description="A playful little heart detail for a sweet, personal finish."><div class="work-art art-4"><div class="hearts">♡ ♡</div></div><div><strong>Little Hearts</strong><span>Cute · Art</span></div></article>
+    <article class="work-item work-trigger wide" data-category="elegant" data-title="Quiet Luxury" data-style="Elegant · Extensions" data-description="Long, refined shapes with subtle color and a clean luxury finish."><div class="work-art art-5"><div class="fingers long"><i></i><i></i><i></i><i></i><i></i></div></div><div><strong>Quiet Luxury</strong><span>Elegant · Extensions</span></div></article>
   </div>
 </section>
 
@@ -101,6 +110,39 @@
 
 <section class="section contact" id="contact"><div><p class="eyebrow">05 · Find Us</p><h2>Come say<br><em>hello.</em></h2></div><div class="contact-details"><p><strong>Location</strong><br>Studio address will appear here</p><p><strong>Hours</strong><br>Mon — Sat · 10:00 — 19:00</p><p><strong>Contact</strong><br>+95 9 XXX XXX XXX</p></div></section>
 </main>
+
+<div class="detail-modal" id="detailModal" aria-hidden="true">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-close" type="button" aria-label="Close" data-close-modal>×</button>
+    <div class="modal-art" id="modalArt"></div>
+    <div class="modal-content">
+      <p class="eyebrow" id="modalEyebrow">Beauty Studio</p>
+      <h2 id="modalTitle">Soft Pearl</h2>
+      <p class="modal-style" id="modalStyle">Elegant · Gel</p>
+      <p class="modal-description" id="modalDescription"></p>
+      <div class="modal-actions">
+        <a class="button button-dark" href="#booking" data-close-modal>Book this style <span>→</span></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="detail-modal" id="serviceModal" aria-hidden="true">
+  <div class="modal-backdrop" data-close-service></div>
+  <div class="modal-panel service-panel" role="dialog" aria-modal="true" aria-labelledby="serviceModalTitle">
+    <button class="modal-close" type="button" aria-label="Close" data-close-service>×</button>
+    <div class="service-modal-art" id="serviceModalArt"></div>
+    <div class="modal-content">
+      <p class="eyebrow">Service</p>
+      <h2 id="serviceModalTitle">Gel Manicure</h2>
+      <p class="modal-style" id="serviceModalPrice">From 00 MMK</p>
+      <p class="modal-description" id="serviceModalDescription"></p>
+      <ul class="service-points" id="servicePoints"></ul>
+      <a class="button button-dark" href="#booking" data-close-service>Choose this service <span>→</span></a>
+    </div>
+  </div>
+</div>
 
 <footer><div class="footer-brand"><strong>Beauty Studio</strong><span>NAILS &amp; BEAUTY</span></div><p>Made for beautiful little moments.</p><small>© 2026 Beauty Studio</small></footer>
 <div class="mobile-bar"><a href="#home">Home</a><a href="#services">Services</a><a href="#work">Gallery</a><a href="#install">Install</a><a href="#booking" class="mobile-book">Book</a></div>
