@@ -1515,3 +1515,76 @@ document.addEventListener("DOMContentLoaded", () => {
   panel.querySelectorAll('[data-close-support]').forEach(el => el.addEventListener('click', close));
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && panel.classList.contains('open')) close(); });
 })();
+
+
+/* v35 — appointment request actions */
+(function () {
+  const studio = window.BEAUTY_STUDIO_CONTENT || {};
+  const cfg = studio.contact || studio;
+
+  function getBookingSnapshot() {
+    const state = window.BEAUTY_STUDIO_STATE || window.bookingState || {};
+    return {
+      service: state.serviceName || state.service || "",
+      price: state.price || "",
+      duration: state.duration || "",
+      date: state.dateLabel || state.date || "",
+      time: state.time || "",
+      inspiration: state.inspiration || "",
+      name: state.name || "",
+      phone: state.phone || ""
+    };
+  }
+
+  function buildRequestText() {
+    const b = getBookingSnapshot();
+    return [
+      "Hello Beauty Studio, I would like to request an appointment.",
+      "",
+      "Service: " + (b.service || "Not selected"),
+      "Price: " + (b.price || "To confirm"),
+      "Duration: " + (b.duration || "To confirm"),
+      "Date: " + (b.date || "Not selected"),
+      "Time: " + (b.time || "Not selected"),
+      "Inspiration: " + (b.inspiration || "None"),
+      "Name: " + (b.name || "Not provided"),
+      "Phone: " + (b.phone || "Not provided")
+    ].join("\n");
+  }
+
+  window.BEAUTY_STUDIO_BUILD_REQUEST = buildRequestText;
+
+  document.addEventListener("click", function (event) {
+    const action = event.target.closest("[data-request-action]");
+    if (!action) return;
+
+    const text = buildRequestText();
+    const type = action.dataset.requestAction;
+
+    if (type === "whatsapp" && cfg.whatsapp) {
+      const number = String(cfg.whatsapp).replace(/\D/g, "");
+      window.open("https://wa.me/" + number + "?text=" + encodeURIComponent(text), "_blank", "noopener");
+    }
+
+    if (type === "telegram" && cfg.telegram) {
+      const handle = String(cfg.telegram).replace(/^@/, "");
+      window.open("https://t.me/" + handle, "_blank", "noopener");
+    }
+
+    if (type === "call" && cfg.phone) {
+      window.location.href = "tel:" + String(cfg.phone).replace(/\s+/g, "");
+    }
+
+    if (type === "copy") {
+      navigator.clipboard?.writeText(text).then(() => {
+        action.classList.add("is-copied");
+        const original = action.textContent;
+        action.textContent = "Copied";
+        setTimeout(() => {
+          action.textContent = original;
+          action.classList.remove("is-copied");
+        }, 1800);
+      });
+    }
+  });
+})();
