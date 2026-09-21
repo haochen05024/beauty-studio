@@ -1995,3 +1995,65 @@ document.addEventListener("DOMContentLoaded", () => {
   overlay.addEventListener("click",e=>{ if(e.target===overlay) hide(); });
   document.addEventListener("keydown",e=>{ if(e.key==="Escape" && overlay.classList.contains("open")) hide(); });
 })();
+
+
+/* v46 — premium gallery work-detail presentation */
+(() => {
+  const grid = document.getElementById('work-grid');
+  const modal = document.getElementById('detailModal');
+  if (!grid || !modal) return;
+  const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+  const gallery = Array.isArray(cfg.gallery) ? cfg.gallery : [];
+  const services = cfg.services || {};
+  const titleEl = document.getElementById('modalTitle');
+  const styleEl = document.getElementById('modalStyle');
+  const moodEl = document.getElementById('modalMood');
+  const recoEl = document.getElementById('modalRecommended');
+  const numberEl = document.getElementById('modalWorkNumber');
+  const modalArt = document.getElementById('modalArt');
+
+  const moodMap = {
+    simple: 'Clean & effortless',
+    elegant: 'Soft & polished',
+    trendy: 'Modern & expressive',
+    cute: 'Sweet & playful'
+  };
+
+  const sync = item => {
+    if (!item) return;
+    const index = [...grid.querySelectorAll('.work-item')].indexOf(item);
+    const data = gallery[index] || {};
+    const category = item.dataset.category || data.category || 'simple';
+    if (numberEl) numberEl.textContent = String(index + 1).padStart(2, '0');
+    if (titleEl) titleEl.textContent = item.dataset.title || data.title || 'Beauty Style';
+    if (styleEl) styleEl.textContent = item.dataset.style || data.style || '';
+    if (moodEl) moodEl.textContent = moodMap[category] || 'Made for you';
+    const serviceKey = item.dataset.recommendedService || data.recommendedService || 'art';
+    if (recoEl) recoEl.textContent = services[serviceKey]?.title || 'Custom Nail Art';
+    if (modalArt) {
+      const photo = item.querySelector('.gallery-photo');
+      modalArt.setAttribute('data-photo-label', `${String(index + 1).padStart(2,'0')} / ${Math.max(gallery.length, 5).toString().padStart(2,'0')}`);
+    }
+  };
+
+  grid.addEventListener('click', e => {
+    const item = e.target.closest('.work-item');
+    if (item) sync(item);
+  }, true);
+
+  // Add editorial index labels to generated cards without changing their data model.
+  const decorate = () => {
+    grid.querySelectorAll('.work-item').forEach((item, i) => {
+      item.dataset.workNumber = String(i + 1).padStart(2, '0');
+      const art = item.querySelector('.work-art');
+      if (art && !art.querySelector('.work-index')) {
+        const badge = document.createElement('span');
+        badge.className = 'work-index';
+        badge.textContent = String(i + 1).padStart(2, '0');
+        art.appendChild(badge);
+      }
+    });
+  };
+  decorate();
+  setTimeout(decorate, 120);
+})();
