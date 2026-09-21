@@ -554,9 +554,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const bookingModal = document.getElementById("bookingModal");
 
   const data = {
-    gel: { title:"Gel Manicure", price:"From 00 MMK", duration:"60 min", durationShort:"60 MIN", number:"01", art:"photo-blush" },
-    art: { title:"Custom Nail Art", price:"From 00 MMK", duration:"90 min", durationShort:"90 MIN", number:"02", art:"photo-rose" },
-    extensions: { title:"Extensions", price:"From 00 MMK", duration:"120 min", durationShort:"120 MIN", number:"03", art:"photo-nude" }
+    gel: { title:"Gel Manicure", price:"From 00 MMK", duration:"60 min", durationShort:"60 MIN", number:"01", kicker:"Everyday", art:"photo-blush", image:"https://images.unsplash.com/photo-1754799670380-17640d939e32?auto=format&fit=crop&fm=jpg&q=82&w=1400", caption:"Natural beauty, lasting glow.", idealFor:"Everyday wear · special moments", highlights:[["Care","Prep & shaping"],["Finish","Clean & polished"],["Feel","Made for you"]] },
+    art: { title:"Custom Nail Art", price:"From 00 MMK", duration:"90 min", durationShort:"90 MIN", number:"02", kicker:"Signature", art:"photo-rose", image:"https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&fm=jpg&q=82&w=1400", caption:"Your mood, made into detail.", idealFor:"Custom looks · creative days", highlights:[["Base","Manicure included"],["Design","Color & detail"],["Plan","Design consultation"]] },
+    extensions: { title:"Extensions", price:"From 00 MMK", duration:"120 min", durationShort:"120 MIN", number:"03", kicker:"Length", art:"photo-nude", image:"https://images.unsplash.com/photo-1772322586649-fc11154e76b9?auto=format&fit=crop&fm=jpg&q=82&w=1400", caption:"Long, refined and beautifully yours.", idealFor:"Length lovers · statement sets", highlights:[["Shape","Consultation"],["Length","Extension application"],["Care","Aftercare guidance"]] }
   };
 
   function selectService(key, openBooking = false) {
@@ -1201,6 +1201,18 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("#serviceModalPrice", s.price);
       setText("#serviceModalDurationText", s.duration);
       setText("#serviceModalDescription", s.description);
+      setText("#serviceModalKicker", s.kicker || "Beauty Studio");
+      setText("#serviceModalCaption", s.caption || "Made with care.");
+      setText("#serviceModalPhotoCount", `Beauty Studio · ${s.number || "01"} / 03`);
+      setText("#serviceIdealFor", s.idealFor || "Everyday wear");
+      if (art) {
+        art.style.backgroundImage = s.image ? `url("${s.image}")` : "";
+      }
+      const highlights = document.getElementById("serviceHighlights");
+      if (highlights) {
+        const rows = Array.isArray(s.highlights) ? s.highlights : [];
+        highlights.innerHTML = rows.map(row => `<div><span>✦</span><strong>${row[0] || ""}</strong><small>${row[1] || ""}</small></div>`).join("");
+      }
       const points = document.getElementById("servicePoints");
       if (points) points.innerHTML = (s.points || []).map(point => `<li>${point}</li>`).join("");
     });
@@ -1217,10 +1229,21 @@ document.addEventListener("DOMContentLoaded", () => {
     card.dataset.category = item.category || "simple";
     card.dataset.recommendedService = item.recommendedService || "art";
     card.dataset.styleName = item.styleName || item.title || "Beauty Style";
-    const strong = card.querySelector("div:last-child strong");
-    const span = card.querySelector("div:last-child span");
+    const info = card.querySelector("div:last-child");
+    const strong = info?.querySelector("strong");
+    const span = info?.querySelector("span");
     if (strong) strong.textContent = item.title || "Beauty Style";
     if (span) span.textContent = item.style || "";
+    if (info) {
+      let reco = info.querySelector(".work-reco");
+      if (!reco) {
+        reco = document.createElement("small");
+        reco.className = "work-reco";
+        info.appendChild(reco);
+      }
+      const serviceTitle = cfg.services?.[item.recommendedService]?.title || "Custom Nail Art";
+      reco.textContent = `Recommended · ${serviceTitle}`;
+    }
   });
 
   // Update basic document metadata without requiring a second HTML edit.

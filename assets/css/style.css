@@ -1438,3 +1438,120 @@ body.modal-open .install-modal{overscroll-behavior:contain}
   transition:transform .45s ease,filter .45s ease;
 }
 .work-item:hover .gallery-photo{transform:scale(1.035);filter:saturate(1.04)}
+
+
+/* v44 — gallery clarity + fuller service detail modal */
+.work-grid{
+  grid-template-columns:1.05fr 1fr 1fr;
+  grid-template-rows:260px 260px;
+  align-items:stretch;
+}
+.work-item{
+  display:grid;
+  grid-template-rows:minmax(0,1fr) auto;
+  min-height:0;
+}
+.work-item.tall{grid-row:1/3}
+.work-item.wide{grid-column:auto}
+.work-art{height:auto;min-height:0}
+.work-item>div:last-child{
+  min-height:58px;
+  padding:11px 3px 4px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  grid-template-rows:auto auto;
+  column-gap:12px;
+  align-content:start;
+}
+.work-item>div:last-child strong{
+  font-size:12px;
+  line-height:1.2;
+}
+.work-item>div:last-child span{
+  grid-column:1;
+  margin-top:3px;
+  font-size:9px;
+  line-height:1.35;
+}
+.work-item>div:last-child .work-view{
+  grid-column:2;
+  grid-row:1/3;
+  align-self:center;
+  white-space:nowrap;
+  font-size:9px;
+  font-weight:500;
+  color:#69564e;
+}
+
+.service-modal-content{
+  padding:clamp(34px,4.5vw,52px);
+  justify-content:flex-start;
+}
+.service-modal-content h2{margin-bottom:7px;line-height:.98}
+.service-modal-content .modal-description{max-width:480px;margin-bottom:18px}
+.service-modal-art{
+  min-height:500px;
+  background-size:cover!important;
+  background-position:center!important;
+  isolation:isolate;
+}
+.service-modal-art:after{
+  content:"";position:absolute;inset:0;z-index:0;
+  background:linear-gradient(180deg,rgba(45,31,27,.05) 0%,transparent 42%,rgba(35,25,21,.48) 100%);
+  pointer-events:none;
+}
+.service-modal-number,.service-modal-duration,.service-modal-caption{z-index:1}
+.service-modal-caption{
+  position:absolute;left:25px;right:25px;bottom:24px;color:#fff;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:18px;
+}
+.service-modal-caption strong{font:italic 24px/1.05 var(--serif);max-width:230px}
+.service-modal-caption span{font-size:8px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;white-space:nowrap}
+.service-highlights{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  margin:3px 0 20px;padding:13px 0 15px;
+  border-top:1px solid var(--bs-line);border-bottom:1px solid var(--bs-line);
+}
+.service-highlights div{min-width:0;display:grid;grid-template-columns:auto 1fr;column-gap:7px;align-items:center}
+.service-highlights span{grid-row:1/3;color:#b77f6c;font-size:10px}
+.service-highlights strong{font-size:9px;line-height:1.1}
+.service-highlights small{font-size:8px;line-height:1.3;color:#9a8981}
+.service-includes-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.service-includes-head span{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#9b8075;font-weight:700}
+.service-includes-head small{font-size:8px;color:#9b8980}
+.service-points{margin:0 0 14px;padding:0;list-style:none}
+.service-points li{position:relative;padding:8px 0 8px 18px;border-bottom:1px solid rgba(80,60,52,.12);font-size:10px;color:#76665f}
+.service-points li:before{content:"✦";position:absolute;left:0;top:8px;color:#bd8875;font-size:8px}
+.service-modal-note{margin:0 0 16px;padding:10px 12px;border-radius:11px;background:#fbf5f1;color:#98857d;font-size:8px;line-height:1.5}
+.service-modal-content .button{width:100%;margin-top:auto}
+@media(max-width:800px){
+  .work-grid{grid-template-columns:1fr 1fr;grid-template-rows:220px 220px 220px}
+  .work-item.tall{grid-row:1/3}
+  .work-item.wide{grid-column:auto}
+  .work-item:nth-child(5){grid-column:1/3}
+  .service-modal-content{padding:25px 22px 28px}
+  .service-modal-art{min-height:285px;height:32dvh}
+  .service-modal-caption{left:19px;right:19px;bottom:18px}
+  .service-modal-caption strong{font-size:20px}
+  .service-highlights{gap:6px;margin-bottom:16px}
+  .service-highlights small{font-size:7px}
+}
+@media(max-width:520px){
+  .work-grid{grid-template-columns:1fr;grid-template-rows:none}
+  .work-item.tall,.work-item.wide,.work-item:nth-child(5){grid-column:auto;grid-row:auto}
+  .work-item{min-height:280px}
+  .work-art{min-height:220px}
+  .service-highlights{grid-template-columns:1fr 1fr 1fr}
+  .service-highlights div{column-gap:5px}
+  .service-highlights strong{font-size:8px}
+  .service-highlights small{font-size:7px}
+}
+
+.work-item>div:last-child .work-reco{
+  grid-column:1;
+  margin-top:3px;
+  font-size:8px;
+  line-height:1.35;
+  letter-spacing:.04em;
+  color:#b08373;
+}
