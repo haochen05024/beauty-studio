@@ -594,3 +594,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   sync();
 })();
+
+/* v14 — mobile viewport safety */
+(() => {
+  const syncViewportLock = () => {
+    const open = document.querySelector(".detail-modal.open,.booking-modal.open,.mobile-menu.open");
+    document.documentElement.classList.toggle("ui-overlay-open", !!open);
+  };
+  const observer = new MutationObserver(syncViewportLock);
+  observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
+  syncViewportLock();
+})();
