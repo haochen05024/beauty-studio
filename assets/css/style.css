@@ -1845,3 +1845,31 @@ body.modal-open .install-modal{overscroll-behavior:contain}
  .time-grid{gap:8px}
  .booking-reassurance{align-items:flex-start}
 }
+
+
+/* v49 — premium studio story / about editorial layer */
+.about-art{overflow:hidden;position:relative;background-position:center;background-size:cover}
+.about-art:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(43,33,29,.02) 20%,rgba(43,33,29,.48) 100%);pointer-events:none}
+.about-art-note{position:absolute;left:clamp(24px,4vw,55px);bottom:clamp(24px,4vw,52px);z-index:2;color:#fff;display:flex;flex-direction:column;gap:7px;text-shadow:0 2px 18px rgba(30,22,19,.2)}
+.about-art-note span{font-size:7px;letter-spacing:.24em;font-weight:700;opacity:.72}
+.about-art-note strong{font:400 clamp(22px,3vw,36px)/1.02 var(--serif);letter-spacing:-.035em}
+.about-art-note strong em{font-style:italic;color:#f1d8cd}
+.about-art-note small{font-size:7px;letter-spacing:.18em;opacity:.65;margin-top:5px}
+.about-copy{position:relative}
+.about-copy:before{content:"ABOUT";position:absolute;right:clamp(24px,4vw,70px);top:clamp(42px,6vw,80px);font-size:7px;letter-spacing:.25em;color:rgba(255,255,255,.23)}
+.about-copy h2{letter-spacing:-.045em}
+.studio-story-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:27px 0 26px;padding:19px 0;border-top:1px solid rgba(255,255,255,.12);border-bottom:1px solid rgba(255,255,255,.12)}
+.studio-story-grid>div{min-width:0}
+.studio-story-grid span{display:block;font:15px var(--serif);color:#c79b89;margin-bottom:9px}
+.studio-story-grid strong{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#fff;margin-bottom:7px}
+.studio-story-grid p{margin:0;color:#aa9b94;font-size:9px;line-height:1.7}
+@media(max-width:800px){
+  .about-art-note{left:20px;bottom:22px}
+  .about-art-note strong{font-size:25px}
+  .about-copy:before{right:20px;top:36px}
+  .studio-story-grid{grid-template-columns:1fr;gap:15px;margin:24px 0 22px;padding:17px 0}
+  .studio-story-grid>div{display:grid;grid-template-columns:28px 1fr;column-gap:9px;align-items:start}
+  .studio-story-grid span{grid-row:1 / span 2;margin:0;font-size:14px}
+  .studio-story-grid strong{margin:0}
+  .studio-story-grid p{grid-column:2;margin-top:3px}
+}
