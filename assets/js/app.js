@@ -17,3 +17,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+// Customer-side gallery filter. No admin/data service is connected yet.
