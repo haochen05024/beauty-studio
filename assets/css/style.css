@@ -204,3 +204,34 @@ body.modal-open{overflow:hidden}
  .install-actions{align-items:flex-start;flex-direction:column}
  .booking-panel{padding:28px 20px;border-radius:22px}.booking-head h2{font-size:42px}.time-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* v7 appointment flow polish */
+.booking-progress{margin-top:24px}
+.progress-track{height:2px;background:var(--line);position:relative}
+.progress-track span{position:absolute;left:0;top:0;height:2px;width:33.333%;background:var(--accent);transition:.25s}
+.progress-labels{display:flex;justify-content:space-between;margin-top:9px;color:#9a8b83;font-size:8px;text-transform:uppercase;letter-spacing:.12em}
+.progress-labels .current{color:var(--ink)}
+.step-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:20px}
+.step-heading>div>span{display:block;color:var(--accent);font-size:8px;letter-spacing:.16em;margin-bottom:5px}
+.step-heading h3{margin:0;font:400 27px var(--serif)}
+.step-heading>small{font-size:9px;color:var(--muted)}
+.availability-note{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:#887971;margin:0 0 10px}
+.booking-options button.selected{border-color:var(--accent);background:#f3e7e1}
+.booking-options button.selected b{color:var(--accent)}
+.date-row{overflow-x:auto;padding-bottom:2px}
+.date-choice{min-width:86px}
+.time-grid button.selected{background:#e9d8d0;border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.back-step{border:0;background:none;padding:13px 0 0;color:#897a72;font-size:9px;cursor:pointer}
+.back-step:hover{color:var(--ink)}
+.booking-summary{gap:0;padding:0;background:#f3e7e1;overflow:hidden}
+.booking-summary>div{padding:13px 15px;border-bottom:1px solid rgba(130,95,82,.12);display:grid;grid-template-columns:75px 1fr;align-items:center}
+.booking-summary>div:last-child{border-bottom:0}
+.booking-summary span{font-size:9px;color:#8e7e75}.booking-summary strong{font-size:10px;font-weight:500}
+.confirm-booking{width:100%;margin-top:13px}
+.booking-complete h3{font:400 34px var(--serif);margin-bottom:8px}
+@media(max-width:700px){
+ .step-heading{align-items:start;flex-direction:column;gap:5px}
+ .step-heading h3{font-size:25px}
+ .date-row{margin-right:-20px;padding-right:20px}
+ .date-choice{flex:0 0 86px}
+}

@@ -203,3 +203,80 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") closeBooking();
   });
 })();
+
+(() => {
+  const modal = document.getElementById("bookingModal");
+  if (!modal) return;
+
+  const steps = [...modal.querySelectorAll(".booking-step")];
+  const dots = [...modal.querySelectorAll("[data-progress]")];
+  const fill = document.getElementById("progressFill");
+  const serviceLabel = document.getElementById("chosenServiceLabel");
+  const summaryService = document.getElementById("summaryService");
+  const summaryDate = document.getElementById("summaryDate");
+  const summaryTime = document.getElementById("summaryTime");
+  const completeSummary = document.getElementById("completeSummary");
+
+  let currentStep = 1;
+  let service = "";
+  let date = "Today";
+  let time = "";
+
+  function setStep(step) {
+    currentStep = step;
+    steps.forEach(s => s.classList.toggle("active", Number(s.dataset.step) === step));
+    dots.forEach(d => d.classList.toggle("current", Number(d.dataset.progress) === step));
+    if (fill) fill.style.width = `${step / 3 * 100}%`;
+  }
+
+  document.querySelectorAll("[data-service-choice]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-service-choice]").forEach(x => x.classList.remove("selected"));
+      btn.classList.add("selected");
+      service = btn.dataset.serviceChoice;
+      if (serviceLabel) serviceLabel.textContent = service;
+      if (summaryService) summaryService.textContent = service;
+      setStep(2);
+    });
+  });
+
+  document.querySelectorAll(".date-choice").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".date-choice").forEach(x => x.classList.remove("active"));
+      btn.classList.add("active");
+      date = btn.dataset.date || btn.textContent.trim();
+      if (summaryDate) summaryDate.textContent = date;
+    });
+  });
+
+  document.querySelectorAll(".time-grid button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".time-grid button").forEach(x => x.classList.remove("selected"));
+      btn.classList.add("selected");
+      time = btn.textContent.trim();
+      if (summaryTime) summaryTime.textContent = time;
+      setStep(3);
+    });
+  });
+
+  modal.querySelectorAll("[data-back-step]").forEach(btn => {
+    btn.addEventListener("click", () => setStep(Number(btn.dataset.backStep)));
+  });
+
+  document.getElementById("confirmBooking")?.addEventListener("click", () => {
+    const nameInput = document.getElementById("guestName");
+    const phoneInput = document.getElementById("guestPhone");
+    const name = nameInput?.value.trim();
+    const phone = phoneInput?.value.trim();
+
+    if (!name) { nameInput?.focus(); return; }
+    if (!phone) { phoneInput?.focus(); return; }
+
+    document.querySelectorAll("#bookingModal .booking-step").forEach(x => x.style.display = "none");
+    const complete = document.getElementById("bookingComplete");
+    complete?.classList.add("show");
+    if (completeSummary) {
+      completeSummary.textContent = `${service} · ${date} · ${time}. The Studio will confirm the final time with you.`;
+    }
+  });
+})();
