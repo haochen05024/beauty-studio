@@ -758,3 +758,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const note=document.querySelector(".contact-status small");
   if(note && cfg.bookingMessage) note.textContent=cfg.bookingMessage;
 })();
+
+/* v22 — document title */
+(() => {
+  if (document.title !== "Beauty Studio · Nails & Beauty") {
+    document.title = "Beauty Studio · Nails & Beauty";
+  }
+})();

@@ -1040,3 +1040,6 @@ select:focus-visible{
   .contact-status .status-dot{grid-row:1 / span 2;margin-top:4px}
   .contact-status small{grid-column:2;margin:0}
 }
+
+/* v22 — metadata-ready brand surface */
+::selection{background:#ead8d0;color:#302823}
