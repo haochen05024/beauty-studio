@@ -613,3 +613,29 @@ document.addEventListener("DOMContentLoaded", () => {
     quick.setAttribute("aria-hidden","true");
   }
 })();
+
+/* v17 — section-aware navigation */
+(() => {
+  const ids=["home","services","work","about","install","booking","contact"];
+  const sections=ids.map(id=>document.getElementById(id)).filter(Boolean);
+  const navLinks=[...document.querySelectorAll(".desktop-nav a,.mobile-bar a")];
+
+  function markActive(id){
+    navLinks.forEach(link=>{
+      const href=link.getAttribute("href")||"";
+      link.classList.toggle("active",href==="#"+id);
+    });
+  }
+  const io=new IntersectionObserver(entries=>{
+    const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+    if(visible) markActive(visible.target.id);
+  },{rootMargin:"-30% 0px -55% 0px",threshold:[0,.2,.5,.8]});
+  sections.forEach(s=>io.observe(s));
+
+  const header=document.querySelector(".site-header");
+  const onScroll=()=>{
+    header?.classList.toggle("is-scrolled",window.scrollY>20);
+  };
+  window.addEventListener("scroll",onScroll,{passive:true});
+  onScroll();
+})();
