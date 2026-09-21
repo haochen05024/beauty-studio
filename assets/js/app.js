@@ -1377,3 +1377,141 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   updateCount(document.querySelector('.filters button.active')?.dataset.filter || 'all');
 })();
+
+/* v33 — gallery → booking handoff
+   A work detail now carries its style, recommended service and price note into
+   the customer booking flow. No backend is required yet.
+*/
+(() => {
+  const detailModal = document.getElementById('detailModal');
+  const bookingModal = document.getElementById('bookingModal');
+  const bookingButton = detailModal?.querySelector('.modal-actions a[href="#booking"]');
+  const grid = document.getElementById('work-grid');
+  if (!detailModal || !bookingModal || !bookingButton || !grid) return;
+
+  let activeWork = null;
+
+  const serviceMap = {
+    gel: 'Gel Manicure',
+    art: 'Custom Nail Art',
+    extensions: 'Extensions'
+  };
+
+  const closeDetail = () => {
+    detailModal.classList.remove('open');
+    detailModal.setAttribute('aria-hidden', 'true');
+  };
+
+  const openBookingAtService = () => {
+    if (!activeWork) return;
+
+    const serviceKey = activeWork.dataset.recommendedService || 'art';
+    const serviceChoice = document.querySelector(
+      `[data-service-choice][data-service-key="${CSS.escape(serviceKey)}"]`
+    );
+
+    // Trigger the existing booking state listeners so price, duration and
+    // final confirmation stay synchronized with the selected service.
+    serviceChoice?.click();
+
+    const inspiration = activeWork.dataset.styleName || activeWork.dataset.title || 'Studio Style';
+    const inspirationField = document.getElementById('summaryInspiration');
+    const inspirationBox = document.getElementById('bookingInspiration');
+    if (inspirationField) inspirationField.textContent = inspiration;
+    if (inspirationBox) inspirationBox.hidden = false;
+
+    const note = document.getElementById('bookingSelectionNote');
+    const serviceName = serviceMap[serviceKey] || activeWork.dataset.priceNote || 'Custom Nail Art';
+    if (note) note.textContent = `${serviceName} · ${inspiration}`;
+
+    const finalInspiration = document.getElementById('finalInspiration');
+    if (finalInspiration) finalInspiration.textContent = inspiration;
+
+    closeDetail();
+    bookingModal.classList.add('open');
+    bookingModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+
+    // Service is already chosen, so continue directly to date/time selection.
+    document.querySelectorAll('#bookingModal .booking-step').forEach(step => {
+      step.classList.toggle('active', step.dataset.step === '2');
+      step.style.display = '';
+    });
+    document.querySelectorAll('#bookingModal .steps span').forEach((step, index) => {
+      step.classList.toggle('current', index === 1);
+    });
+    const fill = document.getElementById('progressFill');
+    if (fill) fill.style.width = '66.666%';
+
+    // Keep the URL useful without navigating away from the current page.
+    if (window.location.hash !== '#booking') {
+      history.replaceState(null, '', '#booking');
+    }
+  };
+
+  grid.addEventListener('click', event => {
+    const card = event.target.closest('.work-item');
+    if (!card) return;
+    activeWork = card;
+  });
+
+  bookingButton.addEventListener('click', event => {
+    event.preventDefault();
+    openBookingAtService();
+  });
+})();
+
+
+/* v34 — customer support widget */
+(() => {
+  const fab = document.getElementById('supportFab');
+  const panel = document.getElementById('supportPanel');
+  const actions = document.getElementById('supportActions');
+  const note = document.getElementById('supportNote');
+  if (!fab || !panel || !actions) return;
+
+  const content = window.BEAUTY_STUDIO_CONTENT || {};
+  const escapeHTML = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;',"\"":'&quot;'}[c]));
+  const validPhone = value => value && !/^\+?0+$/.test(String(value).replace(/[\s()-]/g,'')) && !String(value).includes('XXX') && !String(value).includes('000 000 000');
+  const links = [];
+
+  if (validPhone(content.phone)) {
+    links.push({href:`tel:${String(content.phone).replace(/[^+\d]/g,'')}`, icon:'☎', title:'Call the Studio', detail:content.phone, external:false});
+  }
+  if (content.whatsapp) {
+    const raw = String(content.whatsapp);
+    const href = /^https?:\/\//i.test(raw) ? raw : `https://wa.me/${raw.replace(/\D/g,'')}`;
+    links.push({href, icon:'◌', title:'WhatsApp', detail:'Send us a message', external:true});
+  }
+  if (content.telegram) {
+    const raw = String(content.telegram);
+    const href = /^https?:\/\//i.test(raw) ? raw : `https://t.me/${raw.replace(/^@/,'')}`;
+    links.push({href, icon:'➤', title:'Telegram', detail:'Chat with the Studio', external:true});
+  }
+  if (content.instagram) {
+    links.push({href:content.instagram, icon:'◎', title:'Instagram', detail:'Message us on Instagram', external:true});
+  }
+
+  actions.innerHTML = links.map(item => `<a class="support-action" href="${escapeHTML(item.href)}"${item.external ? ' target="_blank" rel="noopener noreferrer"' : ''}><span class="support-action-main"><span class="support-action-icon" aria-hidden="true">${item.icon}</span><span><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.detail)}</small></span></span><span class="support-action-arrow" aria-hidden="true">→</span></a>`).join('');
+  if (content.contactIntro) {
+    const copy = panel.querySelector('.support-copy');
+    if (copy) copy.textContent = content.contactIntro;
+  }
+  if (links.length) note.textContent = 'Choose the way that feels easiest. We’ll reply as soon as we can.';
+
+  const open = () => {
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden','false');
+    fab.setAttribute('aria-expanded','true');
+    document.body.classList.add('modal-open');
+  };
+  const close = () => {
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden','true');
+    fab.setAttribute('aria-expanded','false');
+    document.body.classList.remove('modal-open');
+  };
+  fab.addEventListener('click', () => panel.classList.contains('open') ? close() : open());
+  panel.querySelectorAll('[data-close-support]').forEach(el => el.addEventListener('click', close));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && panel.classList.contains('open')) close(); });
+})();
