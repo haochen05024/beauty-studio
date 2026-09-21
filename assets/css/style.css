@@ -835,3 +835,159 @@ body{overflow-x:hidden}
 @media(prefers-reduced-motion:reduce){
   .about-signature,.studio-philosophy,.values>div,.about-art{opacity:1;transform:none;transition:none}
 }
+
+/* v20 — Beauty Studio design system polish */
+:root{
+  --bs-ink:#302823;
+  --bs-muted:#897970;
+  --bs-soft:#f7f0ec;
+  --bs-paper:#fffdfa;
+  --bs-line:rgba(72,52,44,.11);
+  --bs-accent:#b98270;
+  --bs-accent-soft:#ead8d0;
+  --bs-radius-sm:10px;
+  --bs-radius-md:16px;
+  --bs-radius-lg:22px;
+  --bs-shadow-soft:0 14px 38px rgba(55,39,32,.07);
+  --bs-shadow-card:0 20px 55px rgba(55,39,32,.09);
+}
+
+/* Global controls */
+.button,
+button,
+input,
+textarea,
+select{font-family:inherit}
+.button{
+  min-height:44px;
+  border-radius:12px;
+  letter-spacing:.08em;
+  transition:transform .2s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease;
+}
+.button:hover{transform:translateY(-1px)}
+.button:active{transform:translateY(0)}
+.button-dark{box-shadow:0 8px 22px rgba(45,34,29,.10)}
+.button-dark:hover{box-shadow:0 12px 28px rgba(45,34,29,.15)}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible{
+  outline:2px solid rgba(185,130,112,.65);
+  outline-offset:3px;
+}
+
+/* Consistent cards */
+.service-card,
+.work-card,
+.device-card,
+.value-card,
+.promo,
+.booking-panel,
+.modal-panel{
+  border-color:var(--bs-line);
+}
+.service-card,
+.work-card{box-shadow:0 1px 0 rgba(255,255,255,.65)}
+.service-card:hover,
+.work-card:hover{box-shadow:var(--bs-shadow-soft)}
+
+.service-info,
+.work-info{border-top-color:var(--bs-line)}
+
+.eyebrow{
+  color:#9a7568;
+  letter-spacing:.18em;
+}
+.section-heading{align-items:end}
+.section-heading>p{color:var(--bs-muted)}
+
+.text-link,
+.center-link{color:#795d52}
+.text-link:hover,.center-link:hover{color:#a46f5e}
+
+/* Refined form controls */
+.booking-options button,
+.date-choice,
+.time-choice{
+  border-color:var(--bs-line);
+}
+.booking-options button:hover,
+.date-choice:hover,
+.time-choice:hover{
+  border-color:rgba(185,130,112,.35);
+}
+.booking-options button.selected,
+.date-choice.selected,
+.time-choice.selected{
+  border-color:rgba(168,116,98,.55);
+  background:#fbf2ee;
+}
+
+/* Subtle unified image treatment */
+.hero-art,
+.promo-art,
+.about-art,
+.service-photo,
+.work-photo{
+  isolation:isolate;
+}
+.hero-art:after,
+.promo-art:after,
+.about-art:after,
+.service-photo:after,
+.work-photo:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.12),transparent 45%);
+  z-index:1;
+  mix-blend-mode:screen;
+}
+
+/* Header polish */
+.site-header.is-scrolled{
+  background:rgba(255,253,250,.94);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  box-shadow:0 8px 30px rgba(45,32,27,.07)!important;
+}
+.desktop-nav a:after{
+  background:var(--bs-accent);
+}
+
+/* Modal polish */
+.modal-backdrop{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.modal-panel,
+.booking-panel{
+  box-shadow:0 28px 80px rgba(39,28,24,.18);
+}
+.modal-close{
+  transition:background .2s ease,transform .2s ease;
+}
+.modal-close:hover{
+  transform:rotate(4deg);
+  background:rgba(255,255,255,.92);
+}
+
+/* Scroll reveal remains restrained */
+@media (prefers-reduced-motion:no-preference){
+  .service-card,.work-card,.device-card,.button,.text-link{will-change:transform}
+}
+
+/* Mobile consistency */
+@media(max-width:800px){
+  .button{min-height:46px;border-radius:13px}
+  .section-heading{align-items:start}
+  .section-heading>p{color:#8e7e76}
+  .service-card,.work-card{border-radius:16px}
+  .device-card{border-radius:15px}
+}
+
+/* Very narrow screens */
+@media(max-width:360px){
+  .button{min-height:44px}
+  .section{padding-left:14px;padding-right:14px}
+}

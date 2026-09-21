@@ -718,3 +718,8 @@ document.addEventListener("DOMContentLoaded", () => {
     io.observe(el);
   });
 })();
+
+/* v20 — UI system marker */
+(() => {
+  document.documentElement.dataset.beautyStudioUi = "v20";
+})();
