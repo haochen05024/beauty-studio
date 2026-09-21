@@ -1873,3 +1873,27 @@ body.modal-open .install-modal{overscroll-behavior:contain}
   .studio-story-grid strong{margin:0}
   .studio-story-grid p{grid-column:2;margin-top:3px}
 }
+
+
+/* v50 · Contact / social premium finish */
+.contact-social-row{grid-column:1 / -1;margin-top:clamp(28px,4vw,54px);padding-top:20px;border-top:1px solid rgba(255,255,255,.1);display:grid;grid-template-columns:150px 1fr;gap:26px;align-items:start}
+.contact-social-label{font-size:8px;letter-spacing:.22em;color:#9f9089;text-transform:uppercase;padding-top:5px}
+.contact-social-links{display:grid;grid-template-columns:repeat(3,1fr);border-left:1px solid rgba(255,255,255,.08)}
+.contact-social-links a{position:relative;min-height:74px;padding:3px 28px 8px 20px;border-right:1px solid rgba(255,255,255,.08);color:#fff;text-decoration:none;transition:background .25s ease,transform .25s ease}
+.contact-social-links a:hover{background:rgba(255,255,255,.035);transform:translateY(-2px)}
+.contact-social-links span{display:block;font:22px var(--serif);letter-spacing:-.02em}
+.contact-social-links small{display:block;margin-top:8px;font-size:8px;letter-spacing:.08em;color:#a99b95;text-transform:uppercase}
+.contact-social-links b{position:absolute;right:12px;top:6px;font-size:13px;font-weight:400;color:#c79b89}
+.contact-signoff{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.07);color:#8f817b}
+.contact-signoff span{font-size:8px;letter-spacing:.2em}
+.contact-signoff em{font:italic 18px var(--serif);color:#c7b8b1}
+@media(max-width:800px){
+  .contact-social-row{grid-template-columns:1fr;gap:14px;margin-top:30px;padding-top:18px}
+  .contact-social-links{grid-template-columns:1fr;border-left:0}
+  .contact-social-links a{border-left:1px solid rgba(255,255,255,.08);border-right:0;border-bottom:1px solid rgba(255,255,255,.08);min-height:66px;padding:8px 38px 8px 15px}
+  .contact-social-links a:last-child{border-bottom:0}
+  .contact-social-links span{font-size:20px}
+  .contact-social-links small{margin-top:5px}
+  .contact-signoff{align-items:flex-start;gap:10px;flex-direction:column}
+  .contact-signoff em{font-size:17px}
+}

@@ -263,7 +263,16 @@
 </section>
 
 <section class="section contact" id="contact" data-contact-section><div><p class="eyebrow">05 · Find Us</p><h2>Come say<br><em>hello.</em></h2></div><div class="contact-status"><span class="status-dot"></span><strong>Studio information</strong><small>Details will be updated when appointments open.</small></div>
-      <div class="contact-details"><p><strong>Location</strong><br>Studio address will appear here</p><p><strong>Hours</strong><br>Mon — Sat · 10:00 — 19:00</p><p><strong>Contact</strong><br>+95 9 XXX XXX XXX</p></div></section>
+      <div class="contact-details"><p><strong>Location</strong><br>Studio address will appear here</p><p><strong>Hours</strong><br>Mon — Sat · 10:00 — 19:00</p><p><strong>Contact</strong><br>+95 9 XXX XXX XXX</p></div>
+      <div class="contact-social-row" aria-label="Studio social channels">
+        <span class="contact-social-label">STAY CLOSE</span>
+        <div class="contact-social-links">
+          <a href="#" aria-label="TikTok" onclick="return false"><span>TikTok</span><small>@yourstudio</small><b>↗</b></a>
+          <a href="#" aria-label="WhatsApp" onclick="return false"><span>WhatsApp</span><small>Message the Studio</small><b>↗</b></a>
+          <a href="#" aria-label="Telegram" onclick="return false"><span>Telegram</span><small>@yourstudio</small><b>↗</b></a>
+        </div>
+      </div>
+      <div class="contact-signoff"><span>BS · 2026</span><em>Beauty, in your own little way.</em></div></section>
 <button class="back-top" id="backTop" type="button" aria-label="Back to top">↑</button>
 <a class="mobile-quick-book" id="mobileQuickBook" href="#booking">Book an appointment <span>→</span></a>
 </main>
@@ -426,14 +435,13 @@
 
       // Contact & social account template. Fill these later from the admin panel.
       social: {
-        instagram: { label: "Instagram", handle: "@yourstudio", url: "" },
         facebook: { label: "Facebook", handle: "Your Studio", url: "" },
         tiktok: { label: "TikTok", handle: "@yourstudio", url: "" },
         whatsapp: { label: "WhatsApp", handle: "+00 000 000 000", url: "" },
         telegram: { label: "Telegram", handle: "@yourstudio", url: "" }
       },
       // Backward-compatible shortcuts used by the current contact widget.
-      instagram: "",
+      tiktok: "",
       whatsapp: "",
       telegram: "",
       contactIntro: "Have a question about a service, a design, or your appointment? Send us a message and we’ll get back to you.",
@@ -463,7 +471,6 @@
 
       // Social/account image template for future profile cards and sharing.
       accountImages: {
-        instagram: "assets/images/accounts/instagram.jpg",
         facebook: "assets/images/accounts/facebook.jpg",
         tiktok: "assets/images/accounts/tiktok.jpg",
         whatsapp: "assets/images/accounts/whatsapp.jpg",
