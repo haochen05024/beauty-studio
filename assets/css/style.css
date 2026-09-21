@@ -1197,3 +1197,17 @@ body.modal-open .install-modal{overscroll-behavior:contain}
 .time-grid button.selected{border-color:var(--accent);background:#f3e7e1;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(183,134,116,.22)}
 .time-grid button{transition:.2s ease}
 @media(max-width:800px){.booking-time-label{display:block;margin-top:18px}.booking-time-label small{display:block;margin-top:4px}.date-row .date-choice span{font-size:11px}.date-row .date-choice small{font-size:7px}}
+
+/* v29 — booking confidence + accessible inline validation */
+.booking-field{position:relative}
+.booking-field input.is-invalid{border-color:#b77f70;box-shadow:0 0 0 3px rgba(183,127,112,.10)}
+.booking-field input.is-valid{border-color:rgba(100,130,100,.55)}
+.field-error{display:block;min-height:0;margin-top:5px;color:#a05f52;font-size:9px;line-height:1.45;letter-spacing:.01em}
+.booking-ready-note{margin:12px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fbf8f5;color:#8b7d75;font-size:9px;line-height:1.55}
+.booking-ready-note.is-ready{background:#f4eee9;color:#6f5e55;border-color:rgba(183,134,116,.28)}
+.booking-ready-note::before{content:"✦";margin-right:7px;color:var(--accent)}
+.booking-complete .complete-mark{box-shadow:0 0 0 8px rgba(183,134,116,.08)}
+@media(max-width:800px){
+  .booking-ready-note{font-size:8.5px;margin-top:10px}
+  .field-error{font-size:8px}
+}

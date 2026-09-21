@@ -1,17 +1,8 @@
-# Beauty Studio — Customer Homepage v6
+# Beauty Studio v29 — Booking Confidence
 
-Customer-facing website only.
+Changed files only:
+- index.html
+- assets/css/style.css
+- assets/js/app.js
 
-### v6
-- Refined Add to Home Screen / Install component
-- Device-aware install presentation
-- Customer appointment flow preview
-- Service selection
-- Date selection
-- Time selection
-- Customer details
-- Confirmation state
-- No backend or admin exposed
-
-Future backend remains separate:
-`beauty-studio-admin` + Cloudflare Worker + D1 + R2.
+Focus: customer-side booking form confidence, inline validation, accessible field states, and clearer readiness messaging. No backend/API changes.

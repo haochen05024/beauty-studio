@@ -1005,3 +1005,115 @@ document.addEventListener("DOMContentLoaded", () => {
     button.addEventListener("click", () => selectTime(button));
   });
 })();
+
+/* v29 — booking confidence layer: inline validation, readiness state and clean reset */
+(() => {
+  const modal = document.getElementById("bookingModal");
+  if (!modal) return;
+  const nameInput = document.getElementById("guestName");
+  const phoneInput = document.getElementById("guestPhone");
+  const nameError = document.getElementById("guestNameError");
+  const phoneError = document.getElementById("guestPhoneError");
+  const ready = document.getElementById("bookingReadyNote");
+  const confirm = document.getElementById("confirmBooking");
+  const complete = document.getElementById("bookingComplete");
+  const finalCard = document.getElementById("finalBookingCard");
+  const serviceButtons = [...modal.querySelectorAll("[data-service-choice]")];
+  const dateButtons = [...modal.querySelectorAll(".date-choice")];
+  const timeButtons = [...modal.querySelectorAll(".time-grid button")];
+
+  const get = id => document.getElementById(id)?.textContent?.trim() || "—";
+  const hasService = () => serviceButtons.some(b => b.classList.contains("selected"));
+  const hasDate = () => dateButtons.some(b => b.classList.contains("active"));
+  const hasTime = () => timeButtons.some(b => b.classList.contains("selected") || b.classList.contains("active"));
+
+  function setError(input, errorEl, message){
+    if (!input || !errorEl) return;
+    input.classList.toggle("is-invalid", !!message);
+    input.classList.toggle("is-valid", !message && input.value.trim().length > 0);
+    input.setAttribute("aria-invalid", message ? "true" : "false");
+    errorEl.textContent = message || "";
+  }
+
+  function validateName(show=true){
+    const value = nameInput?.value.trim() || "";
+    const message = value.length < 2 ? "Please enter your name." : "";
+    if (show) setError(nameInput, nameError, message);
+    return !message;
+  }
+
+  function validatePhone(show=true){
+    const value = phoneInput?.value.trim() || "";
+    const digits = value.replace(/\D/g, "");
+    const message = digits.length < 7 ? "Please enter a valid phone number." : "";
+    if (show) setError(phoneInput, phoneError, message);
+    return !message;
+  }
+
+  function updateReady(){
+    if (!ready) return;
+    const baseReady = hasService() && hasDate() && hasTime();
+    ready.classList.toggle("is-ready", baseReady);
+    ready.textContent = baseReady
+      ? "Everything is selected. Add your contact details and send the request."
+      : "Choose your service, date and time to continue.";
+  }
+
+  [nameInput, phoneInput].forEach(input => input?.addEventListener("input", () => {
+    if (input === nameInput) validateName(true);
+    if (input === phoneInput) validatePhone(true);
+    updateReady();
+  }));
+
+  serviceButtons.forEach(b => b.addEventListener("click", () => setTimeout(updateReady, 0)));
+  dateButtons.forEach(b => b.addEventListener("click", () => setTimeout(updateReady, 0)));
+  timeButtons.forEach(b => b.addEventListener("click", () => setTimeout(updateReady, 0)));
+
+  confirm?.addEventListener("click", event => {
+    const okName = validateName(true);
+    const okPhone = validatePhone(true);
+    if (!okName || !okPhone) {
+      event.stopImmediatePropagation();
+      return;
+    }
+    // Keep the existing completion flow, but make the final preview useful.
+    requestAnimationFrame(() => {
+      const ref = document.getElementById("finalBookingRef");
+      const finalService = document.getElementById("finalService");
+      const finalPrice = document.getElementById("finalPrice");
+      const finalDate = document.getElementById("finalDate");
+      const finalTime = document.getElementById("finalTime");
+      if (finalService) finalService.textContent = get("summaryService");
+      if (finalPrice) finalPrice.textContent = get("summaryPrice");
+      if (finalDate) finalDate.textContent = get("summaryDate");
+      if (finalTime) finalTime.textContent = get("summaryTime");
+      if (ref && (!ref.textContent || ref.textContent === "PREVIEW")) {
+        ref.textContent = "PREVIEW · READY";
+      }
+    });
+  }, true);
+
+  const resetBooking = () => {
+    [nameInput, phoneInput].forEach(input => {
+      if (!input) return;
+      input.value = "";
+      input.classList.remove("is-invalid", "is-valid");
+      input.setAttribute("aria-invalid", "false");
+    });
+    if (nameError) nameError.textContent = "";
+    if (phoneError) phoneError.textContent = "";
+    if (ready) {
+      ready.classList.remove("is-ready");
+      ready.textContent = "Choose your service, date and time to continue.";
+    }
+  };
+
+  modal.querySelectorAll("[data-close-booking]").forEach(el => {
+    el.addEventListener("click", () => {
+      setTimeout(() => {
+        if (!modal.classList.contains("open")) resetBooking();
+      }, 30);
+    });
+  });
+  updateReady();
+})();
