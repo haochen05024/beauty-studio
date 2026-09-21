@@ -318,3 +318,26 @@ document.addEventListener("DOMContentLoaded", () => {
     candidates.forEach(section => section.classList.add("is-visible"));
   }
 })();
+
+(() => {
+  const menu = document.getElementById("mobileMenu");
+  const menuBtn = document.getElementById("mobileMenuBtn");
+  if (!menu || !menuBtn) return;
+
+  const openMenu = () => {
+    menu.classList.add("open");
+    menu.setAttribute("aria-hidden","false");
+    menuBtn.setAttribute("aria-expanded","true");
+    document.body.classList.add("modal-open");
+  };
+  const closeMenu = () => {
+    menu.classList.remove("open");
+    menu.setAttribute("aria-hidden","true");
+    menuBtn.setAttribute("aria-expanded","false");
+    document.body.classList.remove("modal-open");
+  };
+
+  menuBtn.addEventListener("click", openMenu);
+  menu.querySelectorAll("[data-close-menu], nav a").forEach(el => el.addEventListener("click", closeMenu));
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closeMenu(); });
+})();
