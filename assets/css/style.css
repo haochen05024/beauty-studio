@@ -1121,3 +1121,17 @@ body.modal-open .install-modal{overscroll-behavior:contain}
   .install-modal-card{animation:none}
   .device-card{transition:none}
 }
+
+/* v25 · universal install coverage */
+.device-card strong{display:block;white-space:nowrap}
+.device-card small{display:block;white-space:nowrap}
+.install-main{cursor:pointer}
+.install-main:focus-visible{outline:2px solid rgba(185,130,112,.65);outline-offset:3px}
+@media(max-width:800px){
+  .device-card strong{white-space:normal}
+  .device-card small{white-space:normal}
+}
+@media(max-width:390px){
+  .device-card strong{font-size:13px}
+  .device-card small{font-size:8px}
+}

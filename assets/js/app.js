@@ -39,14 +39,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const platform = navigator.platform || "";
   const isIOS = /iphone|ipad|ipod/i.test(ua) || (platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isAndroid = /android/i.test(ua);
+  const isTabletAndroid = isAndroid && !/mobile/i.test(ua);
   const isMac = /macintosh|mac os x/i.test(ua) && !isIOS;
   const isWindows = /windows/i.test(ua);
+  const isChrome = /chrome|crios/i.test(ua) && !/edg|edge|opr|opera/i.test(ua);
+  const isEdge = /edg|edge/i.test(ua);
+  const isSafari = /safari/i.test(ua) && !/chrome|crios|android/i.test(ua);
   const isStandalone = () =>
     window.matchMedia?.("(display-mode: standalone)")?.matches ||
     window.navigator.standalone === true ||
     document.referrer.startsWith("android-app://");
 
-  const alreadyInstalledKey = "beauty-studio-installed-v24";
+  const alreadyInstalledKey = "beauty-studio-installed-v25";
 
   const hideInstall = (message = "Beauty Studio is on your device") => {
     if (installActions) installActions.classList.add("install-complete");
@@ -75,60 +79,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const setGuide = (device) => {
     const guides = {
-      iphone: {
-        label: "iPHONE · SAFARI",
-        title: "Add Beauty Studio<br><em>to your iPhone.</em>",
-        intro: "Use Safari to add Beauty Studio to your Home Screen. After you finish, tap “I've added it”.",
+      ios: {
+        label: "iPHONE · iPAD",
+        title: "Add Beauty Studio<br><em>to your Home Screen.</em>",
+        intro: "On iPhone and iPad, use the browser Share menu to save Beauty Studio like an app.",
         steps: [
-          ["Tap the Share button", "In Safari, tap the Share icon at the bottom of the screen."],
-          ["Choose Add to Home Screen", "Scroll down in the Share sheet and tap “Add to Home Screen”."],
-          ["Tap Add", "Confirm the name, then tap “Add”. Beauty Studio will appear on your Home Screen."]
+          ["Open the Share menu", "In Safari, tap the Share button. On iPad, it is in the browser toolbar."],
+          ["Choose Add to Home Screen", "Scroll through the Share sheet and select “Add to Home Screen”."],
+          ["Tap Add", "Confirm the name and tap “Add”. Beauty Studio will appear on your Home Screen."]
         ],
-        note: "Tip · If you don't see the option, make sure this page is open in Safari."
+        note: "Tip · If the option is missing, open this page in Safari and try again."
       },
       android: {
-        label: "ANDROID · CHROME",
-        title: "Add Beauty Studio<br><em>to your Android.</em>",
-        intro: "Chrome can install Beauty Studio directly when installation is available on your device.",
+        label: isTabletAndroid ? "ANDROID · TABLET" : "ANDROID · PHONE",
+        title: "Add Beauty Studio<br><em>to your Android device.</em>",
+        intro: "Android phones and tablets can use the browser's install option when PWA installation is supported.",
         steps: [
-          ["Open the Chrome menu", "Tap the three dots ⋮ in the top-right corner."],
-          ["Choose Install app", "Tap “Install app” or “Add to Home screen”, depending on your Chrome version."],
-          ["Confirm Install", "Confirm the prompt. Beauty Studio will be added to your device."]
+          ["Open the browser menu", "In Chrome or another supported browser, tap ⋮ or the browser menu."],
+          ["Choose Install", "Tap “Install app”, “Add to Home screen”, or the install icon if your browser shows one."],
+          ["Confirm Install", "Confirm the prompt. Beauty Studio will be added to your Home Screen or app list."]
         ],
-        note: "Tip · If an Install prompt appears, you can use it directly instead of the menu."
+        note: "Tip · Chrome usually shows Install app for supported PWA sites; wording can vary by browser version."
       },
       mac: {
         label: "MAC · SAFARI / CHROME",
-        title: "Add Beauty Studio<br><em>to your Mac.</em>",
-        intro: "Install Beauty Studio from your browser so it can open like an app from your Dock or Applications.",
+        title: "Install Beauty Studio<br><em>on your Mac.</em>",
+        intro: "On Mac, install the website as an app when your browser supports PWA installation.",
         steps: [
-          ["Open the browser install menu", "Safari: use File → Add to Dock. Chrome: use the install icon in the address bar or ⋮ menu."],
-          ["Confirm the install", "Follow the browser's confirmation prompt to add Beauty Studio."],
+          ["Open the install option", "Safari: use File → Add to Dock. Chrome: use the install icon in the address bar or ⋮ menu."],
+          ["Confirm the install", "Follow the browser's confirmation prompt to create the app."],
           ["Open Beauty Studio", "Launch it from your Dock, Applications, or installed apps."]
         ],
-        note: "Tip · Chrome may show an install icon at the right side of the address bar."
+        note: "Tip · If your browser does not offer installation, you can still add a shortcut/bookmark for quick access."
       },
       windows: {
         label: "WINDOWS · CHROME / EDGE",
-        title: "Add Beauty Studio<br><em>to your Windows PC.</em>",
-        intro: "Install Beauty Studio from Chrome or Edge for quick access from your desktop or Start menu.",
+        title: "Install Beauty Studio<br><em>on your Windows PC.</em>",
+        intro: "Chrome and Edge can install Beauty Studio as an app when PWA installation is supported.",
         steps: [
-          ["Open the install option", "Chrome: click the install icon in the address bar or ⋮. Edge: use Apps → Install this site as an app."],
+          ["Open the install option", "Chrome: click the install icon or ⋮. Edge: use Apps → Install this site as an app."],
           ["Confirm Install", "Follow the browser prompt and confirm the installation."],
           ["You're ready", "Beauty Studio will be available from your Start menu and installed apps."]
         ],
-        note: "Tip · The exact menu wording can vary slightly by browser version."
+        note: "Tip · If Install is not shown, use the browser's Create shortcut / Add to desktop option as a fallback."
       },
       desktop: {
-        label: "YOUR DEVICE",
-        title: "Add Beauty Studio<br><em>to your device.</em>",
-        intro: "Open your browser's Install or Add to Home Screen option to save Beauty Studio for quick access.",
+        label: "YOUR DEVICE · BROWSER",
+        title: "Add Beauty Studio<br><em>for quick access.</em>",
+        intro: "We couldn't identify a specific device. Use your browser's Install, Add to Home Screen, Add to Dock, or shortcut option.",
         steps: [
-          ["Open the browser menu", "Look for an Install, Add to Home Screen, or Add to Dock option."],
-          ["Confirm", "Follow the browser's installation prompt."],
-          ["You're ready", "Open Beauty Studio from your installed apps or Home Screen."]
+          ["Open the browser menu", "Look for Install, Add to Home Screen, Add to Dock, Create shortcut, or Add to desktop."],
+          ["Confirm", "Follow the browser's installation or shortcut prompt."],
+          ["You're ready", "Open Beauty Studio from your Home Screen, desktop, Dock, or app list."]
         ],
-        note: "Tip · The available option depends on your browser and device."
+        note: "Tip · Installation wording differs by browser. The site remains fully usable even when PWA installation is unavailable."
       }
     };
 
@@ -145,12 +149,13 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const detectDevice = () => {
-    if (isIOS) return "iphone";
+    if (isIOS) return "ios";
     if (isAndroid) return "android";
     if (isMac) return "mac";
     if (isWindows) return "windows";
     return "desktop";
   };
+
 
   const openInstallGuide = async () => {
     if (isStandalone()) {
@@ -169,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     setGuide(detectDevice());
+    if (modalAction) modalAction.textContent = "I've added it";
     if (modal) {
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
@@ -180,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".device-card").forEach(card => {
     card.addEventListener("click", () => {
       const name = (card.querySelector("strong")?.textContent || "").toLowerCase();
-      const device = name.includes("iphone") ? "iphone" : name.includes("android") ? "android" : name.includes("mac") ? "mac" : name.includes("windows") ? "windows" : "desktop";
+      const device = name.includes("iphone") || name.includes("ipad") ? "ios" : name.includes("android") ? "android" : name.includes("mac") ? "mac" : name.includes("windows") ? "windows" : "desktop";
       setGuide(device);
       modal?.classList.add("open");
       modal?.setAttribute("aria-hidden", "false");
@@ -194,6 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (installBtn) installBtn.hidden = false;
     if (installMainSub) installMainSub.textContent = "Install Beauty Studio";
     if (installStatus) installStatus.textContent = "Ready to install on this device";
+    if (modalAction) modalAction.textContent = "Install Beauty Studio";
   });
 
   window.addEventListener("appinstalled", () => {
