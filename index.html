@@ -4,15 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#fbf8f5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Beauty Studio">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <meta name="description" content="Beauty Studio — nails, beauty and appointments.">
 <title>Beauty Studio — Nails & Beauty</title>
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 <header class="site-header">
-  <a class="brand" href="#home"><span class="brand-mark">BS</span><span><strong>Beauty Studio</strong><small>NAILS &amp; BEAUTY</small></span></a>
+  <a class="brand" href="#home"><span class="brand-mark"><img src="assets/icons/logo.svg" alt="" aria-hidden="true"></span><span><strong>Beauty Studio</strong><small>NAILS &amp; BEAUTY</small></span></a>
   <nav class="desktop-nav"><a href="#services">Services</a><a href="#work">Our Work</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
-  <a class="header-book" href="#booking">Book Now</a>
+  <div class="header-actions"><button class="install-button" id="installBtn" type="button" hidden>Install</button><a class="header-book" href="#booking">Book Now</a></div>
 </header>
 
 <main>
@@ -77,13 +84,26 @@
   <div class="about-copy"><p class="eyebrow">03 · The Studio</p><h2>A quiet space for<br><em>yourself.</em></h2><p>Beauty Studio is built around a simple idea: your appointment should feel personal. From the first color choice to the final detail, everything is done with patience and care.</p><div class="values"><div><b>✦</b><span>Professional<br><small>Carefully finished</small></span></div><div><b>♡</b><span>Personal<br><small>Made for you</small></span></div><div><b>○</b><span>Relaxing<br><small>Your time</small></span></div></div></div>
 </section>
 
+
+<section class="install-section" id="install">
+  <div>
+    <p class="eyebrow">06 · Your Studio</p>
+    <h2>Keep Beauty Studio<br><em>close to you.</em></h2>
+  </div>
+  <div class="install-copy">
+    <p>Add Beauty Studio to your device for a faster, app-like experience. Your browser will show the appropriate install option for your device.</p>
+    <button class="button button-dark install-main" id="installMain" type="button">Add to Home Screen <span>→</span></button>
+    <small id="installHint">Works on supported browsers. You can also use your browser’s Add to Home Screen / Install option.</small>
+  </div>
+</section>
+
 <section class="booking" id="booking"><div><p class="eyebrow">04 · Appointments</p><h2>Ready for your<br><em>next set?</em></h2></div><div class="booking-copy"><p>Choose a service, find a convenient time and let us take care of the details.</p><a class="button button-dark" href="#">Start booking <span>→</span></a><small>Online booking will be connected here.</small></div></section>
 
 <section class="section contact" id="contact"><div><p class="eyebrow">05 · Find Us</p><h2>Come say<br><em>hello.</em></h2></div><div class="contact-details"><p><strong>Location</strong><br>Studio address will appear here</p><p><strong>Hours</strong><br>Mon — Sat · 10:00 — 19:00</p><p><strong>Contact</strong><br>+95 9 XXX XXX XXX</p></div></section>
 </main>
 
 <footer><div class="footer-brand"><strong>Beauty Studio</strong><span>NAILS &amp; BEAUTY</span></div><p>Made for beautiful little moments.</p><small>© 2026 Beauty Studio</small></footer>
-<div class="mobile-bar"><a href="#home">Home</a><a href="#services">Services</a><a href="#work">Gallery</a><a href="#booking" class="mobile-book">Book</a></div>
-<script src="assets/js/app.js"></script>
+<div class="mobile-bar"><a href="#home">Home</a><a href="#services">Services</a><a href="#work">Gallery</a><a href="#install">Install</a><a href="#booking" class="mobile-book">Book</a></div>
+<script src="assets/js/app.js"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
 </body>
 </html>

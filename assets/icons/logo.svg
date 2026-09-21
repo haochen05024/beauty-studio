@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+<rect width="192" height="192" rx="44" fill="#fbf8f5"/>
+<circle cx="96" cy="96" r="66" fill="none" stroke="#a8796c" stroke-width="4"/>
+<path d="M96 126c-19-13-30-27-30-43 0-11 8-19 18-19 7 0 11 4 12 9 2-5 6-9 13-9 10 0 18 8 18 19 0 16-11 30-31 43Z" fill="none" stroke="#a8796c" stroke-width="4" stroke-linejoin="round"/>
+<path d="M96 72c-3-13 2-22 13-29M96 72c-11-9-21-8-29-1M96 72c11-9 21-8 29-1" fill="none" stroke="#a8796c" stroke-width="4" stroke-linecap="round"/>
+<text x="96" y="116" text-anchor="middle" font-family="Georgia,serif" font-size="34" fill="#4a3832">BS</text>
+</svg>

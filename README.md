@@ -1,26 +1,20 @@
-# Beauty Studio — Customer Homepage v3
+# Beauty Studio — Customer Homepage v4
 
 Customer-facing website only.
 
-## Scope
-This repository is the public/customer side of Beauty Studio.
-The future admin system will be a separate project and will not be exposed here.
+### v4 additions
+- Refined BS Beauty Studio brand mark
+- Favicon + Apple touch icon + app icons
+- PWA manifest
+- Service worker for app-like loading/offline shell
+- Install button where the browser supports it
+- Device-aware install guidance for Mac, Windows, iPhone, iPad and Android
 
-## v3
-- Stable CSS-only featured nail visual
-- Fixed hero label overlap
-- Refined services
-- Promotions section
-- Filterable work gallery
-- Studio / About
-- Booking entry point
-- Contact
-- Mobile bottom navigation
-- GitHub Pages ready
+### Architecture
+- Customer: `beauty-studio`
+- Future Admin: separate `beauty-studio-admin`
+- Future API: Cloudflare Worker
+- Future database: D1
+- Future media: R2
 
-## Future architecture
-Customer: `beauty-studio`
-Admin: `beauty-studio-admin`
-API: Cloudflare Worker
-Database: D1
-Media: R2
+Upload the contents of this folder to the root of the `beauty-studio` GitHub repository.
