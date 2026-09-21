@@ -25,6 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const installBtn = document.getElementById("installBtn");
   const installMain = document.getElementById("installMain");
   const installActions = document.getElementById("installActions");
+  const installSection = document.getElementById("install");
+  const installCopy = installSection?.querySelector(".install-copy");
+  const deviceCards = installSection?.querySelector(".device-cards");
   const installStatus = document.getElementById("installStatus");
   const installMainSub = document.getElementById("installMainSub");
   const modal = document.getElementById("installModal");
@@ -50,24 +53,25 @@ document.addEventListener("DOMContentLoaded", () => {
     window.navigator.standalone === true ||
     document.referrer.startsWith("android-app://");
 
-  const alreadyInstalledKey = "beauty-studio-installed-v25";
-
-  const hideInstall = (message = "Beauty Studio is on your device") => {
+  /*
+   * Keep the browser version and installed app separate.
+   * The same origin/storage is shared by both, so a localStorage "installed"
+   * flag would incorrectly hide the install UI from the normal browser tab.
+   * Browser = keep CTA/tutorial. Standalone app = hide tutorial.
+   */
+  const hideInstall = (message = "Beauty Studio is ready on your device") => {
+    if (installSection) installSection.classList.add("install-installed");
     if (installActions) installActions.classList.add("install-complete");
     if (installMain) {
       installMain.hidden = true;
       installMain.setAttribute("aria-hidden", "true");
     }
     if (installBtn) installBtn.hidden = true;
+    if (deviceCards) deviceCards.setAttribute("aria-hidden", "true");
     if (installStatus) {
       installStatus.textContent = message;
       installStatus.classList.add("is-complete");
     }
-    try { localStorage.setItem(alreadyInstalledKey, "1"); } catch (_) {}
-  };
-
-  const isMarkedInstalled = () => {
-    try { return localStorage.getItem(alreadyInstalledKey) === "1"; } catch (_) { return false; }
   };
 
   const closeInstall = () => {
@@ -205,7 +209,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("appinstalled", () => {
     deferredPrompt = null;
-    hideInstall("Beauty Studio has been added");
+    // Keep the browser tab and its install CTA/tutorial intact. The installed
+    // standalone app will hide the tutorial when it is opened.
+    if (installStatus) {
+      installStatus.textContent = "Beauty Studio has been added · Open the installed app to continue";
+    }
     closeInstall();
   });
 
@@ -214,7 +222,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll("[data-close-install]").forEach(el => el.addEventListener("click", closeInstall));
   modalAction?.addEventListener("click", () => {
-    hideInstall("Beauty Studio has been added");
+    // Manual browser instructions cannot reliably tell us when the shortcut
+    // was actually created. Closing the guide must not hide the browser CTA.
     closeInstall();
   });
 
@@ -222,8 +231,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (event.key === "Escape") closeInstall();
   });
 
-  // If the page is opened as an installed app, or the user previously confirmed installation, hide the CTA.
-  if (isStandalone() || isMarkedInstalled()) {
+  // Only the installed standalone app hides the installation tutorial.
+  // The normal browser page keeps the CTA, even after installation.
+  if (isStandalone()) {
     hideInstall();
   }
 })();

@@ -1135,3 +1135,54 @@ body.modal-open .install-modal{overscroll-behavior:contain}
   .device-card strong{font-size:13px}
   .device-card small{font-size:8px}
 }
+
+
+/* v26 install completion polish: remove only the install tutorial after successful install.
+   The browser tab and document title remain untouched. */
+.install-section.install-installed .install-copy > *:not(.eyebrow) {
+  display:none;
+}
+.install-section.install-installed .install-copy {
+  min-height:0;
+}
+.install-section.install-installed .install-actions,
+.install-section.install-installed .device-cards {
+  display:none;
+}
+.install-section.install-installed {
+  min-height:0;
+  padding-top:34px;
+  padding-bottom:34px;
+  grid-template-columns:1fr;
+}
+.install-section.install-installed .install-copy {
+  justify-self:start;
+}
+.install-section.install-installed .install-copy::after {
+  content:"Beauty Studio is ready on your device.";
+  display:block;
+  margin-top:8px;
+  color:#8a7b73;
+  font-size:10px;
+  letter-spacing:.04em;
+}
+@media(max-width:800px){
+  .install-section.install-installed {
+    padding-top:28px;
+    padding-bottom:28px;
+  }
+}
+
+/* v27 · keep browser install UI, hide tutorial only inside the installed app */
+@media (display-mode: standalone) {
+  .install-section.install-installed .install-copy::after {
+    content: "Beauty Studio is ready here.";
+  }
+}
+
+/* v27 · browser tab keeps the install UI; standalone app can hide its tutorial */
+@media (display-mode: standalone) {
+  .install-section.install-installed .install-copy::after {
+    content: "Beauty Studio is ready here.";
+  }
+}
