@@ -2879,6 +2879,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setStatus('Sending your appointment request securely to the Studio…');
 
     try {
+      const customerIdentity = await (window.__beautyStudioEnsureCustomer ? window.__beautyStudioEnsureCustomer({ name, phone }) : null);
+      const customerKey = customerIdentity?.browserKey || localStorage.getItem('beauty_studio_customer_key') || '';
+      if (!customerKey) throw new Error('We could not create your customer ID. Please refresh and try again.');
+
       const response = await fetch(`${API_BASE}/api/bookings`, {
         method: 'POST',
         headers: {
@@ -2886,6 +2890,7 @@ document.addEventListener("DOMContentLoaded", () => {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
+          customerKey,
           customerName: name,
           phone,
           service,
@@ -2941,4 +2946,107 @@ document.addEventListener("DOMContentLoaded", () => {
   // Capture phase runs before the legacy bubble listeners and prevents their
   // preview-only success screen from firing without a D1 write.
   button.addEventListener('click', submitBooking, true);
+})();
+
+
+/* v72 — persistent customer identity + booking status bridge
+   Public customer number is simple: 0001, 0002, 0003...
+   A private browser key is used only to reconnect the same browser to that number. */
+(() => {
+  const API_BASE = 'https://beauty-studio-api.haochen05024.workers.dev';
+  const KEY = 'beauty_studio_customer_key';
+  const NUMBER_KEY = 'beauty_studio_customer_number';
+  const STATUS_KEY = 'beauty_studio_booking_statuses';
+
+  function getKey() {
+    try {
+      let key = localStorage.getItem(KEY);
+      if (!key) {
+        key = (crypto.randomUUID ? crypto.randomUUID() : `bs_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+        localStorage.setItem(KEY, key);
+      }
+      return key;
+    } catch {
+      return '';
+    }
+  }
+
+  async function identify(extra = {}) {
+    const browserKey = getKey();
+    if (!browserKey) return null;
+    try {
+      const response = await fetch(`${API_BASE}/api/customers/identify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ customerKey: browserKey, name: extra.name || '', phone: extra.phone || '' })
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok || !body?.ok || !body?.customer?.customerNumber) return null;
+      localStorage.setItem(NUMBER_KEY, body.customer.customerNumber);
+      return { browserKey, customerNumber: body.customer.customerNumber };
+    } catch (error) {
+      console.warn('Beauty Studio customer identity unavailable', error);
+      return null;
+    }
+  }
+
+  window.__beautyStudioEnsureCustomer = identify;
+  window.__beautyStudioCustomerNumber = () => localStorage.getItem(NUMBER_KEY) || '';
+
+  function statusStore() {
+    try { return JSON.parse(localStorage.getItem(STATUS_KEY) || '{}'); } catch { return {}; }
+  }
+
+  function saveStatusStore(value) {
+    try { localStorage.setItem(STATUS_KEY, JSON.stringify(value)); } catch {}
+  }
+
+  function showStatusNotice(booking) {
+    const status = String(booking.status || '').toLowerCase();
+    if (!['confirmed', 'cancelled'].includes(status)) return;
+    const store = statusStore();
+    const previous = store[booking.id];
+    store[booking.id] = status;
+    saveStatusStore(store);
+    if (previous === status) return;
+
+    const existing = document.getElementById('customerBookingStatusNotice');
+    existing?.remove();
+    const notice = document.createElement('div');
+    notice.id = 'customerBookingStatusNotice';
+    notice.innerHTML = `
+      <div class="cbsn-kicker">BOOKING UPDATE · CUSTOMER ${String(localStorage.getItem(NUMBER_KEY) || '').padStart(4,'0')}</div>
+      <strong>${status === 'confirmed' ? 'Your appointment is confirmed.' : 'Your appointment was not confirmed.'}</strong>
+      <span>${escapeHtml(booking.service || 'Appointment')} · ${escapeHtml(booking.bookingDate || '')} · ${escapeHtml(booking.bookingTime || '')}</span>
+      <button type="button" aria-label="Close">×</button>`;
+    Object.assign(notice.style, {
+      position:'fixed', right:'22px', bottom:'22px', zIndex:'99999', width:'min(380px,calc(100vw - 32px))',
+      padding:'18px 20px', border:'1px solid rgba(125,91,79,.18)', borderRadius:'18px', background:'#fffaf6',
+      boxShadow:'0 18px 50px rgba(55,35,28,.16)', color:'#302621', display:'grid', gap:'6px', fontFamily:'inherit'
+    });
+    const style = document.createElement('style');
+    style.textContent = '#customerBookingStatusNotice .cbsn-kicker{font-size:9px;letter-spacing:.16em;color:#9b6c69;font-weight:700}#customerBookingStatusNotice strong{font-size:15px}#customerBookingStatusNotice span{font-size:12px;color:#81746d}#customerBookingStatusNotice button{position:absolute;top:7px;right:9px;border:0;background:none;font-size:20px;color:#81746d;cursor:pointer}';
+    document.head.appendChild(style);
+    notice.querySelector('button').onclick = () => notice.remove();
+    document.body.appendChild(notice);
+    setTimeout(() => notice.remove(), 9000);
+  }
+
+  async function refreshCustomerBookings() {
+    const browserKey = getKey();
+    if (!browserKey) return;
+    try {
+      const response = await fetch(`${API_BASE}/api/customer/bookings`, {
+        headers: { 'Accept': 'application/json', 'x-customer-key': browserKey },
+        cache: 'no-store'
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok || !body?.ok) return;
+      if (body.customerNumber) localStorage.setItem(NUMBER_KEY, body.customerNumber);
+      (body.bookings || []).forEach(showStatusNotice);
+    } catch {}
+  }
+
+  // Bootstrap identity early, then check for booking status changes on every fresh page load.
+  identify().finally(() => refreshCustomerBookings());
 })();
