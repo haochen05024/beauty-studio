@@ -2362,38 +2362,82 @@ document.addEventListener("DOMContentLoaded", () => {
   const updateServiceModal = (key) => {
     const s = cfg.services?.[key];
     if (!s) return;
+
     const set = (id, value) => text(document.getElementById(id), value);
+    const tags = String(s.tags || "").split(",").map(x => x.trim()).filter(Boolean);
+    const description = String(s.description || "").trim();
+
     const art = document.getElementById("serviceModalArt");
     if (art) {
-      art.className = `service-modal-art ${s.art || ""}`;
-      art.style.backgroundImage = s.image ? `url("${String(s.image).replace(/"/g,'\\"')}")` : "";
+      art.className = `service-modal-art ${s.art || "photo-blush"}`;
+      art.style.backgroundImage = s.image
+        ? `linear-gradient(180deg, rgba(34,25,21,.02), rgba(34,25,21,.28)), url("${String(s.image).replace(/"/g,'\\"')}")`
+        : "";
+      if (!s.image) {
+        art.style.background = "linear-gradient(145deg,#ead8d0,#b99084)";
+      }
     }
-    set("serviceModalNumber", s.number);
-    set("serviceModalDuration", s.durationShort || s.duration);
-    set("serviceModalTitle", s.title || s.name);
-    set("serviceModalPrice", s.price);
+
+    set("serviceModalNumber", s.number || "");
+    set("serviceModalDuration", s.duration ? `${s.duration} MIN` : "");
+    set("serviceModalTitle", s.title || s.name || "Service");
+    set("serviceModalPrice", s.price || "Price on request");
     set("serviceModalDurationText", s.duration ? `${s.duration} min` : "");
-    set("serviceModalDescription", s.description);
-    set("serviceModalKicker", s.kicker || "Beauty Studio");
+    set("serviceModalDescription", description || "A personalized service prepared around your preferred look.");
+    set("serviceModalKicker", (s.kicker && String(s.kicker).toLowerCase() !== "service") ? s.kicker : "Personalized");
     set("serviceModalCaption", s.caption || "Made with care.");
-    set("serviceIdealFor", s.idealFor || "Everyday wear");
+    set("serviceIdealFor", s.idealFor || (tags[0] || "Personalized care"));
+
+    // New services created in Admin may only have name, price, duration,
+    // description and tags. Build useful editorial content automatically.
+    const rawHighlights = Array.isArray(s.highlights) ? s.highlights : [];
+    const highlightRows = rawHighlights.length
+      ? rawHighlights
+      : [
+          [tags[0] || "Service", "Tailored studio service"],
+          [s.duration ? `${s.duration} min` : "Flexible", "Estimated appointment time"],
+          [tags[1] || "Detail", "Personalized finish"]
+        ];
+
     const highlights = document.getElementById("serviceHighlights");
     if (highlights) {
-      const rows = Array.isArray(s.highlights) ? s.highlights : [];
-      highlights.innerHTML = rows.map(row => {
-        const pair = Array.isArray(row) ? row : [row, ""];
+      highlights.hidden = false;
+      highlights.innerHTML = highlightRows.slice(0,3).map(row => {
+        const pair = Array.isArray(row) ? row : [row, "Studio detail"];
         return `<div><span>✦</span><strong>${escapeHtml(pair[0] || "")}</strong><small>${escapeHtml(pair[1] || "")}</small></div>`;
       }).join("");
     }
 
-    const photoCount = document.getElementById("serviceModalPhotoCount");
-    if (photoCount) photoCount.textContent = `Beauty Studio · ${s.number || "01"} / ${String(Object.keys(cfg.services || {}).length).padStart(2, "0")}`;
-
-    const choose = document.getElementById("chooseServiceButton");
-    if (choose) choose.dataset.bookService = key;
+    const rawPoints = Array.isArray(s.points) ? s.points : [];
+    const pointRows = rawPoints.length
+      ? rawPoints
+      : [
+          description || "Personalized service details",
+          tags.length ? `Style: ${tags.join(" · ")}` : "Studio preparation and finish",
+          s.duration ? `Estimated time: ${s.duration} minutes` : "Time confirmed with the studio"
+        ];
 
     const points = document.getElementById("servicePoints");
-    if (points) points.innerHTML = (s.points || []).map(x => `<li>${escapeHtml(x)}</li>`).join("");
+    if (points) {
+      points.hidden = false;
+      points.innerHTML = pointRows.slice(0,4).map(x => `<li>${escapeHtml(x)}</li>`).join("");
+    }
+
+    const photoCount = document.getElementById("serviceModalPhotoCount");
+    if (photoCount) {
+      photoCount.textContent = `Beauty Studio · ${s.number || "01"} / ${String(Object.keys(cfg.services || {}).length).padStart(2, "0")}`;
+    }
+
+    const choose = document.getElementById("chooseServiceButton");
+    if (choose) {
+      choose.dataset.bookService = key;
+      choose.onclick = () => {
+        document.getElementById("serviceModal")?.classList.remove("open");
+        document.body.classList.remove("modal-open");
+        const option = document.querySelector(`[data-service-choice][data-service-key="${CSS.escape(key)}"]`);
+        option?.click();
+      };
+    }
   };
 
   const updateGalleryModal = (index) => {
