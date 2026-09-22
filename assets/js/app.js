@@ -1542,60 +1542,75 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 
 
-/* v34 — customer support widget */
+/* v74 — persistent Need Help chat
+   One conversation per persistent customer identity. */
 (() => {
-  const fab = document.getElementById('supportFab');
-  const panel = document.getElementById('supportPanel');
-  const actions = document.getElementById('supportActions');
-  const note = document.getElementById('supportNote');
-  if (!fab || !panel || !actions) return;
+  const API_BASE='https://beauty-studio-api.haochen05024.workers.dev';
+  const KEY='beauty_studio_customer_key';
+  const fab=document.getElementById('supportFab'), panel=document.getElementById('supportPanel');
+  const messagesEl=document.getElementById('supportMessages'), form=document.getElementById('supportCompose');
+  const input=document.getElementById('supportMessageInput'), send=document.getElementById('supportSendButton');
+  const badge=document.getElementById('supportUnreadBadge'), customerId=document.getElementById('supportCustomerId');
+  const statusText=document.getElementById('supportStatusText'), quick=document.getElementById('supportQuickActions');
+  if(!fab||!panel||!messagesEl||!form)return;
+  const content=window.BEAUTY_STUDIO_CONTENT||{};
+  const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const getKey=()=>{try{return localStorage.getItem(KEY)||''}catch{return ''}};
+  let conversation=null, polling=null, busy=false;
 
-  const content = window.BEAUTY_STUDIO_CONTENT || {};
-  const escapeHTML = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;',"\"":'&quot;'}[c]));
-  const validPhone = value => value && !/^\+?0+$/.test(String(value).replace(/[\s()-]/g,'')) && !String(value).includes('XXX') && !String(value).includes('000 000 000');
-  const links = [];
-
-  if (validPhone(content.phone)) {
-    links.push({href:`tel:${String(content.phone).replace(/[^+\d]/g,'')}`, icon:'☎', title:'Call the Studio', detail:content.phone, external:false});
+  const inject=()=>{
+    if(document.getElementById('supportChatStyles'))return;
+    const st=document.createElement('style');st.id='supportChatStyles';st.textContent=`
+      .support-fab{position:fixed;right:24px;bottom:22px;z-index:10025;display:flex;align-items:center;gap:10px;border:1px solid rgba(125,91,79,.14);border-radius:999px;padding:10px 16px 10px 11px;background:rgba(255,250,246,.97);color:#302621;box-shadow:0 14px 36px rgba(55,35,28,.16);backdrop-filter:blur(12px);cursor:pointer;transition:.2s ease}.support-fab:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(55,35,28,.2)}.support-fab-icon{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#f2e4dc;font-size:18px}.support-fab-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.support-unread-badge{position:absolute;right:-2px;top:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#9b6c69;color:#fff;font:700 10px/19px Arial,sans-serif;text-align:center;border:2px solid #fffaf6}.support-panel{position:fixed;inset:0;z-index:10040;display:none}.support-panel.open{display:block}.support-panel-backdrop{position:absolute;inset:0;background:rgba(48,38,33,.25);backdrop-filter:blur(4px)}.support-chat-card{position:absolute;right:24px;bottom:82px;width:min(430px,calc(100vw - 32px));height:min(650px,calc(100vh - 120px));display:flex;flex-direction:column;background:#fffaf6;border:1px solid rgba(125,91,79,.16);border-radius:26px;box-shadow:0 28px 80px rgba(55,35,28,.23);overflow:hidden}.support-chat-card .support-head{padding:22px 22px 15px;border-bottom:1px solid rgba(125,91,79,.11);display:flex;justify-content:space-between;gap:15px}.support-chat-card .support-head h2{margin:3px 0 3px;font:500 27px Georgia,serif;color:#302621}.support-customer-id{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#a17870}.support-status-row{display:flex;align-items:center;gap:7px;padding:9px 22px;background:#f7eee8;color:#81746d;font-size:11px}.support-status-dot{width:7px;height:7px;border-radius:50%;background:#9db48d;box-shadow:0 0 0 4px rgba(157,180,141,.13)}.support-messages{flex:1;overflow:auto;padding:18px 18px 12px;display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,#fffaf6,#fbf4ef)}.support-chat-empty{margin:auto;text-align:center;max-width:260px;color:#988980;font-size:12px;line-height:1.7}.support-message{max-width:82%;padding:11px 13px;border-radius:17px;display:grid;gap:4px}.support-message.customer{align-self:flex-end;background:#302621;color:#fffaf6;border-bottom-right-radius:5px}.support-message.admin{align-self:flex-start;background:#f1e4dc;color:#302621;border-bottom-left-radius:5px}.support-message small{font-size:9px;opacity:.68;letter-spacing:.07em}.support-message p{margin:0;font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}.support-compose{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(125,91,79,.11);background:#fffaf6}.support-compose textarea{flex:1;min-width:0;resize:none;border:1px solid #dfd1c8;border-radius:15px;background:#fff;padding:11px 12px;color:#302621;font:inherit;font-size:12px;outline:none}.support-compose textarea:focus{border-color:#b88b80;box-shadow:0 0 0 3px rgba(184,139,128,.1)}.support-compose button{border:0;border-radius:15px;background:#302621;color:#fff;padding:0 15px;font-size:11px;font-weight:700;cursor:pointer}.support-compose button:disabled{opacity:.55;cursor:default}.support-quick-actions{display:flex;gap:7px;flex-wrap:wrap;padding:0 14px 10px}.support-quick-actions a{font-size:10px;text-decoration:none;color:#765b52;border:1px solid #dfd1c8;background:#f8eee8;border-radius:999px;padding:7px 10px}.support-chat-card .support-note{margin:0;padding:0 18px 14px;text-align:center;color:#a18d84;font-size:9px;letter-spacing:.06em}.support-close{flex:0 0 auto}.support-card .support-head .eyebrow{margin:0}.support-card .support-close{width:34px;height:34px;border:1px solid #dfd1c8;border-radius:50%;background:#f5ebe5;color:#5f514b;font-size:21px;cursor:pointer}@media(max-width:640px){.support-fab{right:18px;bottom:16px;padding:8px 12px 8px 9px}.support-fab-icon{width:31px;height:31px}.support-chat-card{right:10px;bottom:74px;width:calc(100vw - 20px);height:min(690px,calc(100vh - 94px));border-radius:23px}.support-chat-card .support-head{padding:18px 17px 13px}.support-status-row{padding:8px 17px}.support-messages{padding:15px 13px 10px}.support-message{max-width:88%}}
+    `;document.head.appendChild(st);
+  };
+  const fmt=t=>{try{return new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit'}).format(new Date(t))}catch{return ''}};
+  const setBadge=n=>{const v=Number(n||0);badge.textContent=v>99?'99+':String(v);badge.hidden=v<=0};
+  const render=items=>{
+    const rows=Array.isArray(items)?items:[];
+    if(!rows.length){messagesEl.innerHTML='<div class="support-chat-empty">Ask us anything about services, designs or your appointment.<br><br>We’ll keep your conversation here after refresh.</div>';return}
+    messagesEl.innerHTML=rows.map(m=>`<article class="support-message ${m.sender_type==='admin'?'admin':'customer'}"><small>${m.sender_type==='admin'?'Beauty Studio':'You'} · ${esc(fmt(m.created_at))}</small><p>${esc(m.message)}</p></article>`).join('');
+    messagesEl.scrollTop=messagesEl.scrollHeight;
+  };
+  async function ensure(){
+    const key=getKey();if(!key)return false;
+    try{
+      const r=await fetch(`${API_BASE}/api/support/conversation`,{headers:{Accept:'application/json','x-customer-key':key},cache:'no-store'});const b=await r.json();
+      if(!r.ok||!b?.ok)return false;conversation=b.conversation;customerId.textContent=`Customer ${b.customerNumber||'—'}`;render(b.messages||[]);setBadge(Number(b.conversation?.unread_customer||0));
+      statusText.textContent=b.conversation?.status==='closed'?'Conversation closed · You can start a new message anytime.':'We usually reply as soon as we can.';return true;
+    }catch{return false}
   }
-  if (content.whatsapp) {
-    const raw = String(content.whatsapp);
-    const href = /^https?:\/\//i.test(raw) ? raw : `https://wa.me/${raw.replace(/\D/g,'')}`;
-    links.push({href, icon:'◌', title:'WhatsApp', detail:'Send us a message', external:true});
+  async function sendMessage(e){e.preventDefault();if(busy)return;const message=input.value.trim();if(!message)return;const key=getKey();if(!key)return;
+    busy=true;send.disabled=true;input.disabled=true;
+    try{const r=await fetch(`${API_BASE}/api/support/messages`,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','x-customer-key':key},body:JSON.stringify({message})});const b=await r.json();if(!r.ok||!b?.ok){statusText.textContent=b?.error||'Could not send. Please try again.';return}input.value='';await ensure();}
+    catch{statusText.textContent='Connection issue · please try again.'}
+    finally{busy=false;send.disabled=false;input.disabled=false;input.focus()}
   }
-  if (content.telegram) {
-    const raw = String(content.telegram);
-    const href = /^https?:\/\//i.test(raw) ? raw : `https://t.me/${raw.replace(/^@/,'')}`;
-    links.push({href, icon:'➤', title:'Telegram', detail:'Chat with the Studio', external:true});
-  }
-  if (content.instagram) {
-    links.push({href:content.instagram, icon:'◎', title:'Instagram', detail:'Message us on Instagram', external:true});
-  }
-
-  actions.innerHTML = links.map(item => `<a class="support-action" href="${escapeHTML(item.href)}"${item.external ? ' target="_blank" rel="noopener noreferrer"' : ''}><span class="support-action-main"><span class="support-action-icon" aria-hidden="true">${item.icon}</span><span><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.detail)}</small></span></span><span class="support-action-arrow" aria-hidden="true">→</span></a>`).join('');
-  if (content.contactIntro) {
-    const copy = panel.querySelector('.support-copy');
-    if (copy) copy.textContent = content.contactIntro;
-  }
-  if (links.length) note.textContent = 'Choose the way that feels easiest. We’ll reply as soon as we can.';
-
-  const open = () => {
+  const open=async()=>{
     panel.classList.add('open');
     panel.setAttribute('aria-hidden','false');
     fab.setAttribute('aria-expanded','true');
     document.body.classList.add('modal-open');
+    await ensure();
+    const key=getKey();
+    if(key){
+      try{
+        await fetch(`${API_BASE}/api/support/read`,{method:'POST',headers:{'Accept':'application/json','x-customer-key':key}});
+      }catch{}
+      setBadge(0);
+    }
+    input.focus();
   };
-  const close = () => {
-    panel.classList.remove('open');
-    panel.setAttribute('aria-hidden','true');
-    fab.setAttribute('aria-expanded','false');
-    document.body.classList.remove('modal-open');
-  };
-  fab.addEventListener('click', () => panel.classList.contains('open') ? close() : open());
-  panel.querySelectorAll('[data-close-support]').forEach(el => el.addEventListener('click', close));
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && panel.classList.contains('open')) close(); });
+  const close=()=>{panel.classList.remove('open');panel.setAttribute('aria-hidden','true');fab.setAttribute('aria-expanded','false');document.body.classList.remove('modal-open');};
+  const buildQuick=()=>{const items=[];if(content.phone&&content.phone!=='+00 000 000 000')items.push(`<a href="tel:${String(content.phone).replace(/[^+\d]/g,'')}">Call studio</a>`);if(content.whatsapp)items.push(`<a target="_blank" rel="noopener" href="${esc(/^https?:\/\//i.test(content.whatsapp)?content.whatsapp:`https://wa.me/${String(content.whatsapp).replace(/\D/g,'')}`)}">WhatsApp</a>`);quick.innerHTML=items.join('');};
+  fab.addEventListener('click',()=>panel.classList.contains('open')?close():open());
+  panel.querySelectorAll('[data-close-support]').forEach(x=>x.addEventListener('click',close));
+  form.addEventListener('submit',sendMessage);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+  inject();buildQuick();
+  (async()=>{for(let i=0;i<12&&!getKey();i++)await new Promise(r=>setTimeout(r,350));await ensure();polling=setInterval(async()=>{if(!document.hidden)await ensure()},15000)})();
 })();
-
 
 /* v35 — appointment request actions */
 (function () {
@@ -3081,7 +3096,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const getKey = () => { try { return localStorage.getItem(KEY) || ''; } catch { return ''; } };
   const open = () => { panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); fab.setAttribute('aria-expanded','true'); };
   const close = () => { panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); fab.setAttribute('aria-expanded','false'); };
-  const typeLabel = type => ({booking_confirmed:'BOOKING CONFIRMED',booking_cancelled:'BOOKING UPDATE',booking_completed:'BOOKING COMPLETE',booking_pending:'BOOKING RECEIVED'}[type] || 'STUDIO UPDATE');
+  const typeLabel = type => ({booking_confirmed:'BOOKING CONFIRMED',booking_cancelled:'BOOKING UPDATE',booking_completed:'BOOKING COMPLETE',booking_pending:'BOOKING RECEIVED',support_message:'NEW MESSAGE'}[type] || 'STUDIO UPDATE');
 
   function render(items) {
     const rows = Array.isArray(items) ? items : [];

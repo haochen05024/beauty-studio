@@ -431,21 +431,27 @@
   </section>
 </div>
 
-<!-- Customer support widget -->
-<button class="support-fab" id="supportFab" type="button" aria-label="Contact Beauty Studio" aria-expanded="false">
+<!-- Customer support chat -->
+<button class="support-fab" id="supportFab" type="button" aria-label="Chat with Beauty Studio" aria-expanded="false" aria-controls="supportPanel">
   <span class="support-fab-icon" aria-hidden="true">♡</span>
   <span class="support-fab-label">Need help?</span>
+  <b class="support-unread-badge" id="supportUnreadBadge" hidden>0</b>
 </button>
 <div class="support-panel" id="supportPanel" aria-hidden="true">
   <div class="support-panel-backdrop" data-close-support></div>
-  <div class="support-card" role="dialog" aria-modal="false" aria-labelledby="supportTitle">
+  <div class="support-card support-chat-card" role="dialog" aria-modal="false" aria-labelledby="supportTitle">
     <div class="support-head">
-      <div><p class="eyebrow">Beauty Studio</p><h2 id="supportTitle">How can we help?</h2></div>
-      <button class="support-close" type="button" data-close-support aria-label="Close contact panel">×</button>
+      <div><p class="eyebrow">Beauty Studio · Support</p><h2 id="supportTitle">How can we help?</h2><small class="support-customer-id" id="supportCustomerId">Customer —</small></div>
+      <button class="support-close" type="button" data-close-support aria-label="Close chat">×</button>
     </div>
-    <p class="support-copy">Have a question about a service, a design, or your appointment? Send us a message and we’ll get back to you.</p>
-    <div class="support-actions" id="supportActions"></div>
-    <p class="support-note" id="supportNote">Contact options will appear here once the Studio contact details are added.</p>
+    <div class="support-status-row"><span class="support-status-dot"></span><span id="supportStatusText">We usually reply as soon as we can.</span></div>
+    <div class="support-messages" id="supportMessages" aria-live="polite"><div class="support-chat-empty">Ask us anything about services, designs or your appointment.</div></div>
+    <form class="support-compose" id="supportCompose">
+      <textarea id="supportMessageInput" rows="2" maxlength="2000" placeholder="Write a message…" aria-label="Message Beauty Studio"></textarea>
+      <button type="submit" id="supportSendButton" aria-label="Send message">Send <span>→</span></button>
+    </form>
+    <div class="support-quick-actions" id="supportQuickActions"></div>
+    <p class="support-note" id="supportNote">Your conversation stays with your Customer ID after refresh.</p>
   </div>
 </div>
 
@@ -633,6 +639,6 @@
       });
     })();
   </script>
-  <script src="assets/js/app.js?v=73"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
+  <script src="assets/js/app.js?v=74"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
 </body>
 </html>
