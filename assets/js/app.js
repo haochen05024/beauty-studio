@@ -1,3 +1,4 @@
+/* v68 — live D1 booking controller: date switching, slot rules, custom calendar sync */
 document.addEventListener("DOMContentLoaded", () => {
   const header = document.querySelector(".site-header");
   const updateHeader = () => {
@@ -1757,6 +1758,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const refreshFromSelectedDate = () => {
+    // The final D1 booking controller owns the live slots once rules arrive.
+    if (window.__beautyStudioBookingRulesFinal) return;
     const active = document.querySelector(".date-choice.active") || dateButtons.find(b => !b.disabled);
     if (!active) return;
     renderSlots(active.dataset.working === "true");
@@ -1903,9 +1906,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const studio = window.BEAUTY_STUDIO_CONTENT || {};
   const rules = studio.bookingRules || {};
-  const workingDays = Array.isArray(rules.workingDays) && rules.workingDays.length
+  const fallbackWorkingDays = Array.isArray(rules.workingDays) && rules.workingDays.length
     ? rules.workingDays.map(Number) : [1,2,3,4,5,6];
-  const advanceDays = Math.max(0, Number(rules.advanceDays) || 30);
+  const fallbackAdvanceDays = Math.max(0, Number(rules.advanceDays) || 30);
+  const liveRules = () => window.__beautyStudioBookingRulesFinal || window.BEAUTY_STUDIO_CONTENT?.bookingRules || rules;
+  const workingDays = () => {
+    const value = liveRules().workingDays;
+    return Array.isArray(value) && value.length ? value.map(Number) : fallbackWorkingDays;
+  };
+  const advanceDays = () => Math.max(0, Number(liveRules().advanceDays) || fallbackAdvanceDays);
   const customInput = document.getElementById("customBookingDate");
   const summaryDate = document.getElementById("summaryDate");
   const note = document.getElementById("bookingReadyNote");
@@ -1914,7 +1923,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
   }
   function startToday() { const d = new Date(); d.setHours(12,0,0,0); return d; }
-  function maxDate() { const d = startToday(); d.setDate(d.getDate() + advanceDays); return d; }
+  function maxDate() { const d = startToday(); d.setDate(d.getDate() + advanceDays()); return d; }
   function parseIso(value) { const [y,m,d] = value.split("-").map(Number); return new Date(y,m-1,d,12); }
   function sameDay(a,b) { return iso(a) === iso(b); }
   function monthLabel(date) { return date.toLocaleDateString(undefined,{month:"long",year:"numeric"}); }
@@ -1922,8 +1931,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let view = startToday();
   let selected = null;
-  const min = startToday();
-  const max = maxDate();
+  const minDate = () => startToday();
+  const maxDateValue = () => maxDate();
 
   const overlay = document.createElement("div");
   overlay.className = "bs-calendar-overlay";
@@ -1976,11 +1985,13 @@ document.addEventListener("DOMContentLoaded", () => {
       button.textContent=d.getDate();
       button.setAttribute("aria-label", d.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"}));
       if (d.getMonth() !== view.getMonth()) button.classList.add("is-outside");
+      const min = minDate();
+      const max = maxDateValue();
       const inRange = d >= min && d <= max;
       const day = d.getDay() === 0 ? 7 : d.getDay();
-      const openDay = workingDays.includes(day);
+      const openDay = workingDays().includes(day);
       if (!openDay) button.classList.add("is-closed");
-      if (sameDay(d,min)) button.classList.add("is-today");
+      if (sameDay(d,minDate())) button.classList.add("is-today");
       if (selected && sameDay(d,selected)) button.classList.add("is-selected");
       button.disabled = !inRange || !openDay;
       button.addEventListener("click",()=>choose(d));
@@ -1988,14 +1999,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const monthStart = new Date(view.getFullYear(),view.getMonth(),1,12);
     const monthEnd = new Date(view.getFullYear(),view.getMonth(),last.getDate(),12);
-    prev.disabled = monthEnd < min;
-    next.disabled = monthStart > new Date(max.getFullYear(),max.getMonth(),1,12);
+    prev.disabled = monthEnd < minDate();
+    next.disabled = monthStart > new Date(maxDateValue().getFullYear(),maxDateValue().getMonth(),1,12);
   }
 
   function open() {
     const current = customInput?.value;
     selected = current ? parseIso(current) : null;
-    view = selected ? new Date(selected.getFullYear(),selected.getMonth(),1,12) : new Date(min.getFullYear(),min.getMonth(),1,12);
+    view = selected ? new Date(selected.getFullYear(),selected.getMonth(),1,12) : new Date(minDate().getFullYear(),minDate().getMonth(),1,12);
     render();
     overlay.classList.add("open");
     overlay.setAttribute("aria-hidden","false");
@@ -2018,6 +2029,9 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.querySelectorAll(".date-choice").forEach(x => { if (x !== trigger) x.classList.remove("active"); });
     if (summaryDate) summaryDate.textContent = selectedLabel(selected);
     if (note) note.textContent = "Date selected. Pick an available time to continue.";
+    if (typeof window.__beautyStudioHandleBookingDate === "function") {
+      window.__beautyStudioHandleBookingDate(selected);
+    }
     hide();
   }
 
@@ -2748,11 +2762,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyRules(rules) {
     activeRules = { ...(window.BEAUTY_STUDIO_CONTENT?.bookingRules || {}), ...(rules || {}) };
+    window.__beautyStudioBookingRulesFinal = activeRules;
     updateBookingMessage();
     renderDates();
   }
 
+  function handleBookingDate(date) {
+    const selectedDate = new Date(date);
+    selectedDate.setHours(12, 0, 0, 0);
+    const selectedIso = iso(selectedDate);
+    const matching = dateButtons.find(button => button.dataset.isoDate === selectedIso);
+    dateButtons.forEach(button => button.classList.remove("active"));
+    if (matching) matching.classList.add("active");
+    const summaryDate = document.getElementById("summaryDate");
+    if (summaryDate) summaryDate.textContent = selectedDate.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+    renderTimes(selectedDate);
+  }
+
+  window.__beautyStudioHandleBookingDate = handleBookingDate;
   window.__beautyStudioApplyBookingRules = applyRules;
+
+  // Capture date clicks so legacy v37 listeners cannot rebuild the grid from
+  // their original hard-coded rules after Tomorrow/Today is switched.
+  dateButtons.forEach(button => {
+    if (button.dataset.dateCustom === "true") return;
+    button.addEventListener("click", event => {
+      if (!window.__beautyStudioBookingRulesFinal) return;
+      event.stopImmediatePropagation();
+      if (button.disabled || !button.dataset.isoDate) return;
+      handleBookingDate(new Date(`${button.dataset.isoDate}T12:00:00`));
+    }, true);
+  });
   window.addEventListener("beautyStudioBookingRulesReady", event => applyRules(event.detail || {}));
 
   // If the D1 request has already completed before this block evaluated,
