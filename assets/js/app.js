@@ -1,4 +1,4 @@
-/* v68 — live D1 booking controller: date switching, slot rules, custom calendar sync */
+/* v76 — live D1 booking controller: date switching, slot rules, custom calendar sync */
 document.addEventListener("DOMContentLoaded", () => {
   const header = document.querySelector(".site-header");
   const updateHeader = () => {
@@ -3140,4 +3140,137 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(() => loadNotifications(false), 30000);
   };
   start();
+})();
+
+/* v76 — live service catalog + booking back navigation
+   Booking now uses the same D1 service list as the Services section.
+   Newly added services appear automatically, with live price/duration.
+   Customers can move back from time/details to correct an earlier choice. */
+(() => {
+  const modal = document.getElementById('bookingModal');
+  if (!modal) return;
+
+  const esc = value => String(value ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+
+  const serviceKey = service => String(service?.id ?? service?.key ?? '').trim().toLowerCase();
+
+  const renderBookingServices = () => {
+    const box = modal.querySelector('.booking-options');
+    const services = window.BEAUTY_STUDIO_CONTENT?.services || {};
+    if (!box || !Object.keys(services).length) return;
+
+    const entries = Object.entries(services);
+    box.innerHTML = entries.map(([key, s], index) => {
+      const actualKey = serviceKey(s) || key;
+      const title = s?.title || s?.name || `Service ${index + 1}`;
+      const price = s?.price || 'Price on request';
+      const duration = s?.duration ? `${s.duration} min` : 'Time confirmed';
+      return `<button type="button" data-service-choice="${esc(title)}" data-service-key="${esc(actualKey)}">` +
+        `<span>${esc(title)}</span><small>${esc(price)} · ${esc(duration)}</small><b>→</b></button>`;
+    }).join('');
+
+    const selectedKey = modal.dataset.selectedServiceKey || '';
+    if (selectedKey) {
+      box.querySelector(`[data-service-key="${CSS.escape(selectedKey)}"]`)?.classList.add('selected');
+    }
+  };
+
+  const findService = key => {
+    const services = window.BEAUTY_STUDIO_CONTENT?.services || {};
+    return services[key] || Object.values(services).find(s => serviceKey(s) === key) || null;
+  };
+
+  const setStep = step => {
+    modal.querySelectorAll('.booking-step').forEach(el => {
+      el.classList.toggle('active', Number(el.dataset.step) === step);
+      el.style.display = '';
+    });
+    modal.querySelectorAll('.steps span').forEach((el, index) => {
+      el.classList.toggle('current', index === step - 1);
+    });
+    const fill = document.getElementById('progressFill');
+    if (fill) fill.style.width = `${step / 3 * 100}%`;
+    const panel = modal.querySelector('.booking-panel');
+    if (panel) panel.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const updateServiceSummary = (key, titleFallback = '') => {
+    const service = findService(key);
+    if (!service) return;
+    const title = service.title || service.name || titleFallback || 'Service';
+    const price = service.price || 'Price on request';
+    const duration = service.duration ? `${service.duration} min` : 'Time confirmed';
+
+    modal.dataset.selectedServiceKey = key;
+    document.getElementById('summaryService')?.replaceChildren(document.createTextNode(title));
+    document.getElementById('summaryPrice')?.replaceChildren(document.createTextNode(price));
+    document.getElementById('summaryDuration')?.replaceChildren(document.createTextNode(duration));
+    document.getElementById('chosenServiceLabel')?.replaceChildren(document.createTextNode(title));
+    document.getElementById('bookingSelectionNote')?.replaceChildren(
+      document.createTextNode(`${title} · ${price} · ${duration}`)
+    );
+  };
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .booking-back-button{display:inline-flex;align-items:center;gap:8px;margin:0 0 18px;padding:8px 0;border:0;background:none;color:#8e6a61;font:600 11px/1.2 inherit;letter-spacing:.08em;cursor:pointer;transition:color .2s ease,transform .2s ease}
+    .booking-back-button:hover{color:#302621;transform:translateX(-2px)}
+    .booking-options button small{display:block}
+    @media(max-width:640px){.booking-back-button{margin-bottom:14px;padding:7px 0;font-size:10px}}
+  `;
+  document.head.appendChild(style);
+
+  // Delegation keeps newly-created D1 services clickable.
+  modal.addEventListener('click', event => {
+    const button = event.target.closest('[data-service-choice]');
+    if (!button || !modal.contains(button)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    modal.querySelectorAll('[data-service-choice]').forEach(x => x.classList.remove('selected'));
+    button.classList.add('selected');
+    const key = button.dataset.serviceKey || '';
+    updateServiceSummary(key, button.dataset.serviceChoice || button.textContent.trim());
+    setStep(2);
+  }, true);
+
+  modal.addEventListener('click', event => {
+    const back = event.target.closest('[data-back-step]');
+    if (!back || !modal.contains(back)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const step = Number(back.dataset.backStep || 1);
+    setStep(step);
+
+    // Returning to the time step means the customer may choose a new time.
+    if (step === 2) {
+      const activeDate = modal.querySelector('.date-choice.active');
+      const iso = activeDate?.dataset?.isoDate;
+      if (iso && typeof window.__beautyStudioHandleBookingDate === 'function') {
+        window.__beautyStudioHandleBookingDate(new Date(`${iso}T12:00:00`));
+      }
+    }
+  }, true);
+
+  // Initial fallback/static services are replaced once D1 content arrives.
+  renderBookingServices();
+  document.addEventListener('beautyStudioContentReady', renderBookingServices);
+  window.addEventListener('beautyStudioServicesReady', renderBookingServices);
+
+  // The existing D1 loader does not emit a service-specific event, so observe
+  // the service object briefly and render as soon as the remote list arrives.
+  let lastSignature = '';
+  const sync = () => {
+    const services = window.BEAUTY_STUDIO_CONTENT?.services || {};
+    const signature = Object.entries(services).map(([k,s]) => `${k}|${s?.title}|${s?.price}|${s?.duration}`).join('||');
+    if (signature && signature !== lastSignature) {
+      lastSignature = signature;
+      renderBookingServices();
+    }
+  };
+  sync();
+  const timer = setInterval(sync, 400);
+  setTimeout(() => clearInterval(timer), 12000);
 })();
