@@ -2799,3 +2799,146 @@ document.addEventListener("DOMContentLoaded", () => {
   // apply the current values immediately as well.
   applyRules(window.BEAUTY_STUDIO_CONTENT?.bookingRules || {});
 })();
+
+
+/* v70 — real D1 booking submission controller
+   The legacy booking UI listeners only changed the success screen. This final
+   capture-phase controller owns Confirm request and persists the request to D1. */
+(() => {
+  const button = document.getElementById('confirmBooking');
+  const modal = document.getElementById('bookingModal');
+  if (!button || !modal || button.dataset.realBookingController === '1') return;
+  button.dataset.realBookingController = '1';
+
+  const API_BASE = 'https://beauty-studio-api.haochen05024.workers.dev';
+  let submitting = false;
+
+  const textOf = id => String(document.getElementById(id)?.textContent || '').trim();
+  const setStatus = (message, error = false) => {
+    const el = document.getElementById('bookingReadyNote') || document.getElementById('bookingSelectionNote');
+    if (!el) return;
+    el.textContent = message;
+    el.classList.toggle('is-error', !!error);
+  };
+
+  const activeDateIso = () => {
+    const active = modal.querySelector('.date-choice.active');
+    return active?.dataset?.isoDate || '';
+  };
+
+  const selectedTime = () => {
+    const active = modal.querySelector('.time-grid button.selected, .time-grid button.active');
+    return active?.dataset?.time || active?.textContent?.trim() || '';
+  };
+
+  const submitBooking = async event => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    if (submitting) return;
+
+    const nameInput = document.getElementById('guestName');
+    const phoneInput = document.getElementById('guestPhone');
+    const name = nameInput?.value.trim() || '';
+    const phone = phoneInput?.value.trim() || '';
+    const service = textOf('summaryService');
+    const price = textOf('summaryPrice');
+    const duration = textOf('summaryDuration');
+    const bookingDate = activeDateIso();
+    const bookingTime = selectedTime();
+    const inspiration = textOf('summaryInspiration');
+
+    if (name.length < 2) {
+      nameInput?.focus();
+      setStatus('Please enter your name before sending the request.', true);
+      return;
+    }
+    if (phone.replace(/\D/g, '').length < 7) {
+      phoneInput?.focus();
+      setStatus('Please enter a valid phone number before sending the request.', true);
+      return;
+    }
+    if (!service || service === '—') {
+      setStatus('Please choose a service first.', true);
+      return;
+    }
+    if (!bookingDate || !/^\d{4}-\d{2}-\d{2}$/.test(bookingDate)) {
+      setStatus('Please choose an appointment date.', true);
+      return;
+    }
+    if (!bookingTime || !/^\d{2}:\d{2}$/.test(bookingTime)) {
+      setStatus('Please choose an available time.', true);
+      return;
+    }
+
+    submitting = true;
+    const original = button.innerHTML;
+    button.disabled = true;
+    button.classList.add('is-loading');
+    button.textContent = 'Sending request…';
+    setStatus('Sending your appointment request securely to the Studio…');
+
+    try {
+      const response = await fetch(`${API_BASE}/api/bookings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          customerName: name,
+          phone,
+          service,
+          price,
+          duration,
+          bookingDate,
+          bookingTime,
+          inspiration: inspiration && inspiration !== '—' ? inspiration : '',
+          customerNote: ''
+        })
+      });
+
+      let body = null;
+      try { body = await response.json(); } catch {}
+      if (!response.ok || !body?.ok || !body?.booking?.id) {
+        throw new Error(body?.error || `Booking request failed (${response.status})`);
+      }
+
+      const booking = body.booking;
+      const ref = document.getElementById('finalBookingRef');
+      const finalService = document.getElementById('finalService');
+      const finalPrice = document.getElementById('finalPrice');
+      const finalDate = document.getElementById('finalDate');
+      const finalTime = document.getElementById('finalTime');
+      const finalDuration = document.getElementById('finalDuration');
+      const finalInspiration = document.getElementById('finalInspiration');
+      const finalCard = document.getElementById('finalBookingCard');
+      const complete = document.getElementById('bookingComplete');
+      const completeSummary = document.getElementById('completeSummary');
+
+      if (ref) ref.textContent = booking.id;
+      if (finalService) finalService.textContent = booking.service || service;
+      if (finalPrice) finalPrice.textContent = booking.price || price || 'To confirm';
+      if (finalDate) finalDate.textContent = booking.bookingDate || bookingDate;
+      if (finalTime) finalTime.textContent = booking.bookingTime || bookingTime;
+      if (finalDuration) finalDuration.textContent = booking.duration || duration || 'To confirm';
+      if (finalInspiration) finalInspiration.textContent = booking.inspiration || '—';
+      if (finalCard) finalCard.hidden = false;
+      if (completeSummary) completeSummary.textContent = `${booking.service} · ${booking.bookingDate} · ${booking.bookingTime}. Your request ${booking.id} has been sent to the Studio for review.`;
+
+      modal.querySelectorAll('.booking-step').forEach(x => x.style.display = 'none');
+      complete?.classList.add('show');
+    } catch (error) {
+      console.error('Beauty Studio booking submission failed', error);
+      setStatus(error?.message || 'We could not send the request. Please try again.', true);
+      button.disabled = false;
+      button.classList.remove('is-loading');
+      button.innerHTML = original;
+      submitting = false;
+    }
+  };
+
+  // Capture phase runs before the legacy bubble listeners and prevents their
+  // preview-only success screen from firing without a D1 write.
+  button.addEventListener('click', submitBooking, true);
+})();
