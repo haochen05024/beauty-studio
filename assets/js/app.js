@@ -2183,6 +2183,24 @@ document.addEventListener("DOMContentLoaded", () => {
     Object.entries(fields).forEach(([selector, value]) => {
       document.querySelectorAll(selector).forEach(el => text(el, value));
     });
+
+    // Contact page uses explicit IDs rather than the generic data-studio-* hooks.
+    text(document.getElementById("contactAddress"), cfg.address || "");
+    text(document.getElementById("contactHours"), cfg.hours || "");
+    text(document.getElementById("contactPhone"), cfg.phone || "");
+
+    const callAction = document.getElementById("contactCallAction");
+    if (callAction && cfg.phone) {
+      callAction.textContent = "Call studio  →";
+      callAction.style.cursor = "pointer";
+      callAction.onclick = () => {
+        window.location.href = `tel:${String(cfg.phone).replace(/[^\d+]/g, "")}`;
+      };
+    }
+
+    Object.entries(fields).forEach(([selector, value]) => {
+      document.querySelectorAll(selector).forEach(el => text(el, value));
+    });
     if (cfg.studioName) {
       document.title = `${cfg.studioName} · Nails & Beauty`;
       document.querySelector('meta[property="og:site_name"]')?.setAttribute("content", cfg.studioName);
@@ -2198,7 +2216,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const applyServiceCards = () => {
     const services = cfg.services || {};
     const entries = Object.entries(services);
-    const grid = document.querySelector(".service-grid");
+    const grid = document.querySelector(".services-grid");
     if (!grid) return;
 
     let cards = [...grid.querySelectorAll(".service-card[data-service]")];
@@ -2313,6 +2331,21 @@ document.addEventListener("DOMContentLoaded", () => {
     set("serviceModalKicker", s.kicker || "Beauty Studio");
     set("serviceModalCaption", s.caption || "Made with care.");
     set("serviceIdealFor", s.idealFor || "Everyday wear");
+    const highlights = document.getElementById("serviceHighlights");
+    if (highlights) {
+      const rows = Array.isArray(s.highlights) ? s.highlights : [];
+      highlights.innerHTML = rows.map(row => {
+        const pair = Array.isArray(row) ? row : [row, ""];
+        return `<div><span>✦</span><strong>${escapeHtml(pair[0] || "")}</strong><small>${escapeHtml(pair[1] || "")}</small></div>`;
+      }).join("");
+    }
+
+    const photoCount = document.getElementById("serviceModalPhotoCount");
+    if (photoCount) photoCount.textContent = `Beauty Studio · ${s.number || "01"} / ${String(Object.keys(cfg.services || {}).length).padStart(2, "0")}`;
+
+    const choose = document.getElementById("chooseServiceButton");
+    if (choose) choose.dataset.bookService = key;
+
     const points = document.getElementById("servicePoints");
     if (points) points.innerHTML = (s.points || []).map(x => `<li>${escapeHtml(x)}</li>`).join("");
   };
@@ -2339,7 +2372,17 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".service-card[data-service]").forEach(card => {
       if (card.dataset.d1Bound === "1") return;
       card.dataset.d1Bound = "1";
-      card.addEventListener("click", () => updateServiceModal(card.dataset.service));
+      card.addEventListener("click", () => {
+        const key = card.dataset.service;
+        updateServiceModal(key);
+
+        const modal = document.getElementById("serviceModal");
+        if (modal) {
+          modal.classList.add("open");
+          modal.setAttribute("aria-hidden", "false");
+          document.body.classList.add("modal-open");
+        }
+      });
     });
     const grid = document.getElementById("work-grid");
     grid?.addEventListener("click", event => {
