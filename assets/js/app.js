@@ -2360,11 +2360,17 @@ document.addEventListener("DOMContentLoaded", () => {
       ]);
 
       if (settings?.ok && settings.data) Object.assign(cfg, settings.data);
-      const hasServices = services?.ok && Array.isArray(services.data) && services.data.length;
-      const hasGallery = gallery?.ok && Array.isArray(gallery.data) && gallery.data.length;
+      const remoteServices = services?.ok
+        ? (Array.isArray(services.data) ? services.data : (services.data && typeof services.data === "object" ? Object.values(services.data) : []))
+        : [];
+      const remoteGallery = gallery?.ok
+        ? (Array.isArray(gallery.data) ? gallery.data : (gallery.data && typeof gallery.data === "object" ? Object.values(gallery.data) : []))
+        : [];
+      const hasServices = remoteServices.length > 0;
+      const hasGallery = remoteGallery.length > 0;
 
-      if (hasServices) mergeServices(services.data);
-      if (hasGallery) mergeGallery(gallery.data);
+      if (hasServices) mergeServices(remoteServices);
+      if (hasGallery) mergeGallery(remoteGallery);
       if (booking?.ok && booking.data) cfg.bookingRules = {...(cfg.bookingRules || {}), ...booking.data};
 
       // Re-apply the existing content system after D1 has arrived.
@@ -2380,7 +2386,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       document.documentElement.dataset.d1Content = (hasServices || hasGallery || (settings?.ok && settings.data)) ? "connected" : "empty";
     } catch (error) {
-      // Silent fallback: the static launch-ready content remains visible.
+      console.error("Beauty Studio D1 content load failed", error);
+      // Keep the static launch-ready content visible if the API is unavailable.
       document.documentElement.dataset.d1Content = "fallback";
     }
   };
