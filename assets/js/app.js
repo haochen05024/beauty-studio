@@ -945,7 +945,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* v20 — UI system marker */
 (() => {
-  document.documentElement.dataset.beautyStudioUi = "v64";
+  document.documentElement.dataset.beautyStudioUi = "v20";
 })();
 
 /* v21 — centralized launch content */
@@ -1200,12 +1200,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setText("[data-studio-name]", cfg.studioName);
   setText("[data-studio-city]", cfg.city);
 
-  document.querySelectorAll(".contact-details p").forEach(p => {
-    const label = p.querySelector("strong")?.textContent?.trim().toLowerCase();
-    if (label === "location" && cfg.address) p.innerHTML = `<strong>Location</strong><br>${cfg.address}`;
-    if (label === "hours" && cfg.hours) p.innerHTML = `<strong>Hours</strong><br>${cfg.hours}`;
-    if (label === "contact" && cfg.phone) p.innerHTML = `<strong>Contact</strong><br>${cfg.phone}`;
-  });
+  // Keep the Contact markup and its explicit element IDs intact.
+  // The D1 publishing layer updates #contactAddress / #contactHours / #contactPhone
+  // later in applyBrand(). Replacing the whole <p> here would remove those IDs.
 
   document.querySelectorAll("[data-studio-phone-link]").forEach(el => {
     if (cfg.phone) {
@@ -2492,53 +2489,7 @@ document.addEventListener("DOMContentLoaded", () => {
         get("/api/content/booking-rules")
       ]);
 
-      if (settings?.ok && settings.data) {
-        Object.assign(cfg, settings.data);
-
-        // v64 — apply published D1 settings directly to Contact.
-        // This intentionally uses the response payload itself so Contact/social
-        // content cannot remain on the launch-time placeholder values.
-        const published = settings.data;
-        const putText = (id, value) => {
-          const el = document.getElementById(id);
-          if (el && value !== undefined && value !== null && String(value).trim() !== "") {
-            el.textContent = String(value);
-          }
-        };
-
-        putText("contactAddress", published.address || published.city);
-        putText("contactHours", published.hours);
-        putText("contactPhone", published.phone);
-
-        document.querySelectorAll("[data-studio-address]").forEach(el => {
-          if (published.address) el.textContent = String(published.address);
-        });
-        document.querySelectorAll("[data-studio-hours]").forEach(el => {
-          if (published.hours) el.textContent = String(published.hours);
-        });
-        document.querySelectorAll("[data-studio-phone]").forEach(el => {
-          if (published.phone) el.textContent = String(published.phone);
-        });
-
-        const socialValues = {
-          tiktok: published.tiktok,
-          whatsapp: published.whatsapp,
-          telegram: published.telegram
-        };
-        document.querySelectorAll("[data-social]").forEach(link => {
-          const key = link.dataset.social;
-          const value = socialValues[key];
-          if (value === undefined || value === null || String(value).trim() === "") return;
-          const raw = String(value).trim();
-          const small = link.querySelector("small");
-          if (small) small.textContent = raw;
-          if (/^https?:\/\//i.test(raw)) {
-            link.href = raw;
-            link.target = "_blank";
-            link.rel = "noopener";
-          }
-        });
-      }
+      if (settings?.ok && settings.data) Object.assign(cfg, settings.data);
       const remoteServices = services?.ok
         ? (Array.isArray(services.data) ? services.data : (services.data && typeof services.data === "object" ? Object.values(services.data) : []))
         : [];
