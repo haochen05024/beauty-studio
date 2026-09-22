@@ -1,18 +1,12 @@
-# Beauty Studio v39 — Custom Booking Calendar
+# Beauty Studio Customer v56.1 — PWA cache fix
 
-Overwrite only:
-- index.html
-- assets/css/style.css
-- assets/js/app.js
+Replace only `sw.js` in the current `beauty-studio` GitHub repository.
 
-v39 replaces the browser-native date picker with an in-site Beauty Studio calendar. It keeps the existing booking rules, working days, advance booking window, and step-3 transition.
+Reason:
+The previous PWA service worker was still using the `beauty-studio-v55` cache,
+so the newly uploaded D1 dynamic `assets/js/app.js` could remain cached.
 
+Changing the cache name to v56 forces the browser/PWA to install a fresh cache
+and load the new D1 dynamic JavaScript.
 
-## v56 · D1 customer content bridge
-
-The customer site now reads published content from the public GET endpoints of
-`beauty-studio-api`. If D1 is empty or unavailable, the existing static content
-remains as the fallback. No ADMIN_TOKEN is used on the customer site.
-
-Changed:
-- `assets/js/app.js`
+Do not change the Worker, D1, or Admin project.
