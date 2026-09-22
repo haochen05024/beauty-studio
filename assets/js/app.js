@@ -2198,7 +2198,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const applyServiceCards = () => {
     const services = cfg.services || {};
     const entries = Object.entries(services);
-    const grid = document.querySelector(".services-grid");
+    const grid = document.querySelector(".service-grid");
     if (!grid) return;
 
     let cards = [...grid.querySelectorAll(".service-card[data-service]")];
