@@ -2185,9 +2185,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Contact page uses explicit IDs rather than the generic data-studio-* hooks.
-    text(document.getElementById("contactAddress"), cfg.address || "");
-    text(document.getElementById("contactHours"), cfg.hours || "");
-    text(document.getElementById("contactPhone"), cfg.phone || "");
+    const contactAddress = cfg.address || cfg.city || "";
+    const contactHours = cfg.hours || "";
+    const contactPhone = cfg.phone || "";
+
+    text(document.getElementById("contactAddress"), contactAddress);
+    text(document.getElementById("contactHours"), contactHours);
+    text(document.getElementById("contactPhone"), contactPhone);
+
+    // Also support the generic hooks if the contact layout changes later.
+    document.querySelectorAll("[data-studio-address]").forEach(el => text(el, contactAddress));
+    document.querySelectorAll("[data-studio-hours]").forEach(el => text(el, contactHours));
+    document.querySelectorAll("[data-studio-phone]").forEach(el => text(el, contactPhone));
 
     const callAction = document.getElementById("contactCallAction");
     if (callAction && cfg.phone) {
@@ -2216,7 +2225,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const applyServiceCards = () => {
     const services = cfg.services || {};
     const entries = Object.entries(services);
-    const grid = document.querySelector(".services-grid");
+    const grid = document.querySelector(".service-grid");
     if (!grid) return;
 
     let cards = [...grid.querySelectorAll(".service-card[data-service]")];
