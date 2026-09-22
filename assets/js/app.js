@@ -2538,6 +2538,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (hasGallery) mergeGallery(remoteGallery);
       if (booking?.ok && booking.data) cfg.bookingRules = {...(cfg.bookingRules || {}), ...booking.data};
 
+      // v67 · let the final booking renderer apply the fresh D1 rules after
+      // the async content request has completed. The older booking scripts
+      // run during initial page load and therefore only saw fallback values.
+      window.dispatchEvent(new CustomEvent("beautyStudioBookingRulesReady", {
+        detail: cfg.bookingRules || {}
+      }));
+
       // Re-apply the existing content system after D1 has arrived.
       applyBrand();
       applySocialLinks();
@@ -2563,4 +2570,192 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     loadPublishedContent();
   }
+})();
+
+
+/* v67 — D1 booking rules live renderer
+   The original booking scripts are intentionally kept as a safe fallback,
+   but they run before the async D1 request finishes. This final renderer
+   listens for the D1-ready event and rebuilds the customer booking UI with
+   the actual admin rules: opening/closing time, slot interval, advance days,
+   minimum lead time and booking status.
+*/
+(() => {
+  const modal = document.getElementById("bookingModal");
+  if (!modal) return;
+
+  const timeGrid = modal.querySelector(".time-grid");
+  const dateButtons = [...modal.querySelectorAll(".date-choice")];
+  const customDateButton = modal.querySelector("[data-date-custom]");
+  const timeLabel = modal.querySelector(".booking-time-label small");
+  const bookingMessageTargets = [
+    modal.querySelector(".booking-footnote"),
+    modal.querySelector(".booking-reassurance small")
+  ].filter(Boolean);
+
+  let activeRules = {};
+
+  const pad = n => String(n).padStart(2, "0");
+  const toMinutes = value => {
+    const parts = String(value || "").split(":").map(Number);
+    return (parts[0] || 0) * 60 + (parts[1] || 0);
+  };
+  const formatTime = mins => `${pad(Math.floor(mins / 60))}:${pad(mins % 60)}`;
+  const iso = date => `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+  const today = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+  const localDate = offset => {
+    const d = today();
+    d.setDate(d.getDate() + offset);
+    d.setHours(12,0,0,0);
+    return d;
+  };
+  const workingDay = date => {
+    const day = date.getDay() === 0 ? 7 : date.getDay();
+    const days = Array.isArray(activeRules.workingDays) && activeRules.workingDays.length
+      ? activeRules.workingDays.map(Number)
+      : [1,2,3,4,5,6];
+    return days.includes(day);
+  };
+  const advanceDays = () => Math.max(0, Number(activeRules.advanceDays) || 30);
+  const isPaused = () => String(activeRules.status || "open").toLowerCase() !== "open";
+  const minLeadMinutes = () => Math.max(0, Number(activeRules.minLeadMinutes) || 0);
+
+  function updateBookingMessage() {
+    const message = String(window.BEAUTY_STUDIO_CONTENT?.bookingMessage || "").trim();
+    if (!message) return;
+    bookingMessageTargets.forEach(el => { el.textContent = message; });
+  }
+
+  function makeSlotsForDate(date) {
+    const opening = toMinutes(activeRules.openingTime || "10:00");
+    const closing = toMinutes(activeRules.closingTime || "18:00");
+    const interval = Math.max(5, Number(activeRules.slotMinutes) || 30);
+    const result = [];
+    for (let t = opening; t + interval <= closing; t += interval) {
+      const d = new Date(date);
+      d.setHours(Math.floor(t / 60), t % 60, 0, 0);
+      result.push({ time: formatTime(t), date: d });
+    }
+    return result;
+  }
+
+  function renderTimes(date) {
+    if (!timeGrid) return;
+    timeGrid.innerHTML = "";
+
+    if (isPaused()) {
+      const note = document.createElement("div");
+      note.className = "booking-closed-note";
+      note.textContent = activeRules.closedMessage || "Online booking is currently paused.";
+      timeGrid.appendChild(note);
+      if (timeLabel) timeLabel.textContent = "Booking is currently paused";
+      return;
+    }
+
+    if (!workingDay(date)) {
+      const note = document.createElement("div");
+      note.className = "booking-closed-note";
+      note.textContent = activeRules.closedMessage || "The Studio is closed on this day.";
+      timeGrid.appendChild(note);
+      if (timeLabel) timeLabel.textContent = "No appointments available";
+      return;
+    }
+
+    const now = new Date();
+    const isToday = iso(date) === iso(now);
+    const earliest = new Date(now.getTime() + minLeadMinutes() * 60000);
+    const slots = makeSlotsForDate(date);
+    let available = 0;
+
+    slots.forEach(slot => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.time = slot.time;
+      button.textContent = slot.time;
+
+      if (isToday && slot.date < earliest) {
+        button.disabled = true;
+        button.title = `Available after ${formatTime(earliest.getHours()*60 + earliest.getMinutes())}`;
+        button.classList.add("is-unavailable");
+      } else {
+        available += 1;
+        button.addEventListener("click", () => {
+          timeGrid.querySelectorAll("button").forEach(x => x.classList.remove("selected", "active"));
+          button.classList.add("selected", "active");
+          const summaryTime = document.getElementById("summaryTime");
+          if (summaryTime) summaryTime.textContent = slot.time;
+          document.dispatchEvent(new CustomEvent("beautyStudioTimeSelected", { detail: { time: slot.time } }));
+          modal.querySelectorAll(".booking-step").forEach(step => step.classList.toggle("active", step.dataset.step === "3"));
+          modal.querySelectorAll(".steps span").forEach((step, i) => step.classList.toggle("current", i === 2));
+          const fill = document.getElementById("progressFill");
+          if (fill) fill.style.width = "100%";
+        });
+      }
+      timeGrid.appendChild(button);
+    });
+
+    if (!available) {
+      const note = document.createElement("div");
+      note.className = "booking-closed-note";
+      note.textContent = isToday
+        ? "No times remain today. Please choose another date."
+        : "No appointment times are available.";
+      timeGrid.appendChild(note);
+    }
+
+    if (timeLabel) {
+      timeLabel.textContent = `${activeRules.openingTime || "10:00"}–${activeRules.closingTime || "18:00"} · every ${activeRules.slotMinutes || 30} min`;
+    }
+  }
+
+  function renderDates() {
+    if (!dateButtons.length) return;
+    const maxOffset = advanceDays();
+    const maxDate = localDate(maxOffset);
+
+    dateButtons.forEach((button, index) => {
+      const offset = button.dataset.dateCustom === "true"
+        ? null
+        : Number(button.dataset.dateOffset ?? index);
+      if (offset === null || Number.isNaN(offset)) {
+        button.disabled = isPaused();
+        button.title = isPaused() ? (activeRules.closedMessage || "Online booking is currently paused.") : "Choose a date";
+        return;
+      }
+      const date = localDate(offset);
+      const span = button.querySelector("span");
+      const small = button.querySelector("small");
+      const valid = !isPaused() && date <= maxDate && workingDay(date);
+      if (span) span.textContent = offset === 0 ? "Today" : offset === 1 ? "Tomorrow" : date.toLocaleDateString(undefined,{weekday:"short"});
+      if (small) small.textContent = date.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+      button.dataset.isoDate = iso(date);
+      button.disabled = !valid;
+      button.title = valid ? "Available" : (activeRules.closedMessage || "Unavailable");
+      button.classList.toggle("is-unavailable", !valid);
+    });
+
+    const firstAvailable = dateButtons.find(button => !button.disabled && button.dataset.dateCustom !== "true");
+    const active = dateButtons.find(button => button.classList.contains("active") && !button.disabled) || firstAvailable;
+    dateButtons.forEach(button => button.classList.remove("active"));
+    if (active) {
+      active.classList.add("active");
+      const date = new Date(`${active.dataset.isoDate}T12:00:00`);
+      renderTimes(date);
+    } else {
+      renderTimes(localDate(0));
+    }
+  }
+
+  function applyRules(rules) {
+    activeRules = { ...(window.BEAUTY_STUDIO_CONTENT?.bookingRules || {}), ...(rules || {}) };
+    updateBookingMessage();
+    renderDates();
+  }
+
+  window.__beautyStudioApplyBookingRules = applyRules;
+  window.addEventListener("beautyStudioBookingRulesReady", event => applyRules(event.detail || {}));
+
+  // If the D1 request has already completed before this block evaluated,
+  // apply the current values immediately as well.
+  applyRules(window.BEAUTY_STUDIO_CONTENT?.bookingRules || {});
 })();
