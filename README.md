@@ -1,12 +1,10 @@
-# Beauty Studio Customer v56.1 — PWA cache fix
+# Beauty Studio v57 — D1 cache/update fix
 
-Replace only `sw.js` in the current `beauty-studio` GitHub repository.
+Replace only these files in the customer `beauty-studio` GitHub repository:
+- `index.html`
+- `sw.js`
+- `assets/js/app.js`
 
-Reason:
-The previous PWA service worker was still using the `beauty-studio-v55` cache,
-so the newly uploaded D1 dynamic `assets/js/app.js` could remain cached.
+This version forces the browser to request the new app JavaScript (`app.js?v=57`) and the new service worker (`sw.js?v=57`), while the service-worker cache is bumped to v57. The D1 bridge remains in `assets/js/app.js`.
 
-Changing the cache name to v56 forces the browser/PWA to install a fresh cache
-and load the new D1 dynamic JavaScript.
-
-Do not change the Worker, D1, or Admin project.
+After GitHub Pages finishes deploying, open the customer site in an Incognito window and hard-refresh once. The Services page should then read the service names saved in D1.
