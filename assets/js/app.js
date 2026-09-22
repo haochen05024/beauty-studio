@@ -2057,3 +2057,337 @@ document.addEventListener("DOMContentLoaded", () => {
   decorate();
   setTimeout(decorate, 120);
 })();
+
+
+/* v56 — public D1 content bridge
+   Customer site reads published content from the Beauty Studio API.
+   Static HTML content remains the safe fallback if D1 is empty/unavailable.
+*/
+(() => {
+  const API_BASE = "https://beauty-studio-api.haochen05024.workers.dev";
+  const cfg = window.BEAUTY_STUDIO_CONTENT || {};
+  const fallbackServices = cfg.services || {};
+  const fallbackGallery = Array.isArray(cfg.gallery) ? cfg.gallery : [];
+
+  const get = async (path) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6500);
+    try {
+      const res = await fetch(`${API_BASE}${path}`, {
+        method: "GET",
+        cache: "no-store",
+        signal: controller.signal,
+        headers: { "Accept": "application/json" }
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const body = await res.json();
+      return body;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  const text = (el, value) => {
+    if (el && value !== undefined && value !== null && value !== "") el.textContent = String(value);
+  };
+
+  const escapeHtml = (value) => String(value ?? "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
+  const serviceKey = (service, index) => {
+    const raw = String(service?.id ?? service?.key ?? "").trim().toLowerCase();
+    if (raw) return raw;
+    const name = String(service?.name ?? service?.title ?? "").toLowerCase();
+    if (name.includes("extension")) return "extensions";
+    if (name.includes("art")) return "art";
+    if (name.includes("gel") || name.includes("manicure")) return "gel";
+    return `service-${index + 1}`;
+  };
+
+  const mergeServices = (remote) => {
+    if (!Array.isArray(remote) || !remote.length) return false;
+
+    const next = {};
+    remote.forEach((item, index) => {
+      const key = serviceKey(item, index);
+      const fallback = fallbackServices[key] || {};
+      next[key] = {
+        ...fallback,
+        ...item,
+        id: item.id ?? fallback.id ?? key,
+        title: item.title ?? item.name ?? fallback.title ?? key,
+        description: item.description ?? fallback.description ?? "",
+        price: item.price ?? fallback.price ?? "",
+        duration: item.duration ?? fallback.duration ?? "",
+        durationShort: item.durationShort ?? fallback.durationShort ?? (item.duration ? `${item.duration} MIN` : ""),
+        number: item.number ?? fallback.number ?? String(index + 1).padStart(2, "0"),
+        kicker: item.kicker ?? fallback.kicker ?? "Service",
+        tags: item.tags ?? fallback.tags ?? "",
+        art: item.art ?? fallback.art ?? ["photo-blush","photo-rose","photo-nude"][index % 3],
+        points: item.points ?? fallback.points ?? [],
+        highlights: item.highlights ?? fallback.highlights ?? [],
+        image: item.image || fallback.image || ""
+      };
+    });
+
+    // Mutate the existing object so the site's existing modal/booking closures
+    // keep using the latest data reference.
+    Object.keys(cfg.services || {}).forEach(k => delete cfg.services[k]);
+    Object.assign(cfg.services, next);
+    return true;
+  };
+
+  const galleryFallbackById = new Map(fallbackGallery.map((item, i) => [String(item.id ?? i + 1), item]));
+
+  const mergeGallery = (remote) => {
+    if (!Array.isArray(remote) || !remote.length) return false;
+
+    const next = remote.map((item, index) => {
+      const fallback = galleryFallbackById.get(String(item.id ?? index + 1)) || fallbackGallery[index] || {};
+      return {
+        ...fallback,
+        ...item,
+        id: item.id ?? fallback.id ?? index + 1,
+        title: item.title ?? fallback.title ?? "Beauty Style",
+        style: item.style ?? fallback.style ?? `${item.category || fallback.category || "Beauty"}`,
+        category: String(item.category ?? fallback.category ?? "simple").toLowerCase(),
+        description: item.description ?? fallback.description ?? "",
+        recommendedService: item.recommendedService ?? fallback.recommendedService ?? "art",
+        styleName: item.styleName ?? fallback.styleName ?? item.title ?? fallback.title ?? "Beauty Style",
+        priceNote: item.priceNote ?? fallback.priceNote ?? "",
+        // Admin v3 stores gallery metadata in D1; keep the existing image
+        // until R2/media storage is connected.
+        image: item.image || fallback.image || "",
+        alt: item.alt ?? fallback.alt ?? item.title ?? "Beauty Studio nail design"
+      };
+    });
+
+    cfg.gallery.splice(0, cfg.gallery.length, ...next);
+    return true;
+  };
+
+  const applyBrand = () => {
+    const fields = {
+      ".brand strong": cfg.studioName,
+      ".brand small": cfg.tagline,
+      ".mobile-menu .eyebrow": cfg.studioName,
+      ".footer-brand strong": cfg.studioName,
+      ".footer-brand span": cfg.tagline,
+      "[data-studio-address]": cfg.address,
+      "[data-studio-hours]": cfg.hours,
+      "[data-studio-phone]": cfg.phone,
+      "[data-studio-name]": cfg.studioName,
+      "[data-studio-city]": cfg.city
+    };
+    Object.entries(fields).forEach(([selector, value]) => {
+      document.querySelectorAll(selector).forEach(el => text(el, value));
+    });
+    if (cfg.studioName) {
+      document.title = `${cfg.studioName} · Nails & Beauty`;
+      document.querySelector('meta[property="og:site_name"]')?.setAttribute("content", cfg.studioName);
+    }
+    if (cfg.phone) {
+      document.querySelectorAll("[data-studio-phone-link]").forEach(el => {
+        el.href = `tel:${String(cfg.phone).replace(/[^\d+]/g, "")}`;
+        text(el, cfg.phone);
+      });
+    }
+  };
+
+  const applyServiceCards = () => {
+    const services = cfg.services || {};
+    const entries = Object.entries(services);
+    const grid = document.querySelector(".services-grid");
+    if (!grid) return;
+
+    let cards = [...grid.querySelectorAll(".service-card[data-service]")];
+
+    // Keep the existing premium card structure for the first three services.
+    // If Admin later adds more services, clone the existing visual template.
+    entries.forEach(([, s], index) => {
+      let card = cards[index];
+      if (!card) {
+        card = cards[0]?.cloneNode(true);
+        if (!card) return;
+        grid.appendChild(card);
+        cards.push(card);
+      }
+      const key = Object.keys(services)[index];
+      card.dataset.service = key;
+      card.classList.toggle("featured", index === 1);
+      const artClasses = ["photo-blush","photo-rose","photo-nude"];
+      const photo = card.querySelector(".service-photo");
+      if (photo) {
+        photo.classList.remove("photo-blush","photo-rose","photo-nude");
+        photo.classList.add(s.art || artClasses[index % 3]);
+        text(photo.querySelector("span"), s.number || String(index + 1).padStart(2,"0"));
+        text(photo.querySelector("small"), s.durationShort || (s.duration ? `${s.duration} MIN` : ""));
+        if (s.image) photo.style.backgroundImage = `url("${String(s.image).replace(/"/g,'\\"')}")`;
+      }
+      text(card.querySelector(".service-kicker span:first-child"), s.kicker || "Service");
+      text(card.querySelector(".service-kicker span:last-child"), s.number || String(index + 1).padStart(2,"0"));
+      text(card.querySelector("h3"), s.title || s.name || "Service");
+      text(card.querySelector(".service-info > p"), s.description || "");
+      const meta = card.querySelectorAll(".service-meta span");
+      text(meta[0], s.price || "");
+      text(meta[1], s.duration ? `${s.duration} min` : "");
+      text(card.querySelector(".service-bottom > span"), s.tags || "");
+      text(card.querySelector(".service-photo-label"), s.kicker ? `THE ${String(s.kicker).toUpperCase()} EDIT` : "BEAUTY EDIT");
+    });
+
+    cards.slice(entries.length).forEach(card => card.remove());
+
+    // Booking service choices are updated from the same D1 source.
+    document.querySelectorAll("[data-service-choice]").forEach(btn => {
+      const key = btn.dataset.serviceKey;
+      const s = services[key];
+      if (!s) return;
+      btn.dataset.serviceChoice = s.title || s.name || "";
+      text(btn.querySelector("span"), s.title || s.name || "");
+      text(btn.querySelector("small"), `${s.price || ""} · ${s.duration || ""} min`);
+    });
+  };
+
+  const applyGallery = () => {
+    const gallery = Array.isArray(cfg.gallery) ? cfg.gallery : [];
+    const grid = document.getElementById("work-grid");
+    if (!grid) return;
+    let cards = [...grid.querySelectorAll(".work-item")];
+
+    gallery.forEach((item, index) => {
+      let card = cards[index];
+      if (!card) {
+        card = cards[0]?.cloneNode(true);
+        if (!card) return;
+        grid.appendChild(card);
+        cards.push(card);
+      }
+      card.classList.toggle("tall", index === 0 || index === 4);
+      card.classList.toggle("wide", index === 4);
+      card.dataset.title = item.title || "Beauty Style";
+      card.dataset.style = item.style || "";
+      card.dataset.description = item.description || "";
+      card.dataset.category = item.category || "simple";
+      card.dataset.recommendedService = item.recommendedService || "art";
+      card.dataset.styleName = item.styleName || item.title || "Beauty Style";
+      const info = card.querySelector("div:last-child");
+      text(info?.querySelector("strong"), item.title || "Beauty Style");
+      text(info?.querySelector("span"), item.style || "");
+
+      const art = card.querySelector(".work-art");
+      if (art && item.image) {
+        art.classList.add("has-photo");
+        art.querySelectorAll(".gallery-photo").forEach(img => img.remove());
+        const img = document.createElement("img");
+        img.className = "gallery-photo";
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.alt = item.alt || item.title || "Beauty Studio nail design";
+        img.src = item.image;
+        art.appendChild(img);
+      }
+    });
+
+    cards.slice(gallery.length).forEach(card => card.remove());
+
+    const count = document.getElementById("galleryCount");
+    if (count) count.textContent = `${gallery.length} ${gallery.length === 1 ? "style" : "styles"}`;
+  };
+
+  const updateServiceModal = (key) => {
+    const s = cfg.services?.[key];
+    if (!s) return;
+    const set = (id, value) => text(document.getElementById(id), value);
+    const art = document.getElementById("serviceModalArt");
+    if (art) {
+      art.className = `service-modal-art ${s.art || ""}`;
+      art.style.backgroundImage = s.image ? `url("${String(s.image).replace(/"/g,'\\"')}")` : "";
+    }
+    set("serviceModalNumber", s.number);
+    set("serviceModalDuration", s.durationShort || s.duration);
+    set("serviceModalTitle", s.title || s.name);
+    set("serviceModalPrice", s.price);
+    set("serviceModalDurationText", s.duration ? `${s.duration} min` : "");
+    set("serviceModalDescription", s.description);
+    set("serviceModalKicker", s.kicker || "Beauty Studio");
+    set("serviceModalCaption", s.caption || "Made with care.");
+    set("serviceIdealFor", s.idealFor || "Everyday wear");
+    const points = document.getElementById("servicePoints");
+    if (points) points.innerHTML = (s.points || []).map(x => `<li>${escapeHtml(x)}</li>`).join("");
+  };
+
+  const updateGalleryModal = (index) => {
+    const item = cfg.gallery?.[index];
+    if (!item) return;
+    text(document.getElementById("workDetailTitle"), item.title);
+    text(document.getElementById("workDetailStyle"), item.style);
+    text(document.getElementById("workDetailDescription"), item.description);
+    const modalArt = document.getElementById("modalArt");
+    if (modalArt && item.image) {
+      modalArt.className = "modal-art has-photo";
+      modalArt.querySelectorAll(".gallery-modal-photo").forEach(img => img.remove());
+      const img = document.createElement("img");
+      img.className = "gallery-modal-photo";
+      img.alt = item.alt || item.title || "Beauty Studio nail design";
+      img.src = item.image;
+      modalArt.appendChild(img);
+    }
+  };
+
+  const bindDynamicClicks = () => {
+    document.querySelectorAll(".service-card[data-service]").forEach(card => {
+      if (card.dataset.d1Bound === "1") return;
+      card.dataset.d1Bound = "1";
+      card.addEventListener("click", () => updateServiceModal(card.dataset.service));
+    });
+    const grid = document.getElementById("work-grid");
+    grid?.addEventListener("click", event => {
+      const card = event.target.closest(".work-item");
+      if (!card) return;
+      const cards = [...grid.querySelectorAll(".work-item")];
+      updateGalleryModal(cards.indexOf(card));
+    });
+  };
+
+  const loadPublishedContent = async () => {
+    try {
+      const [settings, services, gallery, booking] = await Promise.all([
+        get("/api/content/settings"),
+        get("/api/content/services"),
+        get("/api/content/gallery"),
+        get("/api/content/booking-rules")
+      ]);
+
+      if (settings?.ok && settings.data) Object.assign(cfg, settings.data);
+      const hasServices = services?.ok && Array.isArray(services.data) && services.data.length;
+      const hasGallery = gallery?.ok && Array.isArray(gallery.data) && gallery.data.length;
+
+      if (hasServices) mergeServices(services.data);
+      if (hasGallery) mergeGallery(gallery.data);
+      if (booking?.ok && booking.data) cfg.bookingRules = {...(cfg.bookingRules || {}), ...booking.data};
+
+      // Re-apply the existing content system after D1 has arrived.
+      applyBrand();
+      applyServiceCards();
+      applyGallery();
+      bindDynamicClicks();
+
+      // Refresh gallery filter counts after D1 content changes.
+      document.querySelectorAll(".filters button").forEach(btn => {
+        if (btn.classList.contains("active")) btn.click();
+      });
+
+      document.documentElement.dataset.d1Content = (hasServices || hasGallery || (settings?.ok && settings.data)) ? "connected" : "empty";
+    } catch (error) {
+      // Silent fallback: the static launch-ready content remains visible.
+      document.documentElement.dataset.d1Content = "fallback";
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadPublishedContent, { once: true });
+  } else {
+    loadPublishedContent();
+  }
+})();
