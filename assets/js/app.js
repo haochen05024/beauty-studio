@@ -3050,3 +3050,79 @@ document.addEventListener("DOMContentLoaded", () => {
   // Bootstrap identity early, then check for booking status changes on every fresh page load.
   identify().finally(() => refreshCustomerBookings());
 })();
+
+
+/* v73 — persistent customer notification center
+   Booking status changes are delivered from D1 and remain available after refresh. */
+(() => {
+  const API_BASE = 'https://beauty-studio-api.haochen05024.workers.dev';
+  const KEY = 'beauty_studio_customer_key';
+  const fab = document.getElementById('customerNotifyFab');
+  const badge = document.getElementById('customerNotifyBadge');
+  const panel = document.getElementById('customerNotificationPanel');
+  const list = document.getElementById('customerNotificationList');
+  if (!fab || !badge || !panel || !list) return;
+
+  const esc = value => String(value ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+
+  const injectStyle = () => {
+    if (document.getElementById('customerNotificationStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'customerNotificationStyles';
+    style.textContent = `
+      .customer-notify-fab{position:fixed;right:24px;bottom:82px;z-index:10020;width:48px;height:48px;border:1px solid rgba(125,91,79,.16);border-radius:50%;background:rgba(255,250,246,.96);color:#302621;box-shadow:0 14px 34px rgba(55,35,28,.14);display:grid;place-items:center;cursor:pointer;font-size:19px;backdrop-filter:blur(12px);transition:transform .2s ease,box-shadow .2s ease}.customer-notify-fab:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(55,35,28,.18)}.customer-notify-fab>b{position:absolute;right:-2px;top:-3px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#9b6c69;color:#fff;font:700 10px/19px Arial,sans-serif;text-align:center;border:2px solid #fffaf6}.customer-notification-panel{position:fixed;inset:0;z-index:10030;display:none}.customer-notification-panel.open{display:block}.customer-notification-backdrop{position:absolute;inset:0;background:rgba(48,38,33,.22);backdrop-filter:blur(3px)}.customer-notification-card{position:absolute;right:24px;bottom:142px;width:min(390px,calc(100vw - 32px));max-height:min(620px,calc(100vh - 180px));overflow:auto;background:#fffaf6;border:1px solid rgba(125,91,79,.16);border-radius:24px;box-shadow:0 24px 70px rgba(55,35,28,.2);padding:22px}.customer-notification-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:16px;border-bottom:1px solid rgba(125,91,79,.12)}.customer-notification-head h2{margin:4px 0 0;font:500 28px Georgia,serif;color:#302621}.customer-notification-close{width:34px;height:34px;border:1px solid rgba(125,91,79,.14);border-radius:50%;background:#f5ebe5;color:#5f514b;font-size:21px;cursor:pointer}.customer-notification-list{display:grid;gap:10px;padding-top:14px}.customer-notification-item{padding:15px;border:1px solid rgba(125,91,79,.12);border-radius:16px;background:#fff;display:grid;gap:5px}.customer-notification-item.unread{background:#f8eee8;border-color:rgba(155,108,105,.25)}.customer-notification-item small{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:#9b6c69;font-weight:700}.customer-notification-item strong{font-size:14px;color:#302621}.customer-notification-item p{margin:0;color:#81746d;font-size:12px;line-height:1.55}.customer-notification-empty{padding:28px 8px;text-align:center;color:#81746d;font-size:12px}.customer-notification-footer{margin-top:14px;text-align:center;color:#a18d84;font-size:10px;letter-spacing:.08em;text-transform:uppercase}@media(max-width:640px){.customer-notify-fab{right:18px;bottom:76px;width:44px;height:44px}.customer-notification-card{right:12px;bottom:132px;width:calc(100vw - 24px);border-radius:22px;padding:18px;max-height:calc(100vh - 155px)}}
+      .support-fab{right:24px;bottom:22px}@media(max-width:640px){.support-fab{right:18px;bottom:16px}}
+    `;
+    document.head.appendChild(style);
+  };
+
+  const getKey = () => { try { return localStorage.getItem(KEY) || ''; } catch { return ''; } };
+  const open = () => { panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); fab.setAttribute('aria-expanded','true'); };
+  const close = () => { panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); fab.setAttribute('aria-expanded','false'); };
+  const typeLabel = type => ({booking_confirmed:'BOOKING CONFIRMED',booking_cancelled:'BOOKING UPDATE',booking_completed:'BOOKING COMPLETE',booking_pending:'BOOKING RECEIVED'}[type] || 'STUDIO UPDATE');
+
+  function render(items) {
+    const rows = Array.isArray(items) ? items : [];
+    if (!rows.length) { list.innerHTML = '<div class="customer-notification-empty">No new updates yet.</div>'; return; }
+    list.innerHTML = rows.map(item => `
+      <article class="customer-notification-item ${Number(item.is_read) ? '' : 'unread'}" data-notification-id="${esc(item.id)}">
+        <small>${typeLabel(item.type)}</small>
+        <strong>${esc(item.title)}</strong>
+        <p>${esc(item.message)}</p>
+      </article>`).join('') + '<div class="customer-notification-footer">Your studio updates stay here after refresh.</div>';
+  }
+
+  async function loadNotifications(markRead = false) {
+    const key = getKey();
+    if (!key) return;
+    try {
+      const response = await fetch(`${API_BASE}/api/customer/notifications`, {headers:{Accept:'application/json','x-customer-key':key},cache:'no-store'});
+      const body = await response.json().catch(() => null);
+      if (!response.ok || !body?.ok) return;
+      render(body.notifications || []);
+      const unread = Number(body.unreadCount || 0);
+      badge.textContent = unread > 99 ? '99+' : String(unread);
+      badge.hidden = unread <= 0;
+      if (markRead && unread > 0) {
+        await fetch(`${API_BASE}/api/customer/notifications/read`, {method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','x-customer-key':key},body:JSON.stringify({})});
+        badge.hidden = true;
+        badge.textContent = '0';
+        [...list.querySelectorAll('.customer-notification-item')].forEach(el => el.classList.remove('unread'));
+      }
+    } catch {}
+  }
+
+  injectStyle();
+  fab.addEventListener('click', async () => { if (panel.classList.contains('open')) close(); else { open(); await loadNotifications(true); } });
+  panel.querySelectorAll('[data-close-notifications]').forEach(el => el.addEventListener('click', close));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+  const start = async () => {
+    for (let i=0; i<10 && !getKey(); i++) await new Promise(r => setTimeout(r, 400));
+    await loadNotifications(false);
+    setInterval(() => loadNotifications(false), 30000);
+  };
+  start();
+})();
