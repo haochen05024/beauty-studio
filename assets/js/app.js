@@ -2256,6 +2256,41 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  const applySocialLinks = () => {
+    const social = (cfg.social && typeof cfg.social === "object") ? cfg.social : {};
+    const definitions = {
+      tiktok: { label: "TikTok", value: cfg.tiktok ?? social.tiktok?.handle ?? "", url: social.tiktok?.url || "" },
+      whatsapp: { label: "WhatsApp", value: cfg.whatsapp ?? social.whatsapp?.handle ?? "", url: social.whatsapp?.url || "" },
+      telegram: { label: "Telegram", value: cfg.telegram ?? social.telegram?.handle ?? "", url: social.telegram?.url || "" }
+    };
+
+    document.querySelectorAll("[data-social]").forEach(link => {
+      const key = link.dataset.social;
+      const item = definitions[key];
+      if (!item) return;
+
+      const value = String(item.value ?? "").trim();
+      const small = link.querySelector("small");
+      if (small && value) small.textContent = value;
+
+      let href = String(item.url || "").trim();
+      if (!href && value) {
+        if (/^https?:\/\//i.test(value)) href = value;
+        else if (key === "tiktok") href = `https://www.tiktok.com/@${value.replace(/^@/, "")}`;
+        else if (key === "whatsapp") href = `https://wa.me/${value.replace(/\D/g, "")}`;
+        else if (key === "telegram") href = `https://t.me/${value.replace(/^@/, "")}`;
+      }
+
+      if (href) {
+        link.href = href;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+      } else {
+        link.href = "#";
+      }
+    });
+  };
+
   const applyServiceCards = () => {
     const services = cfg.services || {};
     const entries = Object.entries(services);
@@ -2505,6 +2540,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Re-apply the existing content system after D1 has arrived.
       applyBrand();
+      applySocialLinks();
       applyServiceCards();
       applyGallery();
       bindDynamicClicks();
