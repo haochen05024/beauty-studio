@@ -1,4 +1,4 @@
-const CACHE_NAME = "beauty-studio-v61";
+const CACHE_NAME = "beauty-studio-v62";
 const APP_SHELL = [
   "./",
   "./index.html",

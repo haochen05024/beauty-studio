@@ -299,22 +299,59 @@ document.addEventListener("DOMContentLoaded", () => {
     item.addEventListener("click", () => {
       const s = services[item.dataset.service];
       if (!s) return;
+
       const art = document.getElementById("serviceModalArt");
-      art.className = "service-modal-art " + s.art;
-      const setText = (id, value) => { const el=document.getElementById(id); if(el) el.textContent=value; };
-      setText("serviceModalNumber", s.number);
-      setText("serviceModalDuration", s.duration);
-      setText("serviceModalCaption", s.caption);
-      setText("serviceModalPhotoCount", s.photoCount);
-      setText("serviceModalKicker", s.kicker);
-      setText("serviceModalTitle", s.title);
-      setText("serviceModalPrice", s.price);
-      setText("serviceModalDurationText", s.durationText);
-      setText("serviceModalDescription", s.description);
-      setText("serviceIdealFor", s.ideal);
-      const highlights=document.getElementById("serviceHighlights");
-      if(highlights) highlights.innerHTML=s.highlights.map(x=>`<div><span>✦</span><strong>${x[0]}</strong><small>${x[1]}</small></div>`).join("");
-      document.getElementById("servicePoints").innerHTML = s.points.map(x => `<li>${x}</li>`).join("");
+      const artClass = s.art || "photo-blush";
+      art.className = "service-modal-art " + artClass;
+
+      // New D1 services may not have a media asset yet. Keep the editorial
+      // panel polished instead of showing the decorative placeholder oval.
+      art.style.background = "";
+      if (s.image) {
+        art.style.backgroundImage = `linear-gradient(180deg, rgba(34,25,21,.03), rgba(34,25,21,.34)), url("${String(s.image).replace(/"/g, '\"')}")`;
+        art.style.backgroundSize = "cover";
+        art.style.backgroundPosition = "center";
+      } else if (!["photo-blush","photo-rose","photo-nude"].includes(artClass)) {
+        art.style.background = "linear-gradient(145deg,#ead8d0,#b99084)";
+      }
+
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value == null ? "" : String(value);
+      };
+
+      setText("serviceModalNumber", s.number || "");
+      setText("serviceModalDuration", s.duration ? `${s.duration} MIN` : "");
+      setText("serviceModalCaption", s.caption || "Made with care.");
+      setText("serviceModalPhotoCount", s.photoCount || "Beauty Studio");
+      setText("serviceModalKicker", String(s.kicker || "Service").toLowerCase() === "service" ? "" : s.kicker);
+      setText("serviceModalTitle", s.title || s.name || "Service");
+      setText("serviceModalPrice", s.price || "Price on request");
+      setText("serviceModalDurationText", s.duration ? `${s.duration} min` : "");
+      setText("serviceModalDescription", s.description || "A personalized service tailored to your preferred look.");
+      setText("serviceIdealFor", s.ideal || "Personalized care");
+
+      const highlights = document.getElementById("serviceHighlights");
+      const highlightItems = Array.isArray(s.highlights) && s.highlights.length
+        ? s.highlights
+        : String(s.tags || "").split(",").map(x => x.trim()).filter(Boolean).slice(0,3).map(x => [x, "Studio detail"]);
+      if (highlights) {
+        highlights.innerHTML = highlightItems.map(x => {
+          const pair = Array.isArray(x) ? x : [x, "Studio detail"];
+          return `<div><span>✦</span><strong>${escapeHtml(pair[0])}</strong><small>${escapeHtml(pair[1] || "")}</small></div>`;
+        }).join("");
+        highlights.hidden = highlightItems.length === 0;
+      }
+
+      const points = document.getElementById("servicePoints");
+      const pointItems = Array.isArray(s.points) && s.points.length
+        ? s.points
+        : String(s.tags || "").split(",").map(x => x.trim()).filter(Boolean);
+      if (points) {
+        points.innerHTML = pointItems.map(x => `<li>${escapeHtml(x)}</li>`).join("");
+        points.hidden = pointItems.length === 0;
+      }
+
       serviceModal.classList.add("open");
       serviceModal.setAttribute("aria-hidden","false");
       document.body.classList.add("modal-open");
@@ -2185,9 +2222,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Contact page uses explicit IDs rather than the generic data-studio-* hooks.
-    const contactAddress = cfg.address || cfg.city || "";
-    const contactHours = cfg.hours || "";
-    const contactPhone = cfg.phone || "";
+    const contactAddress = String(cfg.address ?? "").trim() || String(cfg.city ?? "").trim() || "Studio address coming soon";
+    const contactHours = String(cfg.hours ?? "").trim() || "By appointment";
+    const contactPhone = String(cfg.phone ?? "").trim() || "+00 000 000 000";
 
     text(document.getElementById("contactAddress"), contactAddress);
     text(document.getElementById("contactHours"), contactHours);
@@ -2405,7 +2442,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const loadPublishedContent = async () => {
     try {
       const [settings, services, gallery, booking] = await Promise.all([
-        get("/api/content/settings"),
+        get("/api/content/settings?t=" + Date.now()),
         get("/api/content/services"),
         get("/api/content/gallery"),
         get("/api/content/booking-rules")
