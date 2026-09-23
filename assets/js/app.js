@@ -3105,13 +3105,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function render(items) {
     const rows = Array.isArray(items) ? items : [];
-    if (!rows.length) { list.innerHTML = '<div class="customer-notification-empty">No new updates yet.</div>'; return; }
-    list.innerHTML = rows.map(item => `
+    window.__beautyStudioNotificationCache = rows;
+    const loc = item => window.__beautyStudioLocalizeNotification?.(item) || {
+      label:typeLabel(item.type), title:item.title, message:item.message
+    };
+    if (!rows.length) {
+      const empty = window.__beautyStudioGetLanguage?.()==='zh' ? '暂无新通知。' : window.__beautyStudioGetLanguage?.()==='my' ? 'အသစ်သော အပ်ဒိတ် မရှိသေးပါ။' : 'No new updates yet.';
+      list.innerHTML = `<div class="customer-notification-empty">${empty}</div>`;
+      return;
+    }
+    list.innerHTML = rows.map(item => {
+      const n=loc(item);
+      return `
       <article class="customer-notification-item ${Number(item.is_read) ? '' : 'unread'}" data-notification-id="${esc(item.id)}">
-        <small>${typeLabel(item.type)}</small>
-        <strong>${esc(item.title)}</strong>
-        <p>${esc(item.message)}</p>
-      </article>`).join('') + '<div class="customer-notification-footer">Your studio updates stay here after refresh.</div>';
+        <small>${esc(n.label)}</small>
+        <strong>${esc(n.title)}</strong>
+        <p>${esc(n.message)}</p>
+      </article>`;
+    }).join('') + `<div class="customer-notification-footer">${
+      window.__beautyStudioGetLanguage?.()==='zh' ? '工作室通知会在刷新后保留。' :
+      window.__beautyStudioGetLanguage?.()==='my' ? 'စတူဒီယို အပ်ဒိတ်များကို refresh ပြီးနောက်လည်း သိမ်းထားပါမည်။' :
+      'Your studio updates stay here after refresh.'
+    }</div>`;
   }
 
   async function loadNotifications(markRead = false) {
@@ -3620,3 +3635,256 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   [100,700,1600,3200,6000].forEach(ms=>setTimeout(refreshAll,ms));
 })();
+
+
+/* V87 — complete D1 name/field localization + notification localization.
+   Strategy:
+   1) Prefer explicit Admin fields: titleZh/titleMy, descriptionZh/descriptionMy, etc.
+   2) Localize the current starter catalog when old records only have English fields.
+   3) Keep arbitrary customer/admin-written message text unchanged; only system labels
+      and system-generated booking notification service names are localized.
+*/
+(function(){
+  const L=()=>window.__beautyStudioGetLanguage?.()||'en';
+  const clean=v=>String(v??'').trim();
+  const tr=v=>window.__beautyStudioTranslateText?.(clean(v))||null;
+  const serviceMap={
+    'gel manicure d1 live':{
+      title:{en:'Gel Manicure D1 Live',zh:'凝胶美甲 D1 Live',my:'ဂျယ်လ် လက်သည်း D1 Live'},
+      description:{en:'Clean, glossy and effortless.',zh:'干净、亮泽，自然又精致。',my:'သန့်ရှင်းတောက်ပပြီး သဘာဝကျသော အလှ။'},
+      kicker:{en:'Everyday',zh:'日常款',my:'နေ့စဉ်စတိုင်'},
+      tags:{en:'Clean finish, Everyday, Long-lasting',zh:'干净收尾，日常款，持久',my:'သန့်ရှင်းသပ်ရပ်၊ နေ့စဉ်စတိုင်၊ ကြာရှည်ခံ'},
+      caption:{en:'Natural beauty, lasting glow.',zh:'自然之美，持久光泽。',my:'သဘာဝအလှ၊ ကြာရှည်တောက်ပမှု။'},
+      idealFor:{en:'Everyday wear · special moments',zh:'日常佩戴 · 特别时刻',my:'နေ့စဉ်ဝတ်ဆင်မှု · အထူးအချိန်များ'}
+    },
+    'custom nail art d1xz.net live':{
+      title:{en:'Custom Nail Art D1xz.net Live',zh:'定制美甲 D1xz.net Live',my:'စိတ်ကြိုက် လက်သည်းအလှ D1xz.net Live'},
+      description:{en:'Personal details made for you.',zh:'为你量身打造的个性细节。',my:'သင့်အတွက် အထူးဖန်တီးထားသော ကိုယ်ပိုင်အသေးစိတ်များ။'},
+      kicker:{en:'Signature',zh:'特色款',my:'ထူးခြားစတိုင်'},
+      tags:{en:'Custom detail, Signature, Creative',zh:'专属细节，特色款，创意',my:'စိတ်ကြိုက်အသေးစိတ်၊ ထူးခြားစတိုင်၊ ဖန်တီးမှု'},
+      caption:{en:'Made with care.',zh:'用心为你完成。',my:'ဂရုတစိုက် ဖန်တီးပေးထားသည်။'},
+      idealFor:{en:'Custom looks · creative days',zh:'个性造型 · 创意时光',my:'စိတ်ကြိုက်ဒီဇိုင်း · ဖန်တီးမှုနေ့များ'}
+    },
+    'new service':{
+      title:{en:'New Service',zh:'新服务',my:'ဝန်ဆောင်မှုအသစ်'},
+      description:{en:'Add a short description.',zh:'添加简短描述。',my:'အကျဉ်းချုပ်ဖော်ပြချက် ထည့်ပါ။'},
+      kicker:{en:'Service',zh:'服务',my:'ဝန်ဆောင်မှု'},
+      tags:{en:'Service, Detail, Personalized',zh:'服务，细节，专属',my:'ဝန်ဆောင်မှု၊ အသေးစိတ်၊ စိတ်ကြိုက်'},
+      caption:{en:'Made with care.',zh:'用心完成。',my:'ဂရုတစိုက် ဖန်တီးပေးထားသည်။'},
+      idealFor:{en:'Personalized care',zh:'个性化护理',my:'စိတ်ကြိုက်ဂရုစိုက်မှု'}
+    },
+    'extension nails':{
+      title:{en:'Extension Nails',zh:'延长甲',my:'လက်သည်းတိုးချဲ့ခြင်း'},
+      description:{en:'Length with a polished finish.',zh:'增加长度，呈现精致光泽。',my:'အရှည်တိုးပြီး သပ်ရပ်တောက်ပသော အချောသတ်။'},
+      kicker:{en:'Length',zh:'长度',my:'အရှည်'},
+      tags:{en:'Length, Nails, Refined',zh:'长度，甲型，精致',my:'အရှည်၊ လက်သည်းပုံစံ၊ သပ်ရပ်'},
+      caption:{en:'Made with care.',zh:'用心完成。',my:'ဂရုတစိုက် ဖန်တီးပေးထားသည်။'},
+      idealFor:{en:'Longer nails · polished finish',zh:'延长造型 · 精致收尾',my:'လက်သည်းရှည် · သပ်ရပ်သော အချောသတ်'}
+    },
+    '延长甲':{
+      title:{en:'Extension Nails',zh:'延长甲',my:'လက်သည်းတိုးချဲ့ခြင်း'},
+      description:{en:'Length with a polished finish.',zh:'增加长度，呈现精致光泽。',my:'အရှည်တိုးပြီး သပ်ရပ်တောက်ပသော အချောသတ်။'},
+      kicker:{en:'Length',zh:'长度',my:'အရှည်'},
+      tags:{en:'Length, Nails, Refined',zh:'长度，甲型，精致',my:'အရှည်၊ လက်သည်းပုံစံ၊ သပ်ရပ်'},
+      caption:{en:'Made with care.',zh:'用心完成。',my:'ဂရုတစိုက် ဖန်တီးပေးထားသည်။'},
+      idealFor:{en:'Longer nails · polished finish',zh:'延长造型 · 精致收尾',my:'လက်သည်းရှည် · သပ်ရပ်သော အချောသတ်'}
+    }
+  };
+  const galleryMap={
+    'soft pearl':{en:'Soft Pearl',zh:'柔光珍珠',my:'နူးညံ့ပုလဲ'},
+    'quiet luxury':{en:'Quiet Luxury',zh:'静奢',my:'တိတ်ဆိတ်သော ဇိမ်ခံမှု'},
+    'rose chrome':{en:'Rose Chrome',zh:'玫瑰镜面',my:'နှင်းဆီခရုမ်း'},
+    'little hearts':{en:'Little Hearts',zh:'小心心',my:'နှလုံးသားလေးများ'}
+  };
+  const fieldMap={
+    'clean, glossy and effortless.':{zh:'干净、亮泽，自然又精致。',my:'သန့်ရှင်းတောက်ပပြီး သဘာဝကျသော အလှ။'},
+    'personal details made for you.':{zh:'为你量身打造的个性细节。',my:'သင့်အတွက် အထူးဖန်တီးထားသော ကိုယ်ပိုင်အသေးစိတ်များ။'},
+    'length with a polished finish.':{zh:'增加长度，呈现精致光泽。',my:'အရှည်တိုးပြီး သပ်ရပ်တောက်ပသော အချောသတ်။'},
+    'add a short description.':{zh:'添加简短描述。',my:'အကျဉ်းချုပ်ဖော်ပြချက် ထည့်ပါ။'},
+    'service':{zh:'服务',my:'ဝန်ဆောင်မှု'},
+    'personalized':{zh:'专属服务',my:'စိတ်ကြိုက်ဝန်ဆောင်မှု'},
+    'signature':{zh:'特色款',my:'ထူးခြားစတိုင်'},
+    'everyday':{zh:'日常款',my:'နေ့စဉ်စတိုင်'},
+    'length':{zh:'长度',my:'အရှည်'},
+    'new service':{zh:'新服务',my:'ဝန်ဆောင်မှုအသစ်'}
+  };
+  function direct(v){
+    const raw=clean(v), key=raw.toLowerCase();
+    if(!raw)return raw;
+    if(L()==='en')return raw;
+    const sm=serviceMap[key];
+    if(sm?.title && (key===sm.title.en.toLowerCase())) return sm.title[L()];
+    const gm=galleryMap[key]; if(gm)return gm[L()];
+    const fm=fieldMap[key]; if(fm)return fm[L()];
+    const p=tr(raw); return p||raw;
+  }
+  function pick(o,base,fallback=''){
+    if(!o)return fallback;
+    const l=L();
+    if(l==='en')return clean(o[base]??fallback);
+    const suffixes=l==='zh'?['Zh','_zh','CN','_cn']:['My','_my','Mm','_mm'];
+    for(const suffix of suffixes){
+      const v=o[base+suffix];
+      if(v!=null&&clean(v))return clean(v);
+    }
+    const raw=clean(o[base]??fallback);
+    const key=raw.toLowerCase();
+    const sm=serviceMap[key];
+    if(sm?.[base]?.[l])return sm[base][l];
+    if(base==='title'){
+      const g=galleryMap[key]; if(g)return g[l];
+    }
+    return direct(raw)||fallback;
+  }
+  const services=()=>window.BEAUTY_STUDIO_CONTENT?.services||{};
+  const gallery=()=>Array.isArray(window.BEAUTY_STUDIO_CONTENT?.gallery)?window.BEAUTY_STUDIO_CONTENT.gallery:[];
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+
+  function serviceByName(name){
+    const raw=clean(name).toLowerCase();
+    const entries=Object.entries(services());
+    return entries.find(([k,s])=>{
+      const vals=[s?.title,s?.name,s?.titleZh,s?.titleMy].map(v=>clean(v).toLowerCase());
+      return vals.includes(raw)||clean(k).toLowerCase()===raw;
+    })?.[1]||null;
+  }
+
+  function localizeNotification(item){
+    const lang=L(), type=item?.type||'';
+    const system={
+      booking_confirmed:{title:{en:'Appointment confirmed',zh:'预约已确认',my:'ချိန်းဆိုမှု အတည်ပြုပြီးပါပြီ'},label:{en:'BOOKING CONFIRMED',zh:'预约已确认',my:'ချိန်းဆိုမှု အတည်ပြု'},},
+      booking_cancelled:{title:{en:'Appointment update',zh:'预约状态更新',my:'ချိန်းဆိုမှု အခြေအနေ အပ်ဒိတ်'},label:{en:'BOOKING UPDATE',zh:'预约更新',my:'ချိန်းဆိုမှု အပ်ဒိတ်'}},
+      booking_completed:{title:{en:'Appointment completed',zh:'预约已完成',my:'ချိန်းဆိုမှု ပြီးစီးပါပြီ'},label:{en:'BOOKING COMPLETE',zh:'预约完成',my:'ချိန်းဆိုမှု ပြီးစီး'}},
+      booking_pending:{title:{en:'Booking received',zh:'已收到预约申请',my:'ချိန်းဆိုမှု တောင်းဆိုချက် ရရှိပါပြီ'},label:{en:'BOOKING RECEIVED',zh:'已收到预约',my:'ချိန်းဆိုမှု လက်ခံရရှိ'}},
+      support_message:{title:{en:'New message from Beauty Studio',zh:'Beauty Studio 发来新消息',my:'Beauty Studio မှ မက်ဆေ့ချ်အသစ်'},label:{en:'NEW MESSAGE',zh:'新消息',my:'မက်ဆေ့ချ်အသစ်'}},
+    };
+    const cfg=system[type]||{title:{en:'Studio update',zh:'工作室更新',my:'စတူဒီယို အပ်ဒိတ်'},label:{en:'STUDIO UPDATE',zh:'工作室更新',my:'စတူဒီယို အပ်ဒိတ်'}};
+    let title=cfg.title[lang]||cfg.title.en;
+    let message=clean(item?.message);
+    // Booking messages generated by the Worker are kept factual but the service name
+    // and system date/time separators are localized.
+    if(/^booking_/i.test(type)){
+      const m=message.match(/^(.+?)\s*[·•|]\s*(\d{4}-\d{2}-\d{2})\s*[·•|]\s*(\d{1,2}:\d{2})(.*)$/);
+      if(m){
+        const s=serviceByName(m[1]);
+        const name=s?pick(s,'title',m[1]):direct(m[1]);
+        const sep=lang==='zh'?' · ':lang==='my'?' · ':' · ';
+        message=`${name}${sep}${m[2]}${sep}${m[3]}${m[4]||''}`;
+      }else{
+        message=direct(message);
+      }
+    }
+    return {label:cfg.label[lang]||cfg.label.en,title,message};
+  }
+
+  // Re-apply every D1-created service field, including the modal and booking choices.
+  function refreshServices(){
+    const list=services();
+    document.querySelectorAll('.service-card[data-service]').forEach(card=>{
+      const s=list[card.dataset.service]; if(!s)return;
+      const q=x=>card.querySelector(x);
+      const title=pick(s,'title',pick(s,'name','Beauty Service'));
+      const desc=pick(s,'description','');
+      const kicker=pick(s,'kicker','Service');
+      if(q('h3'))q('h3').textContent=title;
+      if(q('.service-info > p'))q('.service-info > p').textContent=desc;
+      if(q('.service-kicker span:first-child'))q('.service-kicker span:first-child').textContent=kicker;
+      if(q('.service-bottom > span'))q('.service-bottom > span').textContent=pick(s,'tags','');
+      if(q('.service-photo-label'))q('.service-photo-label').textContent=L()==='zh'?'服务精选':L()==='my'?'ဝန်ဆောင်မှုရွေးချယ်မှု':'BEAUTY EDIT';
+      const meta=card.querySelectorAll('.service-meta span');
+      if(meta[0])meta[0].textContent=s.price||'';
+      if(meta[1])meta[1].textContent=s.duration?`${s.duration} MIN`:'';
+    });
+    document.querySelectorAll('[data-service-choice][data-service-key]').forEach(btn=>{
+      const s=list[btn.dataset.serviceKey];if(!s)return;
+      const title=pick(s,'title',pick(s,'name','Beauty Service'));
+      btn.dataset.serviceChoice=title;
+      const sp=btn.querySelector('span'),sm=btn.querySelector('small');
+      if(sp)sp.textContent=title;
+      if(sm)sm.textContent=`${s.price||''} · ${s.duration||''} min`;
+    });
+  }
+
+  function refreshServiceModal(){
+    const key=document.getElementById('chooseServiceButton')?.dataset.bookService;
+    const s=key?services()[key]:null;if(!s)return;
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v??''};
+    set('serviceModalTitle',pick(s,'title',pick(s,'name','Beauty Service')));
+    set('serviceModalDescription',pick(s,'description',''));
+    set('serviceModalKicker',pick(s,'kicker','Service'));
+    set('serviceModalCaption',pick(s,'caption','Made with care.'));
+    set('serviceIdealFor',pick(s,'idealFor','Personalized care'));
+    const tags=pick(s,'tags','').split(',').map(clean).filter(Boolean);
+    const rows=Array.isArray(s.highlights)&&s.highlights.length?s.highlights:[
+      [tags[0]||'Service', 'Tailored studio service'],
+      [s.duration?`${s.duration} min`:'Flexible','Estimated appointment time'],
+      [tags[1]||'Detail','Personalized finish']
+    ];
+    const hi=document.getElementById('serviceHighlights');
+    if(hi)hi.innerHTML=rows.slice(0,3).map(r=>{
+      const a=Array.isArray(r)?r:[r,'Studio detail'];
+      return `<div><span>✦</span><strong>${esc(direct(a[0]))}</strong><small>${esc(direct(a[1]))}</small></div>`;
+    }).join('');
+    const points=L()==='zh'&&Array.isArray(s.pointsZh)?s.pointsZh:L()==='my'&&Array.isArray(s.pointsMy)?s.pointsMy:(Array.isArray(s.points)?s.points:[]);
+    const ul=document.getElementById('servicePoints');
+    if(ul)ul.innerHTML=points.map(x=>`<li>${esc(direct(x))}</li>`).join('');
+  }
+
+  function refreshGallery(){
+    const items=gallery(),cards=[...document.querySelectorAll('#work-grid .work-item')];
+    cards.forEach((card,i)=>{
+      const it=items[i];if(!it)return;
+      const title=pick(it,'title',it.title||'Beauty Style');
+      const style=pick(it,'style',it.category||'');
+      const desc=pick(it,'description',it.description||'');
+      card.dataset.title=title;card.dataset.style=style;card.dataset.description=desc;
+      const info=card.querySelector('div:last-child');
+      if(info?.querySelector('strong'))info.querySelector('strong').textContent=title;
+      if(info?.querySelector('span'))info.querySelector('span').textContent=style;
+      const img=card.querySelector('.gallery-photo');if(img)img.alt=title;
+    });
+  }
+
+  function refreshGalleryModal(){
+    const modal=document.getElementById('detailModal'),grid=document.getElementById('work-grid');
+    if(!modal||!grid||!modal.classList.contains('open'))return;
+    const cards=[...grid.querySelectorAll('.work-item')];
+    const active=cards.find(c=>c.classList.contains('is-active-work'))||cards[0];
+    if(!active)return;
+    const it=gallery()[cards.indexOf(active)];if(!it)return;
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v??''};
+    set('modalTitle',pick(it,'title','Beauty Style'));
+    set('modalStyle',pick(it,'style',it.category||''));
+    set('modalDescription',pick(it,'description',''));
+    const reco=it.recommendedService?services()[it.recommendedService]:null;
+    if(reco)set('modalRecommended',pick(reco,'title',reco.name||'Custom Nail Art'));
+  }
+
+  function refreshNotifications(){
+    const list=document.getElementById('customerNotificationList');
+    if(!list)return;
+    list.querySelectorAll('.customer-notification-item').forEach(item=>{
+      const id=item.dataset.notificationId;
+      const data=window.__beautyStudioNotificationCache?.find?.(x=>String(x.id)===String(id));
+      if(!data)return;
+      const n=localizeNotification(data);
+      const small=item.querySelector('small'),strong=item.querySelector('strong'),p=item.querySelector('p');
+      if(small)small.textContent=n.label;
+      if(strong)strong.textContent=n.title;
+      if(p)p.textContent=n.message;
+    });
+    const empty=list.querySelector('.customer-notification-empty');
+    if(empty)empty.textContent=L()==='zh'?'暂无新通知。':L()==='my'?'အသစ်သော အပ်ဒိတ် မရှိသေးပါ။':'No new updates yet.';
+    const footer=list.querySelector('.customer-notification-footer');
+    if(footer)footer.textContent=L()==='zh'?'工作室通知会在刷新后保留。':L()==='my'?'စတူဒီယို အပ်ဒိတ်များကို refresh ပြီးနောက်လည်း သိမ်းထားပါမည်။':'Your studio updates stay here after refresh.';
+  }
+
+  window.__beautyStudioLocalizeNotification=localizeNotification;
+  window.__beautyStudioRefreshLanguageV87=()=>{
+    refreshServices();refreshGallery();refreshServiceModal();refreshGalleryModal();refreshNotifications();
+  };
+  window.addEventListener('beautyStudioLanguageChanged',window.__beautyStudioRefreshLanguageV87);
+  window.addEventListener('beautyStudioD1ContentReady',window.__beautyStudioRefreshLanguageV87);
+  [150,800,1800,3500,6000].forEach(ms=>setTimeout(window.__beautyStudioRefreshLanguageV87,ms));
+})();
+
