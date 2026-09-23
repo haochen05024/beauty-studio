@@ -1,33 +1,14 @@
-# Beauty Studio Customer — v90 Stable Cleanup
+# Beauty Studio v57 — D1 cache/update fix
 
-This is the customer-facing GitHub Pages project.
-
-## Current production files
-
+Replace only these files in the customer `beauty-studio` GitHub repository:
 - `index.html`
-- `assets/css/style.css`
-- `assets/js/app.js`
 - `sw.js`
-- `manifest.webmanifest`
-- `assets/icons/*`
-- `assets/images/*`
+- `assets/js/app.js`
 
-The old duplicate root-level `css/style.css` and `js/app.js` files were removed because the site loads the `assets/*` versions.
+This version forces the browser to request the new app JavaScript (`app.js?v=57`) and the new service worker (`sw.js?v=57`), while the service-worker cache is bumped to v57. The D1 bridge remains in `assets/js/app.js`.
 
-## v90 cleanup
-
-- Unified the app JavaScript cache-buster to `app.js?v=90`.
-- Bumped the Service Worker cache to `beauty-studio-v90`.
-- Removed unused duplicate root CSS/JS files.
-- Kept the working D1 dynamic content, multilingual Service system, Gallery, Notifications, Booking, Need Help, and PWA behavior unchanged.
-- The multilingual Service layer continues to support English / Chinese / Myanmar and Admin-created localized fields.
-
-## Deployment
-
-Upload the contents of `beauty-studio-main/` to the customer `beauty-studio` GitHub Pages repository.
-
-Do not upload these files to the separate Admin or API projects.
+After GitHub Pages finishes deploying, open the customer site in an Incognito window and hard-refresh once. The Services page should then read the service names saved in D1.
 
 
-## v91
-Polished stable build: accessibility, keyboard focus, reduced-motion support, dynamic live-region semantics, and cache alignment. Existing D1, booking, notification, support, PWA and three-language behavior are preserved.
+## v85
+Added premium in-site contact action confirmation and D1-driven contact links.

@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light">
 <meta name="theme-color" content="#fbf8f5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -48,7 +47,7 @@
   <style>.beauty-lang-toggle{position:fixed;right:18px;top:82px;z-index:1200;border:1px solid rgba(64,45,39,.16);background:rgba(255,250,246,.94);backdrop-filter:blur(12px);color:#342722;border-radius:999px;padding:9px 14px;font:600 13px/1 system-ui,-apple-system,"Noto Sans Myanmar","Myanmar Text",sans-serif;box-shadow:0 10px 30px rgba(54,38,32,.12);cursor:pointer}.beauty-lang-toggle:hover{transform:translateY(-1px)}.lang-my body{font-family:system-ui,-apple-system,"Noto Sans Myanmar","Myanmar Text",sans-serif}@media(max-width:640px){.beauty-lang-toggle{top:70px;right:12px;padding:8px 12px;font-size:12px}}</style></head>
 <body><a class="skip-link" href="#main-content">Skip to content</a><div class="page-progress" id="pageProgress"></div>
 <header class="site-header">
-  <a class="brand" href="#home"><span class="brand-mark"><img src="assets/icons/logo.svg" alt="Beauty Studio" decoding="async" alt="" aria-hidden="true"></span><span><strong>Beauty Studio</strong><small>NAILS &amp; BEAUTY</small></span></a>
+  <a class="brand" href="#home"><span class="brand-mark"><img src="assets/icons/logo.svg" alt="" aria-hidden="true"></span><span><strong>Beauty Studio</strong><small>NAILS &amp; BEAUTY</small></span></a>
   <nav class="desktop-nav"><a href="#services">Services</a><a href="#work">Our Work</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
   <div class="header-actions"><button class="install-button" id="installBtn" type="button" hidden>Install</button><a class="header-book" href="#booking">Book Now</a></div>
 </header>
@@ -168,7 +167,7 @@
     <span>Find your mood</span>
     <p>Save a look you love. Real studio photos can be added here anytime — and we can use your favorite look as inspiration when you book.</p>
   </div>
-  <div class="gallery-toolbar"><div class="filters"><button type="button" class="active" data-filter="all">All</button><button type="button" data-filter="simple">Simple</button><button type="button" data-filter="elegant">Elegant</button><button type="button" data-filter="trendy">Trendy</button><button type="button" data-filter="cute">Cute</button></div><span class="gallery-count" id="galleryCount">5 styles</span></div>
+  <div class="gallery-toolbar"><div class="filters"><button class="active" data-filter="all">All</button><button data-filter="simple">Simple</button><button data-filter="elegant">Elegant</button><button data-filter="trendy">Trendy</button><button data-filter="cute">Cute</button></div><span class="gallery-count" id="galleryCount">5 styles</span></div>
   <div class="work-grid" id="work-grid">
     <article class="work-item work-trigger tall" data-category="elegant" data-title="Soft Pearl" data-style="Elegant · Gel" data-description="A soft, clean finish with a delicate pearl glow — made for everyday elegance."><div class="work-art art-1"><div class="fingers"><i></i><i></i><i></i><i></i></div></div><div><strong>Soft Pearl</strong><span>Elegant · Gel</span><b class="work-view">View →</b></div></article>
     <article class="work-item work-trigger" data-category="simple" data-title="Milky Nude" data-style="Simple · Gel" data-description="A timeless milky nude look that keeps things clean, natural and polished."><div class="work-art art-2"><div class="single-nail"></div></div><div><strong>Milky Nude</strong><span>Simple · Gel</span><b class="work-view">View →</b></div></article>
@@ -270,7 +269,7 @@
     <p class="contact-lead">Questions, bookings, or simply a friendly hello — we’re always here for you.</p>
     <div class="contact-details">
       <p><strong>Location</strong><span id="contactAddress">Studio address will appear here</span><b id="contactMapAction">View on Maps&nbsp; →</b></p>
-      <p><strong>Hours</strong><span id="contactHours">By appointment</span><b>See availability&nbsp; →</b></p>
+      <p><strong>Hours</strong><span id="contactHours">By appointment</span><b id="contactHoursAction">See availability&nbsp; →</b></p>
       <p><strong>Contact</strong><span id="contactPhone">+00 000 000 000</span><b id="contactCallAction">Call studio&nbsp; →</b></p>
     </div>
   </div>
@@ -292,7 +291,7 @@
 <a class="mobile-quick-book" id="mobileQuickBook" href="#booking">Book an appointment <span>→</span></a>
 </main>
 
-<div class="detail-modal" id="detailModal" aria-hidden="true" role="dialog" aria-modal="true">
+<div class="detail-modal" id="detailModal" aria-hidden="true">
   <div class="modal-backdrop" data-close-modal></div>
   <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <button class="modal-close" type="button" aria-label="Close" data-close-modal>×</button>
@@ -307,7 +306,7 @@
         <div><span>MOOD</span><strong id="modalMood">Soft &amp; polished</strong></div>
         <div><span>RECOMMENDED</span><strong id="modalRecommended">Gel Manicure</strong></div>
       </div>
-      <div class="work-detail-note"><span>✦</span><p id="modalNote">Love this look? Bring it as inspiration and the studio can fine-tune the details for you.</p></div>
+      <div class="work-detail-note"><span>✦</span><p>Love this look? Bring it as inspiration and the studio can fine-tune the details for you.</p></div>
       <div class="modal-actions">
         <a class="button button-dark" href="#booking" data-close-modal>Book this style <span>→</span></a>
       </div>
@@ -315,7 +314,7 @@
   </div>
 </div>
 
-<div class="detail-modal" id="serviceModal" aria-hidden="true" role="dialog" aria-modal="true">
+<div class="detail-modal" id="serviceModal" aria-hidden="true">
   <div class="modal-backdrop" data-close-service></div>
   <div class="modal-panel service-panel" role="dialog" aria-modal="true" aria-labelledby="serviceModalTitle">
     <button class="modal-close" type="button" aria-label="Close" data-close-service>×</button>
@@ -342,7 +341,7 @@
   </div>
 </div>
 
-<div class="booking-modal" id="bookingModal" aria-hidden="true" role="dialog" aria-modal="true">
+<div class="booking-modal" id="bookingModal" aria-hidden="true">
   <div class="booking-backdrop" data-close-booking></div>
   <div class="booking-panel" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
     <button class="modal-close" type="button" aria-label="Close" data-close-booking>×</button>
@@ -359,9 +358,9 @@
     <div class="booking-step active" data-step="1">
       <div class="step-heading"><div><p class="eyebrow">01</p><h3>Choose a service</h3></div><p class="step-hint">You can change this later.</p></div>
       <div class="booking-options">
-        <button type="button" data-service-choice="Gel Manicure" data-service-key="gel"><span>Gel Manicure</span><small>From 00 MMK · 60 min</small><b>→</b></button>
-        <button type="button" data-service-choice="Custom Nail Art" data-service-key="art"><span>Custom Nail Art</span><small>From 00 MMK · 90 min</small><b>→</b></button>
-        <button type="button" data-service-choice="Extensions" data-service-key="extensions"><span>Extensions</span><small>From 00 MMK · 120 min</small><b>→</b></button>
+        <button data-service-choice="Gel Manicure" data-service-key="gel"><span>Gel Manicure</span><small>From 00 MMK · 60 min</small><b>→</b></button>
+        <button data-service-choice="Custom Nail Art" data-service-key="art"><span>Custom Nail Art</span><small>From 00 MMK · 90 min</small><b>→</b></button>
+        <button data-service-choice="Extensions" data-service-key="extensions"><span>Extensions</span><small>From 00 MMK · 120 min</small><b>→</b></button>
       </div>
       <p class="booking-footnote">The final price can vary with length, design detail and any add-ons.</p>
     </div>
@@ -415,7 +414,7 @@
         </div>
       </div>
       <div class="booking-complete" id="bookingComplete">
-      <div class="complete-mark">✓</div><h3>Request received.</h3><p>Your appointment request is ready. The Studio will confirm the final time with you.</p><button type="button" class="button button-dark" data-close-booking>Done</button>
+      <div class="complete-mark">✓</div><h3>Request received.</h3><p>Your appointment request is ready. The Studio will confirm the final time with you.</p><button class="button button-dark" data-close-booking>Done</button>
     </div>
   </div>
 </div>
@@ -428,7 +427,7 @@
   <section class="customer-notification-card" role="dialog" aria-modal="false" aria-labelledby="customerNotificationTitle">
     <div class="customer-notification-head">
       <div><p class="eyebrow">Beauty Studio</p><h2 id="customerNotificationTitle">Updates</h2></div>
-      <button type="button" class="customer-notification-close" type="button" data-close-notifications aria-label="Close notifications">×</button>
+      <button class="customer-notification-close" type="button" data-close-notifications aria-label="Close notifications">×</button>
     </div>
     <div id="customerNotificationList" class="customer-notification-list"><div class="customer-notification-empty">No new updates yet.</div></div>
   </section>
@@ -445,7 +444,7 @@
   <div class="support-card support-chat-card" role="dialog" aria-modal="false" aria-labelledby="supportTitle">
     <div class="support-head">
       <div><p class="eyebrow">Beauty Studio · Support</p><h2 id="supportTitle">How can we help?</h2><small class="support-customer-id" id="supportCustomerId">Customer —</small></div>
-      <button type="button" class="support-close" type="button" data-close-support aria-label="Close chat">×</button>
+      <button class="support-close" type="button" data-close-support aria-label="Close chat">×</button>
     </div>
     <div class="support-status-row"><span class="support-status-dot"></span><span id="supportStatusText">We usually reply as soon as we can.</span></div>
     <div class="support-messages" id="supportMessages" aria-live="polite"><div class="support-chat-empty">Ask us anything about services, designs or your appointment.</div></div>
@@ -642,6 +641,6 @@
       });
     })();
   </script>
-  <script src="assets/js/app.js?v=93"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
+  <script src="assets/js/app.js?v=85"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
 </body>
 </html>
