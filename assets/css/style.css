@@ -2182,3 +2182,48 @@ img{max-width:100%}
   }
 }
 
+
+
+/* v92 — tablet floating controls / bottom navigation separation
+   The bottom navigation owns the lowest safe zone. Notification and Need Help
+   stay above it, with enough horizontal room for the Book action.
+*/
+@media (min-width:521px) and (max-width:800px){
+  .mobile-bar{
+    height:72px;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .support-fab{
+    right:16px!important;
+    bottom:calc(88px + env(safe-area-inset-bottom))!important;
+    max-width:calc(100vw - 32px);
+    padding:9px 13px 9px 9px;
+  }
+  .customer-notify-fab{
+    right:16px!important;
+    bottom:calc(150px + env(safe-area-inset-bottom))!important;
+    width:46px;
+    height:46px;
+  }
+  .customer-notification-card{
+    right:16px!important;
+    bottom:calc(160px + env(safe-area-inset-bottom))!important;
+    max-height:calc(100vh - 190px);
+  }
+  .support-chat-card{
+    right:16px!important;
+    bottom:calc(88px + env(safe-area-inset-bottom))!important;
+    width:min(430px,calc(100vw - 32px));
+    height:min(680px,calc(100vh - 120px));
+  }
+}
+
+@media (max-width:520px){
+  .support-fab{
+    bottom:calc(82px + env(safe-area-inset-bottom))!important;
+  }
+  .customer-notify-fab{
+    bottom:calc(148px + env(safe-area-inset-bottom))!important;
+  }
+}
+
