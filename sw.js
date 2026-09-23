@@ -1,4 +1,4 @@
-const CACHE_NAME = "beauty-studio-v78";
+const CACHE_NAME = "beauty-studio-v80"
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -28,36 +28,17 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
-
   const url = new URL(event.request.url);
-  const isDocument =
-    event.request.mode === "navigate" ||
-    url.pathname.endsWith("/") ||
-    url.pathname.endsWith(".html");
-
+  const isSameOrigin = url.origin === self.location.origin;
+  const isDocument = event.request.mode === "navigate" || url.pathname.endsWith("/") || url.pathname.endsWith(".html");
+  const isAsset = /\.(js|css)(\?|$)/i.test(url.pathname + url.search);
   if (isDocument) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-          return response;
-        })
-        .catch(() => caches.match("./index.html"))
-    );
+    event.respondWith(fetch(event.request).then(response => { const copy=response.clone(); caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy)); return response; }).catch(()=>caches.match("./index.html")));
     return;
   }
-
-  event.respondWith(
-    caches.match(event.request).then(cached =>
-      cached ||
-      fetch(event.request).then(response => {
-        if (response.ok && url.origin === self.location.origin) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        }
-        return response;
-      })
-    )
-  );
+  if (isSameOrigin && isAsset) {
+    event.respondWith(fetch(event.request).then(response => { if(response.ok){const copy=response.clone(); caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy));} return response; }).catch(()=>caches.match(event.request)));
+    return;
+  }
+  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => { if(response.ok && isSameOrigin){const copy=response.clone(); caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy));} return response; })));
 });
