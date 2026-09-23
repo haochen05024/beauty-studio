@@ -4145,3 +4145,336 @@ document.addEventListener("DOMContentLoaded", () => {
   },true);
   [100,500,1200,2500,5000].forEach(ms=>setTimeout(refresh,ms));
 })();
+
+
+/* V89 — FINAL SERVICE LANGUAGE OVERRIDE
+   Fixes the remaining D1 service rendering race/override:
+   - identifies the starter services by their stable card keys (gel/art/extensions)
+   - translates title + description + price label + duration label
+   - translates service detail modal title/description/highlights/points
+   - respects explicit Admin titleZh/titleMy/descriptionZh/descriptionMy/etc.
+   - keeps arbitrary new Admin service names unchanged unless translated fields exist,
+     preventing incorrect automatic guesses
+   - re-applies after D1 card creation and language changes
+*/
+(() => {
+  const L = () => window.__beautyStudioGetLanguage?.() || 'en';
+  const clean = v => String(v ?? '').trim();
+  const norm = v => clean(v).toLowerCase().replace(/\s+/g, ' ');
+  const content = () => window.BEAUTY_STUDIO_CONTENT || {};
+  const services = () => content().services || {};
+
+  const profiles = {
+    gel: {
+      title:{en:'Gel Manicure D1 Live',zh:'凝胶美甲 D1 Live',my:'ဂျယ်လ် လက်သည်း D1 Live'},
+      description:{en:'Clean, glossy and effortless.',zh:'干净、亮泽，自然又精致。',my:'သန့်ရှင်းတောက်ပပြီး သဘာဝကျသော အလှ။'},
+      kicker:{en:'Everyday',zh:'日常款',my:'နေ့စဉ်စတိုင်'},
+      tags:{en:'Clean finish, Everyday, Long-lasting',zh:'干净收尾，日常款，持久',my:'သန့်ရှင်းသပ်ရပ်၊ နေ့စဉ်စတိုင်၊ ကြာရှည်ခံ'},
+      caption:{en:'Natural beauty, lasting glow.',zh:'自然之美，持久光泽。',my:'သဘာဝအလှ၊ ကြာရှည်တောက်ပမှု။'},
+      idealFor:{en:'Everyday wear · special moments',zh:'日常佩戴 · 特别时刻',my:'နေ့စဉ်ဝတ်ဆင်မှု · အထူးအချိန်များ'},
+      highlights:[
+        [{en:'Care',zh:'护理',my:'ဂရုစိုက်မှု'},{en:'Prep & shaping',zh:'修甲与塑形',my:'လက်သည်းပြင်ဆင်ခြင်းနှင့် ပုံဖော်ခြင်း'}],
+        [{en:'Finish',zh:'收尾',my:'အချောသတ်'},{en:'Clean & polished',zh:'干净精致的收尾',my:'သန့်ရှင်းသပ်ရပ်သော အချောသတ်'}],
+        [{en:'Feel',zh:'感受',my:'ခံစားချက်'},{en:'Made for you',zh:'为你定制',my:'သင့်အတွက် ဖန်တီးထားသည်'}]
+      ],
+      points:[
+        {en:'Nail preparation & shaping',zh:'指甲修整与塑形',my:'လက်သည်းပြင်ဆင်ခြင်းနှင့် ပုံဖော်ခြင်း'},
+        {en:'Gel color application',zh:'凝胶颜色涂布',my:'ဂျယ်လ်အရောင် လိမ်းပေးခြင်း'},
+        {en:'Clean finish & care',zh:'精致收尾与护理',my:'သန့်ရှင်းသပ်ရပ်သော အချောသတ်နှင့် ဂရုစိုက်မှု'}
+      ]
+    },
+    art: {
+      title:{en:'Custom Nail Art D1xz.net Live',zh:'定制美甲 D1xz.net Live',my:'စိတ်ကြိုက် လက်သည်းအလှ D1xz.net Live'},
+      description:{en:'Personal details made for you.',zh:'为你量身打造的个性细节。',my:'သင့်အတွက် အထူးဖန်တီးထားသော ကိုယ်ပိုင်အသေးစိတ်များ။'},
+      kicker:{en:'Signature',zh:'特色款',my:'ထူးခြားစတိုင်'},
+      tags:{en:'Custom detail, Signature, Creative',zh:'专属细节，特色款，创意',my:'စိတ်ကြိုက်အသေးစိတ်၊ ထူးခြားစတိုင်၊ ဖန်တီးမှု'},
+      caption:{en:'Your mood, made into detail.',zh:'把你的心情变成细节。',my:'သင့်ခံစားချက်ကို အသေးစိတ်အဖြစ် ဖန်တီးပေးပါတယ်။'},
+      idealFor:{en:'Custom looks · creative days',zh:'个性造型 · 创意时光',my:'စိတ်ကြိုက်ဒီဇိုင်း · ဖန်တီးမှုနေ့များ'},
+      highlights:[
+        [{en:'Base',zh:'基础护理',my:'အခြေခံဂရုစိုက်မှု'},{en:'Manicure included',zh:'包含基础美甲护理',my:'အခြေခံလက်သည်းအလှ ပြုလုပ်မှု ပါဝင်သည်'}],
+        [{en:'Design',zh:'设计',my:'ဒီဇိုင်း'},{en:'Color & detail',zh:'颜色与细节',my:'အရောင်နှင့် အသေးစိတ်'}],
+        [{en:'Plan',zh:'方案',my:'အစီအစဉ်'},{en:'Design consultation',zh:'设计沟通',my:'ဒီဇိုင်းတိုင်ပင်ခြင်း'}]
+      ],
+      points:[
+        {en:'Base manicure included',zh:'包含基础美甲护理',my:'အခြေခံလက်သည်းအလှ ပြုလုပ်မှု ပါဝင်သည်'},
+        {en:'Custom color & detail',zh:'定制颜色与细节',my:'စိတ်ကြိုက်အရောင်နှင့် အသေးစိတ်'},
+        {en:'Design consultation',zh:'设计沟通',my:'ဒီဇိုင်းတိုင်ပင်ခြင်း'}
+      ]
+    },
+    extensions: {
+      title:{en:'Extension Nails',zh:'延长甲',my:'လက်သည်းတိုးချဲ့ခြင်း'},
+      description:{en:'Length with a polished finish.',zh:'增加长度，呈现精致光泽。',my:'အရှည်တိုးပြီး သပ်ရပ်တောက်ပသော အချောသတ်။'},
+      kicker:{en:'Length',zh:'长度',my:'အရှည်'},
+      tags:{en:'Length, Nails, Refined',zh:'长度，甲型，精致',my:'အရှည်၊ လက်သည်းပုံစံ၊ သပ်ရပ်'},
+      caption:{en:'Long, refined and beautifully yours.',zh:'修长、精致，真正属于你。',my:'ရှည်လျား၊ သပ်ရပ်ပြီး သင့်အတွက်ပဲ ဖြစ်ပါတယ်။'},
+      idealFor:{en:'Longer nails · polished finish',zh:'延长造型 · 精致收尾',my:'လက်သည်းရှည် · သပ်ရပ်သော အချောသတ်'},
+      highlights:[
+        [{en:'Shape',zh:'甲型',my:'လက်သည်းပုံစံ'},{en:'Consultation',zh:'造型沟通',my:'တိုင်ပင်ခြင်း'}],
+        [{en:'Length',zh:'长度',my:'အရှည်'},{en:'Extension application',zh:'延长甲制作',my:'လက်သည်းတိုးချဲ့ခြင်း'}],
+        [{en:'Care',zh:'护理',my:'ဂရုစိုက်မှု'},{en:'Aftercare guidance',zh:'术后护理指导',my:'နောက်ဆက်တွဲ ဂရုစိုက်မှု လမ်းညွှန်'}]
+      ],
+      points:[
+        {en:'Shape consultation',zh:'甲型沟通',my:'လက်သည်းပုံစံ တိုင်ပင်ခြင်း'},
+        {en:'Extension application',zh:'延长甲制作',my:'လက်သည်းတိုးချဲ့ခြင်း'},
+        {en:'Aftercare guidance',zh:'术后护理指导',my:'နောက်ဆက်တွဲ ဂရုစိုက်မှု လမ်းညွှန်'}
+      ]
+    },
+    new: {
+      title:{en:'New Service',zh:'新服务',my:'ဝန်ဆောင်မှုအသစ်'},
+      description:{en:'Add a short description.',zh:'添加简短描述。',my:'အကျဉ်းချုပ်ဖော်ပြချက် ထည့်ပါ။'},
+      kicker:{en:'Service',zh:'服务',my:'ဝန်ဆောင်မှု'},
+      tags:{en:'Service, Detail, Personalized',zh:'服务，细节，专属',my:'ဝန်ဆောင်မှု၊ အသေးစိတ်၊ စိတ်ကြိုက်'},
+      caption:{en:'Made with care.',zh:'用心完成。',my:'ဂရုတစိုက် ဖန်တီးပေးထားသည်။'},
+      idealFor:{en:'Personalized care',zh:'个性化护理',my:'စိတ်ကြိုက်ဂရုစိုက်မှု'}
+    }
+  };
+
+  const phrase = {
+    'service':{zh:'服务',my:'ဝန်ဆောင်မှု'},
+    'detail':{zh:'细节',my:'အသေးစိတ်'},
+    'personalized':{zh:'专属',my:'စိတ်ကြိုက်'},
+    'care':{zh:'护理',my:'ဂရုစိုက်မှု'},
+    'finish':{zh:'收尾',my:'အချောသတ်'},
+    'feel':{zh:'感受',my:'ခံစားချက်'},
+    'base':{zh:'基础护理',my:'အခြေခံဂရုစိုက်မှု'},
+    'design':{zh:'设计',my:'ဒီဇိုင်း'},
+    'plan':{zh:'方案',my:'အစီအစဉ်'},
+    'shape':{zh:'甲型',my:'လက်သည်းပုံစံ'},
+    'length':{zh:'长度',my:'အရှည်'},
+    'consultation':{zh:'沟通',my:'တိုင်ပင်ခြင်း'},
+    'shape consultation':{zh:'甲型沟通',my:'လက်သည်းပုံစံ တိုင်ပင်ခြင်း'},
+    'extension application':{zh:'延长甲制作',my:'လက်သည်းတိုးချဲ့ခြင်း'},
+    'aftercare guidance':{zh:'术后护理指导',my:'နောက်ဆက်တွဲ ဂရုစိုက်မှု လမ်းညွှန်'},
+    'clean, glossy and effortless.':{zh:'干净、亮泽，自然又精致。',my:'သန့်ရှင်းတောက်ပပြီး သဘာဝကျသော အလှ။'},
+    'personal details made for you.':{zh:'为你量身打造的个性细节。',my:'သင့်အတွက် အထူးဖန်တီးထားသော ကိုယ်ပိုင်အသေးစိတ်များ။'},
+    'length with a polished finish.':{zh:'增加长度，呈现精致光泽。',my:'အရှည်တိုးပြီး သပ်ရပ်တောက်ပသော အချောသတ်။'},
+    'add a short description.':{zh:'添加简短描述。',my:'အကျဉ်းချုပ်ဖော်ပြချက် ထည့်ပါ။'},
+    'made with care.':{zh:'用心完成。',my:'ဂရုတစိုက် ဖန်တီးပေးထားသည်။'},
+    'personalized care':{zh:'个性化护理',my:'စိတ်ကြိုက်ဂရုစိုက်မှု'},
+    'everyday wear · special moments':{zh:'日常佩戴 · 特别时刻',my:'နေ့စဉ်ဝတ်ဆင်မှု · အထူးအချိန်များ'},
+    'custom looks · creative days':{zh:'个性造型 · 创意时光',my:'စိတ်ကြိုက်ဒီဇိုင်း · ဖန်တီးမှုနေ့များ'},
+    'longer nails · polished finish':{zh:'延长造型 · 精致收尾',my:'လက်သည်းရှည် · သပ်ရပ်သော အချောသတ်'},
+    'tailored studio service':{zh:'为你定制的工作室服务',my:'သင့်အတွက် စိတ်ကြိုက်စတူဒီယိုဝန်ဆောင်မှု'},
+    'estimated appointment time':{zh:'预计服务时长',my:'ခန့်မှန်းဝန်ဆောင်ချိန်'},
+    'personalized finish':{zh:'专属精致收尾',my:'စိတ်ကြိုက် သပ်ရပ်သော အချောသတ်'},
+    'base manicure included':{zh:'包含基础美甲护理',my:'အခြေခံလက်သည်းအလှ ပြုလုပ်မှု ပါဝင်သည်'},
+    'custom color & detail':{zh:'定制颜色与细节',my:'စိတ်ကြိုက်အရောင်နှင့် အသေးစိတ်'},
+    'design consultation':{zh:'设计沟通',my:'ဒီဇိုင်းတိုင်ပင်ခြင်း'},
+    'nail preparation & shaping':{zh:'指甲修整与塑形',my:'လက်သည်းပြင်ဆင်ခြင်းနှင့် ပုံဖော်ခြင်း'},
+    'gel color application':{zh:'凝胶颜色涂布',my:'ဂျယ်လ်အရောင် လိမ်းပေးခြင်း'},
+    'clean finish & care':{zh:'精致收尾与护理',my:'သန့်ရှင်းသပ်ရပ်သော အချောသတ်နှင့် ဂရုစိုက်မှု'}
+  };
+
+  const keyAliases = {
+    gel:'gel', manicure:'gel',
+    art:'art', custom:'art',
+    extensions:'extensions', extension:'extensions',
+    'new service':'new', new:'new'
+  };
+
+  const esc = v => clean(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+
+  function profileFor(s, stableKey='') {
+    const k = norm(stableKey);
+    if (keyAliases[k]) return profiles[keyAliases[k]];
+    const candidates = [s?.title,s?.name,s?.titleZh,s?.titleMy,s?.id].map(norm).filter(Boolean);
+    for (const c of candidates) {
+      if (profiles[c]) return profiles[c];
+      if (c.includes('gel manicure')) return profiles.gel;
+      if (c.includes('custom nail art')) return profiles.art;
+      if (c.includes('extension') || c.includes('延长甲') || c.includes('လက်သည်းတိုး')) return profiles.extensions;
+      if (c === 'new service' || c.includes('ဝန်ဆောင်မှုအသစ်')) return profiles.new;
+    }
+    return null;
+  }
+
+  function explicit(s, base) {
+    const l = L();
+    if (l === 'en') return clean(s?.[base]);
+    const suffixes = l === 'zh'
+      ? [`${base}Zh`,`${base}_zh`,`${base}CN`,`${base}_cn`]
+      : [`${base}My`,`${base}_my`,`${base}Mm`,`${base}_mm`];
+    for (const k of suffixes) if (clean(s?.[k])) return clean(s[k]);
+    return '';
+  }
+
+  function translatePhrase(v) {
+    const raw = clean(v);
+    if (!raw || L() === 'en') return raw;
+    const p = phrase[norm(raw)];
+    if (p?.[L()]) return p[L()];
+    return window.__beautyStudioTranslateText?.(raw) || raw;
+  }
+
+  function value(s, base, fallback='', stableKey='') {
+    const ex = explicit(s, base);
+    if (ex) return ex;
+    const p = profileFor(s, stableKey);
+    if (p?.[base]?.[L()]) return p[base][L()];
+    const raw = clean(s?.[base] ?? fallback);
+    return translatePhrase(raw);
+  }
+
+  function priceText(s) {
+    const raw = clean(s?.price);
+    if (!raw) return L()==='zh' ? '价格待定' : L()==='my' ? 'စျေးနှုန်း မသတ်မှတ်ရသေးပါ' : 'Price on request';
+    if (L()==='en') return raw;
+    const stripped = raw.replace(/^from\s*/i,'').trim();
+    return `${L()==='zh'?'起价':'စတင်စျေး'} ${stripped}`;
+  }
+
+  function durationText(s, short=false) {
+    const raw = clean(s?.durationShort || s?.duration);
+    if (!raw) return '';
+    const n = (raw.match(/\d+/)||[''])[0];
+    if (!n) return raw;
+    if (L()==='en') return short ? `${n} MIN` : `${n} min`;
+    return L()==='zh' ? `${n} 分钟` : `${n} မိနစ်`;
+  }
+
+  function renderCard(card, s) {
+    const stableKey = clean(card.dataset.service);
+    const q = sel => card.querySelector(sel);
+
+    const title = value(s,'title',value(s,'name','Beauty Service',stableKey),stableKey);
+    const desc = value(s,'description','',stableKey);
+    const kicker = value(s,'kicker','Service',stableKey);
+    const tags = value(s,'tags','',stableKey);
+
+    if (q('h3')) q('h3').textContent = title;
+    if (q('.service-info > p')) q('.service-info > p').textContent = desc;
+    if (q('.service-kicker span:first-child')) q('.service-kicker span:first-child').textContent = kicker;
+    if (q('.service-bottom > span')) q('.service-bottom > span').textContent = tags;
+
+    const photoLabel = q('.service-photo-label');
+    if (photoLabel) {
+      const labels = {
+        en:'THE SERVICE EDIT',
+        zh:'服务精选',
+        my:'ဝန်ဆောင်မှုရွေးချယ်မှု'
+      };
+      photoLabel.textContent = labels[L()];
+    }
+
+    const meta = card.querySelectorAll('.service-meta span');
+    if (meta[0]) meta[0].textContent = priceText(s);
+    if (meta[1]) meta[1].textContent = durationText(s,true);
+
+    const photoDuration = q('.service-photo small');
+    if (photoDuration) photoDuration.textContent = durationText(s,true);
+  }
+
+  function renderModal() {
+    const choose = document.getElementById('chooseServiceButton');
+    const key = choose?.dataset.bookService;
+    const s = key ? services()[key] : null;
+    if (!s) return;
+
+    const set = (id, v) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = clean(v);
+    };
+
+    const p = profileFor(s,key);
+    set('serviceModalNumber', s.number || '');
+    set('serviceModalTitle', value(s,'title',value(s,'name','Beauty Service',key),key));
+    set('serviceModalPrice', priceText(s));
+    set('serviceModalDuration', durationText(s,true));
+    set('serviceModalDurationText', durationText(s,false));
+    set('serviceModalDescription', value(s,'description','',key));
+    set('serviceModalKicker', value(s,'kicker','Service',key));
+    set('serviceModalCaption', value(s,'caption','Made with care.',key));
+    set('serviceIdealFor', value(s,'idealFor','Personalized care',key));
+
+    const highlightData = (L() !== 'en' && Array.isArray(s?.[`highlights${L()==='zh'?'Zh':'My'}`]) && s[`highlights${L()==='zh'?'Zh':'My'}`].length)
+      ? s[`highlights${L()==='zh'?'Zh':'My'}`]
+      : (p?.highlights || s?.highlights || [
+          ['Service','Tailored studio service'],
+          [s.duration ? `${s.duration} min` : 'Flexible','Estimated appointment time'],
+          ['Detail','Personalized finish']
+        ]);
+
+    const hi = document.getElementById('serviceHighlights');
+    if (hi) {
+      hi.innerHTML = highlightData.slice(0,3).map(row => {
+        const a = Array.isArray(row) ? row : [row,'Studio detail'];
+        const left = (a[0] && typeof a[0] === 'object') ? (a[0][L()] || a[0].en || '') : translatePhrase(a[0]);
+        const right = (a[1] && typeof a[1] === 'object') ? (a[1][L()] || a[1].en || '') : translatePhrase(a[1]);
+        return `<div><span>✦</span><strong>${esc(left)}</strong><small>${esc(right)}</small></div>`;
+      }).join('');
+    }
+
+    const explicitPoints = L()==='zh' ? s?.pointsZh : L()==='my' ? s?.pointsMy : s?.points;
+    const pointData = Array.isArray(explicitPoints) && explicitPoints.length ? explicitPoints : (p?.points || []);
+    const ul = document.getElementById('servicePoints');
+    if (ul) {
+      ul.innerHTML = pointData.slice(0,4).map(item => {
+        const v = item && typeof item === 'object' && !Array.isArray(item)
+          ? (item[L()] || item.en || '')
+          : translatePhrase(item);
+        return `<li>${esc(v)}</li>`;
+      }).join('');
+    }
+
+    const note = document.querySelector('#serviceModal .service-modal-note');
+    if (note) {
+      note.textContent = L()==='zh'
+        ? '最终价格可能因长度、设计细节和附加项目而有所变化。'
+        : L()==='my'
+          ? 'နောက်ဆုံးစျေးနှုန်းက အရှည်၊ ဒီဇိုင်းအသေးစိတ်နဲ့ အပိုဝန်ဆောင်မှုအလိုက် ပြောင်းလဲနိုင်ပါတယ်။'
+          : 'Final price may vary with length, design detail and add-ons.';
+    }
+  }
+
+  function renderAll() {
+    const list = services();
+    document.querySelectorAll('.service-card[data-service]').forEach(card => {
+      const s = list[card.dataset.service];
+      if (s) renderCard(card,s);
+    });
+
+    document.querySelectorAll('[data-service-choice][data-service-key]').forEach(btn => {
+      const s = list[btn.dataset.serviceKey];
+      if (!s) return;
+      const title = value(s,'title',value(s,'name','Beauty Service',btn.dataset.serviceKey),btn.dataset.serviceKey);
+      btn.dataset.serviceChoice = title;
+      const span = btn.querySelector('span');
+      const small = btn.querySelector('small');
+      if (span) span.textContent = title;
+      if (small) small.textContent = `${priceText(s)} · ${durationText(s,false)}`;
+    });
+
+    renderModal();
+  }
+
+  let queued = false;
+  function queue() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      renderAll();
+    });
+  }
+
+  window.__beautyStudioRefreshServiceLanguageV89 = renderAll;
+  window.addEventListener('beautyStudioLanguageChanged', queue);
+  window.addEventListener('beautyStudioD1ContentReady', queue);
+  document.addEventListener('click', e => {
+    if (e.target.closest?.('.service-card,.service-trigger,[data-service-choice],#chooseServiceButton')) {
+      setTimeout(queue, 30);
+    }
+  }, true);
+
+  const grid = document.querySelector('.service-grid');
+  if (grid) {
+    const observer = new MutationObserver(mutations => {
+      const structural = mutations.some(m => m.type === 'childList' && (m.addedNodes.length || m.removedNodes.length));
+      if (structural) queue();
+    });
+    observer.observe(grid,{childList:true,subtree:true});
+  }
+
+  [0,150,500,1200,2500,5000,8000].forEach(ms => setTimeout(queue,ms));
+})();
+
