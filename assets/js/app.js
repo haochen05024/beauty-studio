@@ -2230,52 +2230,68 @@ document.addEventListener("DOMContentLoaded", () => {
     return true;
   };
 
+  const customerLang = () => {
+    const v = localStorage.getItem("beauty_studio_language") || "en";
+    return ["en","zh","my"].includes(v) ? v : "en";
+  };
+  const localized = (obj, base, fallback = "") => {
+    if (!obj) return fallback;
+    const lang = customerLang();
+    const key = lang === "zh" ? `${base}Zh` : lang === "my" ? `${base}My` : base;
+    return String(obj[key] ?? obj[base] ?? fallback ?? "");
+  };
+  const localizedService = (obj, base, fallback = "") => localized(obj, base, fallback);
+
   const applyBrand = () => {
+    const studioName = localized(cfg, "studioName", "Beauty Studio");
+    const tagline = localized(cfg, "tagline", cfg.tagline || "NAILS & BEAUTY");
+    const city = localized(cfg, "city", "Your City");
+    const address = localized(cfg, "address", "Studio address coming soon");
+    const hours = localized(cfg, "hours", "By appointment");
+    const bookingMessage = localized(cfg, "bookingMessage", "Appointments are confirmed after your request is reviewed.");
     const fields = {
-      ".brand strong": cfg.studioName,
-      ".brand small": cfg.tagline,
-      ".mobile-menu .eyebrow": cfg.studioName,
-      ".footer-brand strong": cfg.studioName,
-      ".footer-brand span": cfg.tagline,
-      "[data-studio-address]": cfg.address,
-      "[data-studio-hours]": cfg.hours,
+      ".brand strong": studioName,
+      ".brand small": tagline,
+      ".mobile-menu .eyebrow": studioName,
+      ".footer-brand strong": studioName,
+      ".footer-brand span": tagline,
+      "[data-studio-address]": address,
+      "[data-studio-hours]": hours,
       "[data-studio-phone]": cfg.phone,
-      "[data-studio-name]": cfg.studioName,
-      "[data-studio-city]": cfg.city
+      "[data-studio-name]": studioName,
+      "[data-studio-city]": city
     };
     Object.entries(fields).forEach(([selector, value]) => {
       document.querySelectorAll(selector).forEach(el => text(el, value));
     });
 
-    // Contact page uses explicit IDs rather than the generic data-studio-* hooks.
-    const contactAddress = String(cfg.address ?? "").trim() || String(cfg.city ?? "").trim() || "Studio address coming soon";
-    const contactHours = String(cfg.hours ?? "").trim() || "By appointment";
+    const contactAddress = String(address || city || "Studio address coming soon").trim();
+    const contactHours = String(hours || "By appointment").trim();
     const contactPhone = String(cfg.phone ?? "").trim() || "+00 000 000 000";
-
     text(document.getElementById("contactAddress"), contactAddress);
     text(document.getElementById("contactHours"), contactHours);
     text(document.getElementById("contactPhone"), contactPhone);
-
-    // Also support the generic hooks if the contact layout changes later.
     document.querySelectorAll("[data-studio-address]").forEach(el => text(el, contactAddress));
     document.querySelectorAll("[data-studio-hours]").forEach(el => text(el, contactHours));
     document.querySelectorAll("[data-studio-phone]").forEach(el => text(el, contactPhone));
 
     const callAction = document.getElementById("contactCallAction");
     if (callAction && cfg.phone) {
-      callAction.textContent = "Call studio  →";
+      const lang = customerLang();
+      callAction.textContent = lang === "zh" ? "联系工作室  →" : lang === "my" ? "စတူဒီယိုကို ဖုန်းဆက်ရန်  →" : "Call studio  →";
       callAction.style.cursor = "pointer";
-      callAction.onclick = () => {
-        window.location.href = `tel:${String(cfg.phone).replace(/[^\d+]/g, "")}`;
-      };
+      callAction.onclick = () => { window.location.href = `tel:${String(cfg.phone).replace(/[^\d+]/g, "")}`; };
     }
 
-    Object.entries(fields).forEach(([selector, value]) => {
-      document.querySelectorAll(selector).forEach(el => text(el, value));
-    });
-    if (cfg.studioName) {
-      document.title = `${cfg.studioName} · Nails & Beauty`;
-      document.querySelector('meta[property="og:site_name"]')?.setAttribute("content", cfg.studioName);
+    if (bookingMessage) {
+      document.querySelectorAll("[data-booking-message]").forEach(el => text(el, bookingMessage));
+      const bookingStatus = document.querySelector(".contact-status small");
+      if (bookingStatus) bookingStatus.textContent = bookingMessage;
+    }
+
+    if (studioName) {
+      document.title = `${studioName} · Nails & Beauty`;
+      document.querySelector('meta[property="og:site_name"]')?.setAttribute("content", studioName);
     }
     if (cfg.phone) {
       document.querySelectorAll("[data-studio-phone-link]").forEach(el => {
@@ -2350,15 +2366,19 @@ document.addEventListener("DOMContentLoaded", () => {
         text(photo.querySelector("small"), s.durationShort || (s.duration ? `${s.duration} MIN` : ""));
         if (s.image) photo.style.backgroundImage = `url("${String(s.image).replace(/"/g,'\\"')}")`;
       }
-      text(card.querySelector(".service-kicker span:first-child"), s.kicker || "Service");
+      const skicker = localizedService(s, "kicker", "Service");
+      const stitle = localizedService(s, "title", s.name || "Service");
+      const sdescription = localizedService(s, "description", "");
+      const stags = localizedService(s, "tags", "");
+      text(card.querySelector(".service-kicker span:first-child"), skicker);
       text(card.querySelector(".service-kicker span:last-child"), s.number || String(index + 1).padStart(2,"0"));
-      text(card.querySelector("h3"), s.title || s.name || "Service");
-      text(card.querySelector(".service-info > p"), s.description || "");
+      text(card.querySelector("h3"), stitle);
+      text(card.querySelector(".service-info > p"), sdescription);
       const meta = card.querySelectorAll(".service-meta span");
       text(meta[0], s.price || "");
       text(meta[1], s.duration ? `${s.duration} min` : "");
-      text(card.querySelector(".service-bottom > span"), s.tags || "");
-      text(card.querySelector(".service-photo-label"), s.kicker ? `THE ${String(s.kicker).toUpperCase()} EDIT` : "BEAUTY EDIT");
+      text(card.querySelector(".service-bottom > span"), stags);
+      text(card.querySelector(".service-photo-label"), skicker ? `THE ${String(skicker).toUpperCase()} EDIT` : "BEAUTY EDIT");
     });
 
     cards.slice(entries.length).forEach(card => card.remove());
@@ -2368,8 +2388,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const key = btn.dataset.serviceKey;
       const s = services[key];
       if (!s) return;
-      btn.dataset.serviceChoice = s.title || s.name || "";
-      text(btn.querySelector("span"), s.title || s.name || "");
+      const stitle = localizedService(s, "title", s.name || "");
+      btn.dataset.serviceChoice = stitle;
+      text(btn.querySelector("span"), stitle);
       text(btn.querySelector("small"), `${s.price || ""} · ${s.duration || ""} min`);
     });
   };
@@ -2390,15 +2411,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       card.classList.toggle("tall", index === 0 || index === 4);
       card.classList.toggle("wide", index === 4);
-      card.dataset.title = item.title || "Beauty Style";
-      card.dataset.style = item.style || "";
-      card.dataset.description = item.description || "";
+      const gtitle = localized(item, "title", "Beauty Style");
+      const gstyle = localized(item, "style", "");
+      const gdescription = localized(item, "description", "");
+      card.dataset.title = gtitle;
+      card.dataset.style = gstyle;
+      card.dataset.description = gdescription;
       card.dataset.category = item.category || "simple";
       card.dataset.recommendedService = item.recommendedService || "art";
       card.dataset.styleName = item.styleName || item.title || "Beauty Style";
       const info = card.querySelector("div:last-child");
-      text(info?.querySelector("strong"), item.title || "Beauty Style");
-      text(info?.querySelector("span"), item.style || "");
+      text(info?.querySelector("strong"), gtitle);
+      text(info?.querySelector("span"), gstyle);
 
       const art = card.querySelector(".work-art");
       if (art && item.image) {
@@ -2425,8 +2449,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!s) return;
 
     const set = (id, value) => text(document.getElementById(id), value);
-    const tags = String(s.tags || "").split(",").map(x => x.trim()).filter(Boolean);
-    const description = String(s.description || "").trim();
+    const tags = String(localizedService(s, "tags", "")).split(",").map(x => x.trim()).filter(Boolean);
+    const description = String(localizedService(s, "description", "")).trim();
+    const stitle = localizedService(s, "title", s.name || "Service");
+    const skicker = localizedService(s, "kicker", "Personalized");
+    const scaption = localizedService(s, "caption", "Made with care.");
+    const sideal = localizedService(s, "idealFor", tags[0] || "Personalized care");
 
     const art = document.getElementById("serviceModalArt");
     if (art) {
@@ -2441,19 +2469,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     set("serviceModalNumber", s.number || "");
     set("serviceModalDuration", s.duration ? `${s.duration} MIN` : "");
-    set("serviceModalTitle", s.title || s.name || "Service");
+    set("serviceModalTitle", stitle);
     set("serviceModalPrice", s.price || "Price on request");
     set("serviceModalDurationText", s.duration ? `${s.duration} min` : "");
     set("serviceModalDescription", description || "A personalized service prepared around your preferred look.");
-    set("serviceModalKicker", (s.kicker && String(s.kicker).toLowerCase() !== "service") ? s.kicker : "Personalized");
-    set("serviceModalCaption", s.caption || "Made with care.");
-    set("serviceIdealFor", s.idealFor || (tags[0] || "Personalized care"));
+    set("serviceModalKicker", (skicker && String(skicker).toLowerCase() !== "service") ? skicker : "Personalized");
+    set("serviceModalCaption", scaption);
+    set("serviceIdealFor", sideal);
 
     // New services created in Admin may only have name, price, duration,
     // description and tags. Build useful editorial content automatically.
-    const rawHighlights = Array.isArray(s.highlights) ? s.highlights : [];
+    const lang = customerLang();
+    const rawHighlights = lang === "zh" ? (Array.isArray(s.highlightsZh) ? s.highlightsZh : []) : lang === "my" ? (Array.isArray(s.highlightsMy) ? s.highlightsMy : []) : (Array.isArray(s.highlights) ? s.highlights : []);
+    const fallbackHighlights = Array.isArray(s.highlights) ? s.highlights : [];
     const highlightRows = rawHighlights.length
       ? rawHighlights
+      : fallbackHighlights.length
+      ? fallbackHighlights
       : [
           [tags[0] || "Service", "Tailored studio service"],
           [s.duration ? `${s.duration} min` : "Flexible", "Estimated appointment time"],
@@ -2469,9 +2501,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }).join("");
     }
 
-    const rawPoints = Array.isArray(s.points) ? s.points : [];
+    const rawPoints = lang === "zh" ? (Array.isArray(s.pointsZh) ? s.pointsZh : []) : lang === "my" ? (Array.isArray(s.pointsMy) ? s.pointsMy : []) : (Array.isArray(s.points) ? s.points : []);
+    const fallbackPoints = Array.isArray(s.points) ? s.points : [];
     const pointRows = rawPoints.length
       ? rawPoints
+      : fallbackPoints.length
+      ? fallbackPoints
       : [
           description || "Personalized service details",
           tags.length ? `Style: ${tags.join(" · ")}` : "Studio preparation and finish",
@@ -2504,9 +2539,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const updateGalleryModal = (index) => {
     const item = cfg.gallery?.[index];
     if (!item) return;
-    text(document.getElementById("workDetailTitle"), item.title);
-    text(document.getElementById("workDetailStyle"), item.style);
-    text(document.getElementById("workDetailDescription"), item.description);
+    text(document.getElementById("workDetailTitle"), localized(item, "title", "Beauty Style"));
+    text(document.getElementById("workDetailStyle"), localized(item, "style", ""));
+    text(document.getElementById("workDetailDescription"), localized(item, "description", ""));
     const modalArt = document.getElementById("modalArt");
     if (modalArt && item.image) {
       modalArt.className = "modal-art has-photo";
@@ -2543,6 +2578,13 @@ document.addEventListener("DOMContentLoaded", () => {
       updateGalleryModal(cards.indexOf(card));
     });
   };
+
+  window.addEventListener("beautyStudioLanguageChanged", () => {
+    applyBrand();
+    applySocialLinks();
+    applyServiceCards();
+    applyGallery();
+  });
 
   const loadPublishedContent = async () => {
     try {
