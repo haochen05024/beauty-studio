@@ -1,21 +1,10 @@
-# Beauty Studio v57 — D1 cache/update fix
+# Beauty Studio Customer v90
 
-Replace only these files in the customer `beauty-studio` GitHub repository:
-- `index.html`
-- `sw.js`
-- `assets/js/app.js`
+Recovery + language stability release.
 
-This version forces the browser to request the new app JavaScript (`app.js?v=57`) and the new service worker (`sw.js?v=57`), while the service-worker cache is bumped to v57. The D1 bridge remains in `assets/js/app.js`.
-
-After GitHub Pages finishes deploying, open the customer site in an Incognito window and hard-refresh once. The Services page should then read the service names saved in D1.
-
-
-## v86
-Added premium in-site contact action confirmation and D1-driven contact links.
-
-
-## v87
-Customer-visible D1 studio identity, address, hours, booking message, Services and Gallery content now follow the selected English / 中文 / မြန်မာ language. Future customer-facing D1 content should use the same localized field pattern.
-
-
-Version v89: restored the known-good trilingual customer runtime, moved booking message localization to Booking Rules data, and bumped Service Worker cache to v89.
+- Restores the v87 customer runtime as the base.
+- Keeps Booking Rules multilingual message support.
+- Language switcher is present in HTML and remains visible above booking/service overlays.
+- Language changes refresh brand, services, gallery and booking message content.
+- Service worker v90 uses network-first for HTML/JS/CSS and aggressively removes old caches.
+- No Worker or D1 schema changes.

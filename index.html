@@ -653,6 +653,20 @@
       });
     })();
   </script>
-  <script src="assets/js/app.js?v=89"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
+  <script src="assets/js/app.js?v=90"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").then(r=>r.update()).catch(()=>{});}</script>
+
+  <!-- v90: language switcher is present in the HTML so it never disappears while dynamic content loads. -->
+  <div class="beauty-lang-wrap" id="beautyLangWrap">
+    <button id="beautyLangToggle" type="button" class="beauty-lang-toggle" aria-expanded="false" aria-label="Language / 语言 / ဘာသာစကား">
+      <span class="beauty-lang-globe" aria-hidden="true">◎</span>
+      <span class="beauty-lang-current">English</span>
+      <span class="beauty-lang-chevron" aria-hidden="true">⌄</span>
+    </button>
+    <div class="beauty-lang-menu" role="menu" aria-label="Language selector">
+      <button type="button" data-lang-choice="en" role="menuitem"><span>English</span><small>EN</small></button>
+      <button type="button" data-lang-choice="zh" role="menuitem"><span>中文</span><small>中文</small></button>
+      <button type="button" data-lang-choice="my" role="menuitem"><span>မြန်မာ</span><small>MY</small></button>
+    </div>
+  </div>
 </body>
 </html>
