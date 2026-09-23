@@ -3292,7 +3292,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const b=document.getElementById('beautyLangToggle');
     if(b){
       const label=currentLang==='en'?'English':(currentLang==='zh'?'中文':'မြန်မာ');
-      b.querySelector('.beauty-lang-current')?.replaceChildren(document.createTextNode(label));
+      const currentEl = b.querySelector('.beauty-lang-current');
+      if(currentEl && currentEl.textContent !== label){
+        currentEl.replaceChildren(document.createTextNode(label));
+      }
       b.setAttribute('aria-expanded',b.classList.contains('open')?'true':'false');
       b.setAttribute('aria-label','Language / 语言 / ဘာသာစကား');
       b.querySelectorAll('[data-lang-choice]').forEach(item=>item.classList.toggle('active',item.dataset.langChoice===currentLang));
