@@ -2395,7 +2395,67 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+
+  const defaultGalleryCategories = [
+    {id:"simple",en:"Simple",zh:"简约",my:"ရိုးရှင်း"},
+    {id:"elegant",en:"Elegant",zh:"优雅",my:"အလှပ"},
+    {id:"trendy",en:"Trendy",zh:"潮流",my:"ခေတ်မီ"},
+    {id:"cute",en:"Cute",zh:"可爱",my:"ချစ်စရာ"}
+  ];
+  const galleryCategories = () => {
+    const raw = Array.isArray(cfg.galleryCategories) && cfg.galleryCategories.length ? cfg.galleryCategories : defaultGalleryCategories;
+    return raw.map((x,i)=>({
+      id:String(x?.id || `category-${i+1}`).trim().toLowerCase(),
+      en:String(x?.en || x?.name || x?.id || `Category ${i+1}`),
+      zh:String(x?.zh || x?.en || x?.name || x?.id || `分类 ${i+1}`),
+      my:String(x?.my || x?.en || x?.name || x?.id || `အမျိုးအစား ${i+1}`)
+    }));
+  };
+  const categoryByValue = value => {
+    const raw=String(value||"").trim().toLowerCase();
+    return galleryCategories().find(c=>[c.id,c.en,c.zh,c.my].some(v=>String(v).trim().toLowerCase()===raw));
+  };
+  const applyGalleryFilters = () => {
+    const grid=document.getElementById("work-grid"); if(!grid)return;
+    const buttons=[...document.querySelectorAll(".filters button")];
+    const active=buttons.find(b=>b.classList.contains("active")) || buttons[0];
+    const filter=String(active?.dataset.filter||"all").trim().toLowerCase();
+    const cards=[...grid.querySelectorAll(".work-item")];
+    cards.forEach(item=>{
+      const category=categoryByValue(item.dataset.category)?.id || String(item.dataset.category||"").trim().toLowerCase();
+      item.classList.toggle("hidden",filter!=="all" && category!==filter);
+    });
+    const visible=cards.filter(x=>!x.classList.contains("hidden"));
+    const count=document.getElementById("galleryCount");
+    if(count)count.textContent=`${visible.length} ${visible.length===1?"style":"styles"}`;
+    let empty=grid.querySelector(".gallery-empty-state");
+    if(!visible.length && cards.length){
+      if(!empty){empty=document.createElement("div");empty.className="gallery-empty-state";grid.appendChild(empty);}
+      const lang=localStorage.getItem("beauty_studio_language")||"en";
+      const cat=galleryCategories().find(x=>x.id===filter);
+      const label=cat?.[lang]||active?.textContent?.trim()||filter;
+      const title=lang==="zh"?`还没有${label}款式`:lang==="my"?`${label} ဒီဇိုင်း မရှိသေးပါ`:`No ${label} styles yet`;
+      const note=lang==="zh"?"工作室添加作品后会显示在这里。":lang==="my"?"စတူဒီယိုက ဒီဇိုင်းတွေထည့်ပြီးတဲ့အခါ ဒီမှာ ပြပါမယ်။":"More looks will appear here as the studio adds them.";
+      empty.innerHTML=`<strong>${escapeHtml(title)}</strong><span>${escapeHtml(note)}</span>`;
+    }else if(empty)empty.remove();
+  };
+  const renderGalleryCategories = () => {
+    const wrap=document.querySelector(".filters"); if(!wrap)return;
+    const current=String(wrap.querySelector("button.active")?.dataset.filter||"all").trim().toLowerCase();
+    const lang=localStorage.getItem("beauty_studio_language")||"en";
+    const cats=galleryCategories();
+    const allLabel=lang==="zh"?"全部":lang==="my"?"အားလုံး":"All";
+    wrap.innerHTML=`<button class="${current==="all"?"active":""}" data-filter="all">${allLabel}</button>`+
+      cats.map(cat=>`<button class="${cat.id===current?"active":""}" data-filter="${escapeHtml(cat.id)}">${escapeHtml(cat[lang]||cat.en)}</button>`).join("");
+    if(!wrap.querySelector("button.active"))wrap.querySelector("button")?.classList.add("active");
+    wrap.querySelectorAll("button").forEach(button=>button.addEventListener("click",()=>{
+      wrap.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+      button.classList.add("active"); applyGalleryFilters();
+    }));
+  };
+
   const applyGallery = () => {
+    renderGalleryCategories();
     const gallery = Array.isArray(cfg.gallery) ? cfg.gallery : [];
     const grid = document.getElementById("work-grid");
     if (!grid) return;
@@ -2445,25 +2505,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const count = document.getElementById("galleryCount");
     if (count) count.textContent = `${gallery.length} ${gallery.length === 1 ? "style" : "styles"}`;
 
-    // Re-apply the currently selected filter after D1 content replaces the cards.
-    const buttons = [...document.querySelectorAll(".filters button")];
-    const active = buttons.find(btn => btn.classList.contains("active")) || buttons[0];
-    const filter = String(active?.dataset.filter || "all").trim().toLowerCase();
-    cards = [...grid.querySelectorAll(".work-item")];
-    cards.forEach(item => item.classList.toggle("hidden", filter !== "all" && String(item.dataset.category || "").toLowerCase() !== filter));
-    const visible = cards.filter(item => !item.classList.contains("hidden"));
-    let empty = grid.querySelector(".gallery-empty-state");
-    if (!visible.length && gallery.length) {
-      if (!empty) {
-        empty = document.createElement("div");
-        empty.className = "gallery-empty-state";
-        grid.appendChild(empty);
-      }
-      const label = active?.textContent?.trim() || filter;
-      empty.innerHTML = `<strong>No ${escapeHtml(label)} styles yet</strong><span>More looks will appear here as the studio adds them.</span>`;
-    } else if (empty) {
-      empty.remove();
-    }
+    // Re-apply the current managed category after D1 content replaces the cards.
+    applyGalleryFilters();
   };
 
   const updateServiceModal = (key) => {
@@ -3366,22 +3409,45 @@ document.addEventListener("DOMContentLoaded", () => {
   const original = new WeakMap();
   function translateText(text){ const key=text.trim(); const pair=I18N[key]; if(!pair)return null; return currentLang==='en' ? key : pair[currentLang==='my'?1:0]; }
   function walk(root){ const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT); const nodes=[]; let n; while(n=walker.nextNode())nodes.push(n); nodes.forEach(node=>{ if(!node.nodeValue.trim())return; const parent=node.parentElement; if(!parent||['SCRIPT','STYLE','NOSCRIPT'].includes(parent.tagName))return; let base=original.get(node); if(base===undefined){base=node.nodeValue;original.set(node,base)} const t=translateText(base); if(t){const lead=base.match(/^\s*/)?.[0]||'';const trail=base.match(/\s*$/)?.[0]||'';node.nodeValue=lead+t+trail;} }); }
+  let applyRun=0;
   function apply(){
+    const run=++applyRun;
     document.documentElement.lang=currentLang==='my'?'my':(currentLang==='zh'?'zh-CN':'en');
-    walk(document.body);
-    document.querySelectorAll('[placeholder]').forEach(el=>{const b=el.dataset.i18nPlaceholder||el.getAttribute('placeholder');if(!el.dataset.i18nPlaceholder)el.dataset.i18nPlaceholder=b;const t=translateText(b);if(t)el.setAttribute('placeholder',t)});
-    document.querySelectorAll('[aria-label]').forEach(el=>{const b=el.dataset.i18nAria||el.getAttribute('aria-label');if(!el.dataset.i18nAria)el.dataset.i18nAria=b;const t=translateText(b);if(t)el.setAttribute('aria-label',t)});
-    const b=document.getElementById('beautyLangToggle');
-    if(b){
-      const label=currentLang==='en'?'English':(currentLang==='zh'?'中文':'မြန်မာ');
-      b.querySelector('.beauty-lang-current')?.replaceChildren(document.createTextNode(label));
-      b.setAttribute('aria-expanded',b.classList.contains('open')?'true':'false');
-      b.setAttribute('aria-label','Language / 语言 / ဘာသာစကား');
-      b.querySelectorAll('[data-lang-choice]').forEach(item=>item.classList.toggle('active',item.dataset.langChoice===currentLang));
-    }
-    document.documentElement.classList.toggle('lang-my',currentLang==='my');
-    window.dispatchEvent(new CustomEvent('beautyStudioLanguageChanged',{detail:{lang:currentLang}}));
-    window.dispatchEvent(new CustomEvent('beautyStudioLanguageChangedV90',{detail:{lang:currentLang}}));
+    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+    const nodes=[]; let node;
+    while(node=walker.nextNode())nodes.push(node);
+    let cursor=0;
+    const finish=()=>{
+      if(run!==applyRun)return;
+      document.querySelectorAll('[placeholder]').forEach(el=>{const b=el.dataset.i18nPlaceholder||el.getAttribute('placeholder');if(!el.dataset.i18nPlaceholder)el.dataset.i18nPlaceholder=b;const t=translateText(b);if(t)el.setAttribute('placeholder',t)});
+      document.querySelectorAll('[aria-label]').forEach(el=>{const b=el.dataset.i18nAria||el.getAttribute('aria-label');if(!el.dataset.i18nAria)el.dataset.i18nAria=b;const t=translateText(b);if(t)el.setAttribute('aria-label',t)});
+      const b=document.getElementById('beautyLangToggle');
+      if(b){
+        const label=currentLang==='en'?'English':(currentLang==='zh'?'中文':'မြန်မာ');
+        b.querySelector('.beauty-lang-current')?.replaceChildren(document.createTextNode(label));
+        b.setAttribute('aria-expanded',b.classList.contains('open')?'true':'false');
+        b.setAttribute('aria-label','Language / 语言 / ဘာသာစကား');
+        b.querySelectorAll('[data-lang-choice]').forEach(item=>item.classList.toggle('active',item.dataset.langChoice===currentLang));
+      }
+      document.documentElement.classList.toggle('lang-my',currentLang==='my');
+      window.dispatchEvent(new CustomEvent('beautyStudioLanguageChanged',{detail:{lang:currentLang}}));
+      window.dispatchEvent(new CustomEvent('beautyStudioLanguageChangedV90',{detail:{lang:currentLang}}));
+    };
+    const chunk=()=>{
+      if(run!==applyRun)return;
+      const end=Math.min(cursor+180,nodes.length);
+      for(;cursor<end;cursor++){
+        const n=nodes[cursor]; if(!n.nodeValue.trim())continue;
+        const p=n.parentElement; if(!p||['SCRIPT','STYLE','NOSCRIPT'].includes(p.tagName))continue;
+        let base=original.get(n);
+        if(base===undefined){base=n.nodeValue;original.set(n,base)}
+        const t=translateText(base);
+        if(t){const lead=base.match(/^\s*/)?.[0]||'';const trail=base.match(/\s*$/)?.[0]||'';n.nodeValue=lead+t+trail;}
+      }
+      if(cursor<nodes.length){requestAnimationFrame(chunk);return;}
+      finish();
+    };
+    requestAnimationFrame(chunk);
   }
   function setLanguage(next){
     if(!['en','zh','my'].includes(next))return;
@@ -3433,7 +3499,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function start(){
     addToggle();
     apply();
-    [250,800,1800,3500,6000].forEach(ms=>setTimeout(apply,ms));
+    renderGalleryCategories();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
