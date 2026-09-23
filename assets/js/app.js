@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
       button.classList.add("active");
       const filter = button.dataset.filter;
       document.querySelectorAll(".work-item").forEach(item => {
-        item.classList.toggle("hidden", filter !== "all" && item.dataset.category !== filter);
+        item.classList.toggle("hidden", filter !== "all" && String(item.dataset.category || "").toLowerCase() !== String(filter).toLowerCase());
       });
     });
   });
@@ -574,7 +574,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!buttons.length || !items.length) return;
 
   const updateCount = filter => {
-    const visible = items.filter(item => filter === "all" || item.dataset.category === filter).length;
+    const visible = items.filter(item => filter === "all" || String(item.dataset.category || "").toLowerCase() === String(filter).toLowerCase()).length;
     if (count) count.textContent = `${visible} ${visible === 1 ? "style" : "styles"}`;
   };
 
@@ -583,7 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const filter = button.dataset.filter || "all";
       buttons.forEach(b => b.classList.toggle("active", b === button));
       items.forEach(item => {
-        const show = filter === "all" || item.dataset.category === filter;
+        const show = filter === "all" || String(item.dataset.category || "").toLowerCase() === String(filter).toLowerCase();
         item.classList.toggle("hidden", !show);
         if (show) {
           item.animate(
@@ -2122,7 +2122,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 
 
-/* v56 — public D1 content bridge
+/* v92 — public D1 content bridge
    Customer site reads published content from the Beauty Studio API.
    Static HTML content remains the safe fallback if D1 is empty/unavailable.
 */
@@ -2417,7 +2417,7 @@ document.addEventListener("DOMContentLoaded", () => {
       card.dataset.title = gtitle;
       card.dataset.style = gstyle;
       card.dataset.description = gdescription;
-      card.dataset.category = item.category || "simple";
+      card.dataset.category = String(item.category || "simple").trim().toLowerCase();
       card.dataset.recommendedService = item.recommendedService || "art";
       card.dataset.styleName = item.styleName || item.title || "Beauty Style";
       const info = card.querySelector("div:last-child");
@@ -2425,16 +2425,18 @@ document.addEventListener("DOMContentLoaded", () => {
       text(info?.querySelector("span"), gstyle);
 
       const art = card.querySelector(".work-art");
-      if (art && item.image) {
-        art.classList.add("has-photo");
+      if (art) {
         art.querySelectorAll(".gallery-photo").forEach(img => img.remove());
-        const img = document.createElement("img");
-        img.className = "gallery-photo";
-        img.loading = "lazy";
-        img.decoding = "async";
-        img.alt = item.alt || item.title || "Beauty Studio nail design";
-        img.src = item.image;
-        art.appendChild(img);
+        art.classList.toggle("has-photo", !!item.image);
+        if (item.image) {
+          const img = document.createElement("img");
+          img.className = "gallery-photo";
+          img.loading = "lazy";
+          img.decoding = "async";
+          img.alt = item.alt || item.title || "Beauty Studio nail design";
+          img.src = item.image;
+          art.appendChild(img);
+        }
       }
     });
 
@@ -2442,6 +2444,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const count = document.getElementById("galleryCount");
     if (count) count.textContent = `${gallery.length} ${gallery.length === 1 ? "style" : "styles"}`;
+
+    // Re-apply the currently selected filter after D1 content replaces the cards.
+    const buttons = [...document.querySelectorAll(".filters button")];
+    const active = buttons.find(btn => btn.classList.contains("active")) || buttons[0];
+    const filter = String(active?.dataset.filter || "all").trim().toLowerCase();
+    cards = [...grid.querySelectorAll(".work-item")];
+    cards.forEach(item => item.classList.toggle("hidden", filter !== "all" && String(item.dataset.category || "").toLowerCase() !== filter));
+    const visible = cards.filter(item => !item.classList.contains("hidden"));
+    let empty = grid.querySelector(".gallery-empty-state");
+    if (!visible.length && gallery.length) {
+      if (!empty) {
+        empty = document.createElement("div");
+        empty.className = "gallery-empty-state";
+        grid.appendChild(empty);
+      }
+      const label = active?.textContent?.trim() || filter;
+      empty.innerHTML = `<strong>No ${escapeHtml(label)} styles yet</strong><span>More looks will appear here as the studio adds them.</span>`;
+    } else if (empty) {
+      empty.remove();
+    }
   };
 
   const updateServiceModal = (key) => {
