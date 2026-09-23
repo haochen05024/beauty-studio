@@ -4147,7 +4147,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 
 
-/* V89 — FINAL SERVICE LANGUAGE OVERRIDE
+/* V90 — FINAL SERVICE LANGUAGE OVERRIDE
    Fixes the remaining D1 service rendering race/override:
    - identifies the starter services by their stable card keys (gel/art/extensions)
    - translates title + description + price label + duration label
@@ -4457,7 +4457,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  window.__beautyStudioRefreshServiceLanguageV89 = renderAll;
+  window.__beautyStudioRefreshServiceLanguageV90 = renderAll;
   window.addEventListener('beautyStudioLanguageChanged', queue);
   window.addEventListener('beautyStudioD1ContentReady', queue);
   document.addEventListener('click', e => {
