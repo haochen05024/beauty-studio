@@ -3345,3 +3345,188 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 
 /* V77 bilingual UI — extended copy */
+
+/* V86 — premium contact action routing + in-site confirmation */
+(() => {
+  const TEXT = {
+    en: {
+      eyebrow: 'BEAUTY STUDIO · CONTACT',
+      mapTitle: 'Open Maps', mapCopy: 'You’re about to continue to the studio location in your maps app.',
+      availabilityTitle: 'View availability', availabilityCopy: 'You’re about to continue to the studio booking area.',
+      callTitle: 'Call the studio', callCopy: 'You’re about to open the studio phone link.',
+      tiktokTitle: 'Open TikTok', tiktokCopy: 'You’re about to continue to the studio’s TikTok profile.',
+      whatsappTitle: 'Open WhatsApp', whatsappCopy: 'You’re about to continue to the studio’s WhatsApp chat.',
+      telegramTitle: 'Open Telegram', telegramCopy: 'You’re about to continue to the studio’s Telegram profile.',
+      destination: 'Destination', cancel: 'Not now', continue: 'Continue →', unavailable: 'This contact link is not available yet.'
+    },
+    zh: {
+      eyebrow: 'BEAUTY STUDIO · 联系方式',
+      mapTitle: '打开地图', mapCopy: '即将前往工作室地图位置。',
+      availabilityTitle: '查看可预约时间', availabilityCopy: '即将进入工作室预约页面。',
+      callTitle: '联系工作室', callCopy: '即将打开工作室电话链接。',
+      tiktokTitle: '打开 TikTok', tiktokCopy: '即将前往工作室的 TikTok 主页。',
+      whatsappTitle: '打开 WhatsApp', whatsappCopy: '即将进入工作室的 WhatsApp 对话。',
+      telegramTitle: '打开 Telegram', telegramCopy: '即将前往工作室的 Telegram。',
+      destination: '目标', cancel: '暂不打开', continue: '继续 →', unavailable: '这个联系方式目前还没有设置。'
+    },
+    my: {
+      eyebrow: 'BEAUTY STUDIO · ဆက်သွယ်ရန်',
+      mapTitle: 'မြေပုံဖွင့်ရန်', mapCopy: 'စတူဒီယိုတည်နေရာကို မြေပုံအက်ပ်တွင် ဖွင့်ပါမည်။',
+      availabilityTitle: 'ရနိုင်သောအချိန်များကြည့်ရန်', availabilityCopy: 'စတူဒီယိုရက်ချိန်းစာမျက်နှာသို့ ဆက်သွားပါမည်။',
+      callTitle: 'စတူဒီယိုကို ဖုန်းဆက်ရန်', callCopy: 'စတူဒီယိုဖုန်းလင့်ခ်ကို ဖွင့်ပါမည်။',
+      tiktokTitle: 'TikTok ဖွင့်ရန်', tiktokCopy: 'စတူဒီယို၏ TikTok စာမျက်နှာသို့ သွားပါမည်။',
+      whatsappTitle: 'WhatsApp ဖွင့်ရန်', whatsappCopy: 'စတူဒီယို၏ WhatsApp စကားပြောခန်းသို့ သွားပါမည်။',
+      telegramTitle: 'Telegram ဖွင့်ရန်', telegramCopy: 'စတူဒီယို၏ Telegram စာမျက်နှာသို့ သွားပါမည်။',
+      destination: 'သွားမည့်နေရာ', cancel: 'မဖွင့်တော့ပါ', continue: 'ဆက်သွားရန် →', unavailable: 'ဒီဆက်သွယ်ရန်လင့်ခ်ကို မသတ်မှတ်ရသေးပါ။'
+    }
+  };
+  let lang = localStorage.getItem('beauty_studio_language') || 'en';
+  const getText = () => TEXT[lang] || TEXT.en;
+  window.addEventListener('beautyStudioLanguageChanged', e => { lang = e.detail?.lang || lang; updateModal(); });
+
+  const escape = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const getCfg = () => window.BEAUTY_STUDIO_CONTENT || {};
+  const cleanPhone = value => String(value || '').replace(/[^+\d]/g, '');
+  const getHref = type => {
+    const cfg = getCfg();
+    const social = cfg.social && typeof cfg.social === 'object' ? cfg.social : {};
+    if (type === 'map') return String(cfg.mapUrl || '').trim();
+    if (type === 'availability') return String(cfg.availabilityUrl || '#booking').trim() || '#booking';
+    if (type === 'call') return String(cfg.callUrl || (cfg.phone ? `tel:${cleanPhone(cfg.phone)}` : '')).trim();
+    const item = social[type] || {};
+    const raw = String(item.url || cfg[type] || item.handle || '').trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw) || /^(tel:|mailto:|sms:)/i.test(raw)) return raw;
+    if (type === 'tiktok') return `https://www.tiktok.com/@${raw.replace(/^@/, '')}`;
+    if (type === 'whatsapp') return `https://wa.me/${raw.replace(/\D/g, '')}`;
+    if (type === 'telegram') return `https://t.me/${raw.replace(/^@/, '')}`;
+    return raw;
+  };
+
+  const labels = () => {
+    const t = getText();
+    return {
+      map: t.mapTitle, availability: t.availabilityTitle, call: t.callTitle,
+      tiktok: t.tiktokTitle, whatsapp: t.whatsappTitle, telegram: t.telegramTitle
+    };
+  };
+  const iconFor = type => ({map:'⌖',availability:'◷',call:'◌',tiktok:'♪',whatsapp:'◔',telegram:'↗'})[type] || '↗';
+
+  let active = null;
+  function ensureModal() {
+    if (document.getElementById('contactActionModal')) return document.getElementById('contactActionModal');
+    const modal = document.createElement('div');
+    modal.id = 'contactActionModal';
+    modal.className = 'contact-action-modal';
+    modal.setAttribute('aria-hidden','true');
+    modal.innerHTML = `
+      <div class="contact-action-backdrop" data-contact-action-close></div>
+      <div class="contact-action-card" role="dialog" aria-modal="true" aria-labelledby="contactActionTitle">
+        <button class="contact-action-close" type="button" aria-label="Close" data-contact-action-close>×</button>
+        <div class="contact-action-icon" id="contactActionIcon">↗</div>
+        <p class="contact-action-eyebrow" id="contactActionEyebrow"></p>
+        <h2 id="contactActionTitle"></h2>
+        <p class="contact-action-copy" id="contactActionCopy"></p>
+        <div class="contact-action-destination"><span id="contactActionDestinationLabel"></span><strong id="contactActionDestination"></strong></div>
+        <div class="contact-action-buttons">
+          <button class="contact-action-cancel" type="button" data-contact-action-close></button>
+          <button class="contact-action-continue" type="button" id="contactActionContinue"></button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => {
+      if (e.target.closest('[data-contact-action-close]')) close();
+    });
+    modal.querySelector('#contactActionContinue').addEventListener('click', () => {
+      if (!active?.href) return close();
+      const href = active.href;
+      const type = active.type;
+      close();
+      if (type === 'availability' && href === '#booking') {
+        document.getElementById('booking')?.scrollIntoView({behavior:'smooth', block:'start'});
+        return;
+      }
+      if (/^tel:/i.test(href)) {
+        // The browser/OS may still show its own phone-handler confirmation. This is controlled by the device, not the website.
+        window.location.href = href;
+        return;
+      }
+      window.open(href, '_blank', 'noopener,noreferrer');
+    });
+    return modal;
+  }
+  function updateModal() {
+    const modal = document.getElementById('contactActionModal');
+    if (!modal || !active) return;
+    const t = getText();
+    const labelsNow = labels();
+    const title = labelsNow[active.type] || 'Open';
+    const copyKey = `${active.type}Copy`;
+    modal.querySelector('#contactActionEyebrow').textContent = t.eyebrow;
+    modal.querySelector('#contactActionTitle').textContent = title;
+    modal.querySelector('#contactActionCopy').textContent = t[copyKey] || '';
+    modal.querySelector('#contactActionDestinationLabel').textContent = t.destination;
+    modal.querySelector('#contactActionDestination').textContent = active.destination || title;
+    modal.querySelector('[data-contact-action-close].contact-action-cancel').textContent = t.cancel;
+    modal.querySelector('#contactActionContinue').textContent = t.continue;
+    modal.querySelector('#contactActionIcon').textContent = iconFor(active.type);
+  }
+  function close() {
+    const modal = document.getElementById('contactActionModal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('modal-open');
+    active = null;
+  }
+  function open(type, href, destination) {
+    if (!href) return;
+    active = {type, href, destination};
+    const modal = ensureModal();
+    updateModal();
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('modal-open');
+  }
+
+  const actionType = el => {
+    if (!el) return null;
+    if (el.closest('#contactMapAction')) return 'map';
+    if (el.closest('#contactHoursAction')) return 'availability';
+    if (el.closest('#contactCallAction')) return 'call';
+    const social = el.closest('[data-social]');
+    if (social && ['tiktok','whatsapp','telegram'].includes(social.dataset.social)) return social.dataset.social;
+    return null;
+  };
+
+  // Capture before native <a> navigation so the website always shows its own premium confirmation first.
+  document.addEventListener('click', event => {
+    const type = actionType(event.target);
+    if (!type) return;
+    const href = getHref(type) || (type === 'availability' ? '#booking' : '');
+    if (!href || href === '#') {
+      event.preventDefault();
+      const t = getText();
+      window.dispatchEvent(new CustomEvent('beautyStudioToast',{detail:{message:t.unavailable}}));
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    const labelsNow = labels();
+    open(type, href, labelsNow[type] || type);
+  }, true);
+
+  // Keep the visible contact action elements keyboard-accessible even when their old inline anchors are replaced by D1.
+  const refreshActions = () => {
+    const map = document.getElementById('contactMapAction');
+    const availability = document.getElementById('contactHoursAction');
+    const call = document.getElementById('contactCallAction');
+    [[map,'map'],[availability,'availability'],[call,'call']].forEach(([el,type]) => {
+      if (!el) return;
+      el.setAttribute('role','button');
+      el.setAttribute('tabindex','0');
+      el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); } });
+    });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refreshActions); else refreshActions();
+})();

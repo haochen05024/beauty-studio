@@ -10,5 +10,5 @@ This version forces the browser to request the new app JavaScript (`app.js?v=57`
 After GitHub Pages finishes deploying, open the customer site in an Incognito window and hard-refresh once. The Services page should then read the service names saved in D1.
 
 
-## v85
+## v86
 Added premium in-site contact action confirmation and D1-driven contact links.
