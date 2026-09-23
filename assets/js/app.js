@@ -2248,7 +2248,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const city = localized(cfg, "city", "Your City");
     const address = localized(cfg, "address", "Studio address coming soon");
     const hours = localized(cfg, "hours", "By appointment");
-    const bookingMessage = localized(cfg.bookingRules || {}, "bookingMessage", localized(cfg, "bookingMessage", "Appointments are confirmed after your request is reviewed."));
+    const bookingMessage = localized(cfg, "bookingMessage", "Appointments are confirmed after your request is reviewed.");
     const fields = {
       ".brand strong": studioName,
       ".brand small": tagline,
@@ -2584,7 +2584,6 @@ document.addEventListener("DOMContentLoaded", () => {
     applySocialLinks();
     applyServiceCards();
     applyGallery();
-    if (window.__beautyStudioBookingRulesFinal && typeof window.__beautyStudioApplyBookingRules === 'function') window.__beautyStudioApplyBookingRules(window.__beautyStudioBookingRulesFinal);
   });
 
   const loadPublishedContent = async () => {
@@ -2645,7 +2644,6 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 
 
-/* v88 — Booking message is sourced from D1 Booking Rules and re-localized on language changes. */
 /* v67 — D1 booking rules live renderer
    The original booking scripts are intentionally kept as a safe fallback,
    but they run before the async D1 request finishes. This final renderer

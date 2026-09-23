@@ -16,3 +16,6 @@ Added premium in-site contact action confirmation and D1-driven contact links.
 
 ## v87
 Customer-visible D1 studio identity, address, hours, booking message, Services and Gallery content now follow the selected English / 中文 / မြန်မာ language. Future customer-facing D1 content should use the same localized field pattern.
+
+
+Version v89: restored the known-good trilingual customer runtime, moved booking message localization to Booking Rules data, and bumped Service Worker cache to v89.
