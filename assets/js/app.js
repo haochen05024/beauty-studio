@@ -1,3 +1,7 @@
+/* v91 — polished stable build
+ * Accessibility, keyboard, live-region and language-safe UI refinements.
+ */
+
 /* v76 — live D1 booking controller: date switching, slot rules, custom calendar sync */
 document.addEventListener("DOMContentLoaded", () => {
   const header = document.querySelector(".site-header");
@@ -4476,5 +4480,40 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   [0,150,500,1200,2500,5000,8000].forEach(ms => setTimeout(queue,ms));
+})();
+
+
+
+/* v91 — accessibility + UI polish
+   No visual redesign. This layer only improves keyboard/screen-reader behavior
+   and keeps dynamic D1 UI announcements understandable.
+*/
+(() => {
+  const mark = (el, attrs) => {
+    if (!el) return;
+    Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v));
+  };
+
+  mark(document.getElementById('customerNotifyFab'), {'aria-live':'polite'});
+  mark(document.getElementById('supportFab'), {'aria-live':'polite'});
+
+  const panel = document.getElementById('supportPanel');
+  if (panel) mark(panel, {'role':'dialog','aria-modal':'true','aria-label':'Need Help'});
+
+  const notices = document.getElementById('customerNotificationPanel');
+  if (notices) mark(notices, {'role':'dialog','aria-modal':'true','aria-label':'Notifications'});
+
+  // Make dynamically generated service/notification text announceable without
+  // forcing focus or changing the visual layout.
+  ['serviceModalTitle','serviceModalDescription','chosenServiceLabel'].forEach(id => {
+    const el=document.getElementById(id);
+    if(el) el.setAttribute('aria-live','polite');
+  });
+
+  // Keep the document language in sync with the existing language engine.
+  window.addEventListener('beautyStudioLanguageChanged', e => {
+    const lang=e?.detail?.lang;
+    if(lang) document.documentElement.lang = lang==='zh'?'zh-CN':lang==='my'?'my':'en';
+  });
 })();
 

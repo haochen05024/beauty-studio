@@ -27,3 +27,7 @@ The old duplicate root-level `css/style.css` and `js/app.js` files were removed 
 Upload the contents of `beauty-studio-main/` to the customer `beauty-studio` GitHub Pages repository.
 
 Do not upload these files to the separate Admin or API projects.
+
+
+## v91
+Polished stable build: accessibility, keyboard focus, reduced-motion support, dynamic live-region semantics, and cache alignment. Existing D1, booking, notification, support, PWA and three-language behavior are preserved.

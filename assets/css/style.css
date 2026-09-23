@@ -2156,3 +2156,29 @@ footer p{color:#d9cbc4}
   .beauty-lang-menu{width:164px}
 }
 @media(max-width:390px){.beauty-lang-wrap{right:10px}.beauty-lang-current{max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+
+
+/* v91 — final polish layer
+   Accessibility and device-safety only; existing visual design remains intact.
+*/
+:where(button,a,input,textarea,select):focus-visible{
+  outline:2px solid currentColor;
+  outline-offset:3px;
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto!important}
+  *,*::before,*::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+img{max-width:100%}
+@supports (padding: max(0px)){
+  .support-fab,
+  .customer-notify-fab{
+    margin-bottom:max(0px, env(safe-area-inset-bottom));
+  }
+}
+
