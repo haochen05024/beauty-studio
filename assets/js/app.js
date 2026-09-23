@@ -1451,6 +1451,18 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('modalTitle').textContent = item.dataset.title || 'Beauty Style';
     document.getElementById('modalStyle').textContent = item.dataset.style || '';
     document.getElementById('modalDescription').textContent = item.dataset.description || '';
+    const workItems = Array.from(grid.querySelectorAll('.work-item'));
+    const workData = window.BEAUTY_STUDIO_CONTENT?.gallery?.[workItems.indexOf(item)];
+    if(workData){
+      const setWork=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v||''};
+      const L=window.__beautyStudioGetLanguage?.()||'en';
+      const pickWork=(base,fallback='')=>{const suffixes=L==='zh'?['Zh','_zh','CN','_cn']:L==='my'?['My','_my','Mm','_mm']:[];for(const x of suffixes){const k=base+x;if(workData[k]!=null&&String(workData[k]).trim())return String(workData[k]);}return String(workData[base]??fallback);};
+      setWork('modalWorkNumber',workData.number||String(workItems.indexOf(item)+1).padStart(2,'0'));
+      setWork('modalMood',pickWork('mood',''));
+      const rec=workData.recommendedService ? (window.BEAUTY_STUDIO_CONTENT?.services||{})[workData.recommendedService] : null;
+      if(rec){const suffixes=L==='zh'?['Zh','_zh']:L==='my'?['My','_my']:[];let title=rec.title||rec.name||'Custom Nail Art';for(const x of suffixes){if(rec['title'+x]){title=rec['title'+x];break;}}setWork('modalRecommended',title);}
+      setWork('modalNote',pickWork('note','Love this look? Bring it as inspiration and the studio can fine-tune the details for you.'));
+    }
     modal.classList.add('open');
     modal.setAttribute('aria-hidden','false');
     document.body.classList.add('modal-open');
@@ -3860,6 +3872,9 @@ document.addEventListener("DOMContentLoaded", () => {
     set('modalTitle',pick(it,'title','Beauty Style'));
     set('modalStyle',pick(it,'style',it.category||''));
     set('modalDescription',pick(it,'description',''));
+    set('modalWorkNumber',it.number||String(cards.indexOf(active)+1).padStart(2,'0'));
+    set('modalMood',pick(it,'mood',''));
+    set('modalNote',pick(it,'note','Love this look? Bring it as inspiration and the studio can fine-tune the details for you.'));
     const reco=it.recommendedService?services()[it.recommendedService]:null;
     if(reco)set('modalRecommended',pick(reco,'title',reco.name||'Custom Nail Art'));
   }
