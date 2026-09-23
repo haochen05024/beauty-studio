@@ -3334,21 +3334,9 @@ document.addEventListener("DOMContentLoaded", () => {
     wrap.querySelectorAll('[data-lang-choice]').forEach(item=>item.addEventListener('click',()=>setLanguage(item.dataset.langChoice)));
     document.addEventListener('click',e=>{if(!wrap.contains(e.target)){menu.classList.remove('open');b.classList.remove('open');b.setAttribute('aria-expanded','false')}});
   }
-  let applyingLanguage=false;
-  const obs=new MutationObserver(m=>{
-    if(applyingLanguage)return;
-    let added=false;
-    m.forEach(x=>{if(x.addedNodes && x.addedNodes.length)added=true});
-    if(added){
-      applyingLanguage=true;
-      try{apply()}finally{applyingLanguage=false}
-    }
-  });
-  function start(){
-    addToggle();
-    applyingLanguage=true;
-    try{apply()}finally{applyingLanguage=false}
-    obs.observe(document.body,{childList:true,subtree:true})
-  }
+  const obs=new MutationObserver(m=>{if(currentLang==='zh')return;let c=false;m.forEach(x=>{if(x.addedNodes.length)c=true});if(c)apply()});
+  function start(){addToggle();apply();obs.observe(document.body,{childList:true,subtree:true})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
+
+/* V77 bilingual UI — extended copy */
