@@ -2180,7 +2180,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ...item,
         id: item.id ?? fallback.id ?? key,
         title: item.title ?? item.name ?? fallback.title ?? key,
+        titleZh: item.titleZh ?? item.nameZh ?? fallback.titleZh ?? fallback.nameZh ?? "",
+        titleMy: item.titleMy ?? item.nameMy ?? fallback.titleMy ?? fallback.nameMy ?? "",
         description: item.description ?? fallback.description ?? "",
+        descriptionZh: item.descriptionZh ?? fallback.descriptionZh ?? "",
+        descriptionMy: item.descriptionMy ?? fallback.descriptionMy ?? "",
         price: item.price ?? fallback.price ?? "",
         duration: item.duration ?? fallback.duration ?? "",
         durationShort: item.durationShort ?? fallback.durationShort ?? (item.duration ? `${item.duration} MIN` : ""),
@@ -3326,6 +3330,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "Aftercare guidance":["护理指导","နောက်ဆက်တွဲဂရုစိုက်မှု လမ်းညွှန်"],"Natural beauty, lasting glow.":["自然之美，持久光彩。","သဘာဝအလှ၊ ကြာရှည်တောက်ပမှု။"],"Your mood, made into detail.":["把你的心情变成细节。","သင့်ခံစားချက်ကို အသေးစိတ်အဖြစ် ဖန်တီးပေးပါတယ်။"],"Long, refined and beautifully yours.":["修长、精致，真正属于你。","ရှည်လျား၊ သပ်ရပ်ပြီး သင့်အတွက်ပဲ ဖြစ်ပါတယ်။"]
   });
 
+  Object.assign(I18N, {"Skip to content":["跳转到内容","အကြောင်းအရာသို့ သွားရန်"],"A little beauty, made for you":["为你而生的小小美好。","သင့်အတွက် ဖန်တီးထားတဲ့ အလှအပလေး။"],"Your nails. Your style.":["你的指尖，你的风格。","သင့်လက်သည်း၊ သင့်စတိုင်။"],"Featured Style":["精选款式","ရွေးချယ်ထားသော ဒီဇိုင်း"],"Soft Blush":["柔粉","နူးညံ့ပန်းရောင်"],"Clean · Elegant · Everyday":["干净 · 优雅 · 日常","သန့်ရှင်း · လှပ · နေ့စဉ်"],"Beauty · Care · Detail":["美丽 · 呵护 · 细节","အလှ · ဂရုစိုက်မှု · အသေးစိတ်"],"THE EVERYDAY EDIT":["日常精选","နေ့စဉ်ရွေးချယ်မှု"],"THE SIGNATURE EDIT":["特色精选","အထူးရွေးချယ်မှု"],"THE LENGTH EDIT":["延长精选","အရှည်ဒီဇိုင်းရွေးချယ်မှု"],"PRICING & TIMING ARE SHOWN BEFORE YOU BOOK":["预约前会显示价格与时长","ရက်ချိန်းမယူမီ စျေးနှုန်းနဲ့ ကြာချိန်ကို ပြသပေးပါမယ်"],"Not sure what to choose?":["不知道怎么选？","ဘာကိုရွေးရမလဲ မသေချာဘူးလား။"],"Start with the look you love. Your final service can be fine-tuned with the Studio before the appointment is confirmed.":["先从你喜欢的款式开始。预约确认前，我们可以和你一起微调最终服务。","သင်နှစ်သက်တဲ့ ဒီဇိုင်းကနေ စလိုက်ပါ။ ရက်ချိန်းအတည်ပြုမီ စတူဒီယိုနဲ့အတူ နောက်ဆုံးဝန်ဆောင်မှုကို ညှိပေးနိုင်ပါတယ်။"],"PERSONALIZED":["为你定制","သင့်အတွက် အထူးဖန်တီးထားသည်"],"Start booking":["开始预约","ရက်ချိန်းစတင်ရန်"],"STUDIO EDIT":["工作室精选","စတူဒီယိုရွေးချယ်မှု"],"Color · Detail · Mood":["颜色 · 细节 · 氛围","အရောင် · အသေးစိတ် · ခံစားချက်"],"Special for you":["为你特别准备","သင့်အတွက် အထူးပြင်ဆင်ထားသည်"],"New look.":["新的款式。","ဒီဇိုင်းအသစ်။"],"New mood.":["新的心情。","ခံစားချက်အသစ်။"],"Seasonal colors, little details and styles made for the moments you want to remember.":["为值得记住的时刻准备季节色彩、细节与款式。","မှတ်မိနေချင်တဲ့ အချိန်လေးတွေအတွက် ရာသီအလိုက်အရောင်၊ အသေးစိတ်နဲ့ ဒီဇိုင်းတွေကို ဖန်တီးပေးပါတယ်။"],"See promotions":["查看活动","ပရိုမိုးရှင်းများကြည့်ရန်"],"Real nails.\nReal happiness.":["真实的指尖。真实的快乐。","တကယ့်လက်သည်း။ တကယ့်ပျော်ရွှင်မှု။"],"Find your mood":["找到你的风格","သင့်စတိုင်ကို ရှာပါ"],"Save a look you love. Real studio photos can be added here anytime — and we can use your favorite look as inspiration when you book.":["收藏你喜欢的款式。之后这里可以随时加入真实作品照片，预约时也可以直接用喜欢的款式作为参考。","သင်နှစ်သက်တဲ့ ဒီဇိုင်းကို သိမ်းထားပါ။ နောက်ပိုင်းမှာ စတူဒီယိုရဲ့ တကယ့်လက်ရာပုံတွေကို ထည့်နိုင်ပြီး ရက်ချိန်းယူတဲ့အခါ သင်ကြိုက်တဲ့ဒီဇိုင်းကို ကိုးကားအဖြစ် အသုံးပြုနိုင်ပါတယ်။"],"All":["全部","အားလုံး"],"Simple":["简约","ရိုးရှင်း"],"Elegant":["优雅","လှပသပ်ရပ်"],"Trendy":["潮流","ခေတ်မီ"],"Cute":["可爱","ချစ်စရာ"],"Soft Pearl":["柔光珍珠","ပျော့ပျောင်း ပုလဲအလင်း"],"Milky Nude":["奶油裸色","နို့ရောင် Nude"],"Rose Chrome":["玫瑰镜面","Rose Chrome"],"Little Hearts":["小心心","နှလုံးသားလေးများ"],"Quiet Luxury":["静奢","အေးချမ်းခမ်းနားမှု"],"Elegant · Gel":["优雅 · 凝胶","လှပသပ်ရပ် · ဂျယ်လ်"],"Simple · Gel":["简约 · 凝胶","ရိုးရှင်း · ဂျယ်လ်"],"Trendy · Art":["潮流 · 艺术","ခေတ်မီ · ဒီဇိုင်း"],"Cute · Art":["可爱 · 艺术","ချစ်စရာ · ဒီဇိုင်း"],"Elegant · Extensions":["优雅 · 延长甲","လှပသပ်ရပ် · လက်သည်းတိုးချဲ့"],"View →":["查看 →","ကြည့်ရန် →"],"BS · 2026":["BS · 2026","BS · 2026"],"Beauty, in your own little way.":["用属于你的方式，美得刚刚好。","သင့်ကိုယ်ပိုင်ပုံစံလေးနဲ့ လှပလိုက်ပါ။"],"A quiet space for\nyourself.":["留一处只属于自己的安静空间。","သင့်အတွက်ပဲ သီးသန့်အေးချမ်းတဲ့ နေရာလေး။"],"Studio signature":["工作室特色","စတူဒီယိုရဲ့ ထူးခြားချက်"],"Studio philosophy":["工作室理念","စတူဒီယိုအယူအဆ"],"Quiet appointments, thoughtful details and nails that still feel like you.":["安静的预约体验、细致的服务，以及依然像你的指尖。","အေးချမ်းတဲ့ ရက်ချိန်းအတွေ့အကြုံ၊ ဂရုတစိုက်အသေးစိတ်နဲ့ သင့်လိုပဲ ခံစားရတဲ့ လက်သည်းဒီဇိုင်း။"],"Personal":["专属","ကိုယ်ပိုင်"],"Every set starts with your mood, your style and the little details you care about.":["每一套都从你的心情、风格和在意的小细节开始。","ဒီဇိုင်းတိုင်းက သင့်ခံစားချက်၊ သင့်စတိုင်နဲ့ သင်ဂရုစိုက်တဲ့ အသေးစိတ်လေးတွေကနေ စပါတယ်။"],"Thoughtful":["细致","ဂရုတစိုက်"],"A calm process, considered choices and a finish that feels polished without feeling overdone.":["从容的过程、经过考虑的选择，以及精致但不过度的完成效果。","အေးချမ်းတဲ့ လုပ်ငန်းစဉ်၊ သေချာရွေးချယ်မှုနဲ့ မလွန်ကဲဘဲ သပ်ရပ်လှပတဲ့ အပြီးသတ်။"],"Yours":["属于你","သင့်အတွက်"],"Save a look, bring an idea or simply choose a color. The final result should still feel like you.":["收藏一个款式、带来一个想法，或只是选一种颜色。最后的结果依然应该像你。","ဒီဇိုင်းတစ်ခုသိမ်းထားပါ၊ အကြံတစ်ခုယူလာပါ ဒါမှမဟုတ် အရောင်တစ်ရောင်ပဲ ရွေးပါ။ နောက်ဆုံးရလဒ်က သင့်လိုပဲ ဖြစ်နေသင့်ပါတယ်။"],"Professional":["专业","ကျွမ်းကျင်မှု"],"Carefully finished":["细致完成","ဂရုတစိုက် အပြီးသတ်"],"Made for you":["为你而做","သင့်အတွက် ဖန်တီးထားသည်"],"Relaxing":["放松","အေးချမ်းမှု"],"Your time":["属于你的时间","သင့်အချိန်"],"Keep Beauty Studio\nclose to you.":["让 Beauty Studio 陪在你身边。","Beauty Studio ကို သင့်အနီးမှာ အမြဲရှိနေစေပါ။"],"Available on phones, tablets & computers":["支持手机、平板和电脑","ဖုန်း၊ တက်ဘလက်နဲ့ ကွန်ပျူတာတွေမှာ အသုံးပြုနိုင်ပါတယ်"],"Phone / Tablet":["手机 / 平板","ဖုန်း / တက်ဘလက်"],"Device-aware install guide":["设备专属安装指南","သင့်စက်အတွက် ထည့်သွင်းလမ်းညွှန်"],"YOUR DEVICE":["你的设备","သင့်စက်"],"Maybe later":["以后再说","နောက်မှလုပ်မယ်"],"Add Beauty Studio to your home screen.":["将 Beauty Studio 添加到主屏幕。","Beauty Studio ကို ပင်မမျက်နှာပြင်သို့ ထည့်ပါ။"],"Follow the steps for your device. Once Beauty Studio is added, this button will disappear.":["按照你的设备步骤操作。添加 Beauty Studio 后，这个按钮会消失。","သင့်စက်အတွက် အဆင့်များကို လိုက်နာပါ။ Beauty Studio ထည့်ပြီးရင် ဒီခလုတ်ပျောက်သွားပါမယ်။"],"✦ You can open Beauty Studio from your home screen anytime.":["✦ 你可以随时从主屏幕打开 Beauty Studio。","✦ ပင်မမျက်နှာပြင်ကနေ Beauty Studio ကို အချိန်မရွေး ဖွင့်နိုင်ပါတယ်။"],"04 · Appointments":["04 · 预约","04 · ရက်ချိန်းများ"],"Ready for your\nnext set?":["准备好下一套了吗？","နောက်ဒီဇိုင်းအတွက် အသင့်ဖြစ်ပြီလား။"],"Personal care":["贴心护理","ကိုယ်ပိုင်ဂရုစိုက်မှု"],"Flexible time":["灵活时间","အဆင်ပြေတဲ့အချိန်"],"Easy booking":["轻松预约","လွယ်ကူတဲ့ ရက်ချိန်း"],"05 · Find Us":["05 · 找到我们","05 · ကျွန်ုပ်တို့ကို ရှာပါ"],"Location":["位置","တည်နေရာ"],"Studio address will appear here":["工作室地址将在这里显示","စတူဒီယိုလိပ်စာကို ဒီမှာ ပြသပေးပါမယ်"],"View on Maps →":["在地图中查看 →","မြေပုံမှာ ကြည့်ရန် →"],"Hours":["营业时间","ဖွင့်ချိန်"],"By appointment":["预约制","ရက်ချိန်းဖြင့်"],"See availability →":["查看可预约时间 →","ရနိုင်တဲ့အချိန်တွေ ကြည့်ရန် →"],"Contact":["联系我们","ဆက်သွယ်ရန်"],"+00 000 000 000":["+00 000 000 000","+00 000 000 000"],"Call studio →":["联系工作室 →","စတူဒီယိုကို ဖုန်းဆက်ရန် →"],"By appointment only":["仅限预约","ရက်ချိန်းဖြင့်သာ"],"Appointments are confirmed after your request is reviewed.":["预约请求审核后才会确认。","ရက်ချိန်းတောင်းဆိုမှုကို စစ်ဆေးပြီးမှ အတည်ပြုပေးပါမယ်။"],"STAY CLOSE":["保持联系","ဆက်သွယ်နေပါ"],"TikTok":["TikTok","TikTok"],"Follow →":["关注 →","Follow →"],"WhatsApp":["WhatsApp","WhatsApp"],"Telegram":["Telegram","Telegram"],"STUDIO NOTE":["工作室寄语","စတူဒီယိုမှတ်ချက်"],"Good nails.":["好看的指甲。","လှပတဲ့ လက်သည်းများ။"],"Brighter days.":["让每一天更明亮。","နေ့ရက်တိုင်း ပိုမိုတောက်ပပါစေ။"],"Made for beautiful little moments.":["为每一个美好瞬间而做。","လှပတဲ့အချိန်လေးတိုင်းအတွက် ဖန်တီးထားပါတယ်။"],"STYLE":["款式","ဒီဇိုင်း"],"MOOD":["氛围","ခံစားချက်"],"RECOMMENDED":["推荐","အကြံပြု"],"Love this look? Bring it as inspiration and the studio can fine-tune the details for you.":["喜欢这个款式？预约时可以把它作为参考，我们会为你微调细节。","ဒီဒီဇိုင်းကို ကြိုက်လား။ ရက်ချိန်းယူတဲ့အခါ ကိုးကားပုံအဖြစ် ယူလာနိုင်ပြီး အသေးစိတ်ကို သင့်အတွက် ညှိပေးနိုင်ပါတယ်။"],"Service ·":["服务 ·","ဝန်ဆောင်မှု ·"],"What's included":["包含内容","ပါဝင်သည့်အရာများ"],"Final price may vary with length, design detail and add-ons.":["最终价格可能因长度、设计细节和附加项目而有所变化。","နောက်ဆုံးစျေးနှုန်းက အရှည်၊ ဒီဇိုင်းအသေးစိတ်နဲ့ အပိုဝန်ဆောင်မှုများအလိုက် ပြောင်းလဲနိုင်ပါတယ်။"],"Appointments":["预约","ရက်ချိန်းများ"],"A little time, made entirely for you.":["留一点时间，只为你而准备。","သင့်အတွက်ပဲ သီးသန့်ထားတဲ့ အချိန်လေး။"],"01 — 03":["01 — 03","01 — 03"],"From 00 MMK · 60 min":["起价 00 MMK · 60 分钟","00 MMK မှ · 60 မိနစ်"],"From 00 MMK · 90 min":["起价 00 MMK · 90 分钟","00 MMK မှ · 90 မိနစ်"],"From 00 MMK · 120 min":["起价 00 MMK · 120 分钟","00 MMK မှ · 120 မိနစ်"],"The final price can vary with length, design detail and any add-ons.":["最终价格可能因长度、设计细节和附加项目而变化。","နောက်ဆုံးစျေးနှုန်းက အရှည်၊ ဒီဇိုင်းအသေးစိတ်နဲ့ အပိုဝန်ဆောင်မှုတွေအလိုက် ပြောင်းလဲနိုင်ပါတယ်။"],"Choose a service":["选择服务","ဝန်ဆောင်မှုရွေးပါ"],"You can change this later.":["之后可以修改。","နောက်မှ ပြောင်းလဲနိုင်ပါတယ်။"],"Choose a time":["选择时间","အချိန်ရွေးပါ"],"Pick a day first, then a time.":["先选择日期，再选择时间。","အရင်ဆုံး ရက်ရွေးပြီးနောက် အချိန်ရွေးပါ။"],"Today":["今天","ယနေ့"],"Tomorrow":["明天","မနက်ဖြန်"],"Choose date":["选择日期","ရက်စွဲရွေးပါ"],"Pick a date":["选择一个日期","ရက်စွဲတစ်ခုရွေးပါ"],"Available times":["可预约时间","ရနိုင်သောအချိန်များ"],"Live availability · based on studio rules":["实时可预约时间 · 根据工作室规则","လက်ရှိရနိုင်သောအချိန် · စတူဒီယိုစည်းမျဉ်းများအပေါ် မူတည်သည်"],"Inspiration":["灵感 / 参考","စိတ်ကူး / ကိုးကား"],"Service":["服务","ဝန်ဆောင်မှု"],"Price":["价格","စျေးနှုန်း"],"Booking details update as you choose.":["预约详情会随着你的选择更新。","သင်ရွေးချယ်သလို ရက်ချိန်းအသေးစိတ်တွေ ပြောင်းလဲပေးပါမယ်။"],"Choose your service, date and time to continue.":["选择服务、日期和时间后继续。","ဆက်လုပ်ရန် ဝန်ဆောင်မှု၊ ရက်စွဲနဲ့ အချိန်ကို ရွေးပါ။"],"We’ll use these details to confirm your appointment.":["我们会使用这些信息确认你的预约。","ဒီအချက်အလက်တွေကို အသုံးပြုပြီး သင့်ရက်ချိန်းကို အတည်ပြုပေးပါမယ်။"],"Thoughtful from start to finish.":["从开始到结束，都用心对待。","အစကနေ အဆုံးထိ ဂရုတစိုက် ဆောင်ရွက်ပေးပါတယ်။"],"Your request is reviewed by the Studio before the appointment is confirmed.":["预约请求会由工作室审核后确认。","ရက်ချိန်းတောင်းဆိုမှုကို စတူဒီယိုက စစ်ဆေးပြီးမှ အတည်ပြုပေးပါမယ်။"],"Your request is sent securely to the Studio for review. You’ll receive confirmation after it is reviewed.":["你的请求会安全发送给工作室审核，审核后你会收到确认。","သင့်တောင်းဆိုမှုကို လုံခြုံစွာ စတူဒီယိုထံ ပို့ပေးပြီး စစ်ဆေးပြီးနောက် အတည်ပြုချက်ရရှိပါမယ်။"],"Appointment request":["预约请求","ရက်ချိန်းတောင်းဆိုမှု"],"PREVIEW":["预览","ကြိုတင်ကြည့်ရှုရန်"],"Request received.":["已收到请求。","တောင်းဆိုမှုကို လက်ခံရရှိပါပြီ။"],"Your appointment request is ready. The Studio will confirm the final time with you.":["你的预约请求已准备好，工作室会与你确认最终时间。","သင့်ရက်ချိန်းတောင်းဆိုမှု အဆင်သင့်ဖြစ်ပါပြီ။ နောက်ဆုံးအချိန်ကို စတူဒီယိုက သင့်နဲ့ အတည်ပြုပေးပါမယ်။"],"Done":["完成","ပြီးပါပြီ"],"Customer notifications":["客户通知","ဖောက်သည် အသိပေးချက်များ"],"Updates":["更新","အပ်ဒိတ်များ"],"No new updates yet.":["暂时没有新通知。","အသိပေးချက်အသစ် မရှိသေးပါ။"],"Customer support chat":["客户支持聊天","ဖောက်သည်အကူအညီ စကားပြောခန်း"],"Need help?":["需要帮助吗？","အကူအညီလိုပါသလား။"],"Beauty Studio · Support":["Beauty Studio · 客服","Beauty Studio · အကူအညီ"],"How can we help?":["有什么可以帮助你？","ဘယ်လိုကူညီပေးရမလဲ။"],"Customer —":["客户 —","ဖောက်သည် —"],"We usually reply as soon as we can.":["我们会尽快回复你。","တတ်နိုင်သမျှ အမြန်ဆုံး ပြန်ကြားပေးပါမယ်။"],"Ask us anything about services, designs or your appointment.":["关于服务、款式或预约，都可以问我们。","ဝန်ဆောင်မှု၊ ဒီဇိုင်း ဒါမှမဟုတ် ရက်ချိန်းအကြောင်း ဘာမဆို မေးနိုင်ပါတယ်။"],"Send":["发送","ပို့ရန်"],"Your conversation stays with your Customer ID after refresh.":["刷新后，你的对话仍会保留在客户编号下。","Refresh လုပ်ပြီးနောက်လည်း သင့်စကားပြောမှတ်တမ်းက Customer ID နဲ့အတူ ရှိနေပါမယ်။"],"Home":["首页","ပင်မစာမျက်နှာ"],"Install":["安装","ထည့်သွင်းရန်"],"Gallery":["作品集","လက်ရာများ"],"Add a short description.":["添加简短描述。","အတိုချုံးဖော်ပြချက် ထည့်ပါ။"],"Made with care.":["用心打造。","ဂရုတစိုက် ဖန်တီးထားသည်။"],"Personalized care":["专属护理","ကိုယ်ပိုင်ဂရုစိုက်မှု"],"Everyday wear":["适合日常","နေ့စဉ်ဝတ်ဆင်ရန် သင့်တော်သည်"],"Service detail":["服务细节","ဝန်ဆောင်မှုအသေးစိတ်"],"Tailored studio service":["为你定制的工作室服务","သင့်အတွက် စိတ်ကြိုက် စတူဒီယိုဝန်ဆောင်မှု"],"Estimated appointment time":["预计预约时长","ခန့်မှန်း ရက်ချိန်းကြာချိန်"],"Personalized finish":["专属收尾","ကိုယ်ပိုင်အပြီးသတ်"],"Beauty Service":["美容服务","အလှအပဝန်ဆောင်မှု"],"New Service":["新服务","ဝန်ဆောင်မှုအသစ်"],"New Look":["新作品","လက်ရာအသစ်"],"Beauty Style":["美甲款式","အလှဒီဇိုင်း"],"Close":["关闭","ပိတ်ရန်"],"I've added it":["我已经添加了","ထည့်ပြီးပါပြီ"],"Install Beauty Studio":["安装 Beauty Studio","Beauty Studio ကို ထည့်သွင်းရန်"],"Ready to install on this device":["此设备可以安装","ဒီစက်မှာ ထည့်သွင်းနိုင်ပါပြီ"],"Beauty Studio has been added":["Beauty Studio 已添加","Beauty Studio ထည့်သွင်းပြီးပါပြီ"],"Beauty Studio will be available from your Start menu and installed apps.":["Beauty Studio 会出现在开始菜单和已安装应用中。","Beauty Studio ကို Start menu နဲ့ ထည့်သွင်းထားတဲ့ app တွေထဲကနေ ဖွင့်နိုင်ပါမယ်။"],"You're ready":["准备好了","အဆင်သင့်ဖြစ်ပါပြီ"],"Open Beauty Studio":["打开 Beauty Studio","Beauty Studio ကို ဖွင့်ရန်"],"Confirm Install":["确认安装","ထည့်သွင်းမှု အတည်ပြုရန်"],"Choose Install":["选择安装","ထည့်သွင်းရန် ရွေးပါ"],"Open the install option":["打开安装选项","ထည့်သွင်းရန် ရွေးချယ်မှုကို ဖွင့်ပါ"],"Confirm the install":["确认安装","ထည့်သွင်းမှုကို အတည်ပြုပါ"],"Open Beauty Studio from your Dock, Applications, or installed apps.":["从 Dock、应用程序或已安装应用中打开 Beauty Studio。","Dock၊ Applications ဒါမှမဟုတ် ထည့်သွင်းထားတဲ့ app တွေကနေ Beauty Studio ကို ဖွင့်ပါ။"],"In Safari, tap the Share button. On iPad, it is in the browser toolbar.":["在 Safari 中点击分享按钮。iPad 上可在浏览器工具栏找到。","Safari မှာ Share ခလုတ်ကို နှိပ်ပါ။ iPad မှာ browser toolbar ထဲမှာ ရှိပါတယ်။"],"Scroll through the Share sheet and select “Add to Home Screen”.":["在分享菜单中找到“添加到主屏幕”。","Share menu ထဲက “Add to Home Screen” ကို ရွေးပါ။"],"Confirm the name and tap “Add”. Beauty Studio will appear on your Home Screen.":["确认名称并点击“添加”，Beauty Studio 就会出现在主屏幕。","အမည်ကို အတည်ပြုပြီး “Add” ကို နှိပ်ပါ။ Beauty Studio က ပင်မမျက်နှာပြင်မှာ ပေါ်လာပါမယ်။"],"Tip · If the option is missing, open this page in Safari and try again.":["提示 · 如果找不到该选项，请用 Safari 打开此页面再试一次。","အကြံပြုချက် · ရွေးချယ်စရာမတွေ့ရင် ဒီစာမျက်နှာကို Safari နဲ့ဖွင့်ပြီး ထပ်စမ်းပါ။"],"Android phones and tablets can use the browser's install option when PWA installation is supported.":["Android 手机和平板在浏览器支持 PWA 安装时，可以使用安装选项。","PWA ထည့်သွင်းမှုကို browser က ထောက်ပံ့ပါက Android ဖုန်းနဲ့ တက်ဘလက်တွေမှာ install option ကို အသုံးပြုနိုင်ပါတယ်။"],"Open the browser menu":["打开浏览器菜单","Browser menu ကို ဖွင့်ပါ"],"In Chrome or another supported browser, tap ⋮ or the browser menu.":["在 Chrome 或其他支持的浏览器中点击 ⋮ 或浏览器菜单。","Chrome ဒါမှမဟုတ် ထောက်ပံ့တဲ့ browser တစ်ခုမှာ ⋮ ဒါမှမဟုတ် browser menu ကို နှိပ်ပါ။"],"Tap “Install app”, “Add to Home screen”, or the install icon if your browser shows one.":["点击“安装应用”“添加到主屏幕”或浏览器显示的安装图标。","“Install app”၊ “Add to Home screen” ဒါမှမဟုတ် browser မှာ ပေါ်တဲ့ install icon ကို နှိပ်ပါ။"],"Confirm the prompt. Beauty Studio will be added to your Home Screen or app list.":["确认提示，Beauty Studio 会添加到主屏幕或应用列表。","ပေါ်လာတဲ့ အတည်ပြုချက်ကို လက်ခံပါ။ Beauty Studio ကို ပင်မမျက်နှာပြင် ဒါမှမဟုတ် app list ထဲ ထည့်ပေးပါမယ်။"],"On Mac, install the website as an app when your browser supports PWA installation.":["在 Mac 上，如果浏览器支持 PWA，可以将网站安装为应用。","Mac မှာ browser က PWA ကို ထောက်ပံ့ရင် ဝဘ်ဆိုဒ်ကို app အဖြစ် ထည့်သွင်းနိုင်ပါတယ်။"],"Safari: use File → Add to Dock. Chrome: use the install icon in the address bar or ⋮ menu.":["Safari：使用 文件 → 添加到 Dock。Chrome：使用地址栏安装图标或 ⋮ 菜单。","Safari: File → Add to Dock ကို သုံးပါ။ Chrome: address bar ထဲက install icon ဒါမှမဟုတ် ⋮ menu ကို သုံးပါ။"],"Launch it from your Dock, Applications, or installed apps.":["从 Dock、应用程序或已安装应用中打开。","Dock၊ Applications ဒါမှမဟုတ် ထည့်သွင်းထားတဲ့ app တွေကနေ ဖွင့်ပါ။"],"Chrome and Edge can install Beauty Studio as an app when PWA installation is supported.":["Chrome 和 Edge 在支持 PWA 时可以将 Beauty Studio 安装为应用。","PWA ကို ထောက်ပံ့ရင် Chrome နဲ့ Edge မှာ Beauty Studio ကို app အဖြစ် ထည့်သွင်းနိုင်ပါတယ်။"],"Chrome: click the install icon or ⋮. Edge: use Apps → Install this site as an app.":["Chrome：点击安装图标或 ⋮。Edge：使用 应用 → 将此网站安装为应用。","Chrome: install icon ဒါမှမဟုတ် ⋮ ကို နှိပ်ပါ။ Edge: Apps → Install this site as an app ကို သုံးပါ။"],"We couldn't identify a specific device. Use your browser's Install, Add to Home Screen, Add to Dock, or shortcut option.":["无法识别具体设备。请使用浏览器的安装、添加到主屏幕、添加到 Dock 或创建快捷方式选项。","သင့်စက်ကို သီးခြားမသိနိုင်ပါ။ Browser ရဲ့ Install၊ Add to Home Screen၊ Add to Dock ဒါမှမဟုတ် shortcut option ကို သုံးပါ။"],"Look for Install, Add to Home Screen, Add to Dock, Create shortcut, or Add to desktop.":["查找安装、添加到主屏幕、添加到 Dock、创建快捷方式或添加到桌面的选项。","Install၊ Add to Home Screen၊ Add to Dock၊ Create shortcut ဒါမှမဟုတ် Add to desktop ကို ရှာပါ။"],"Tip · Installation wording differs by browser. The site remains fully usable even when PWA installation is unavailable.":["提示 · 不同浏览器的安装名称可能不同。即使无法安装 PWA，网站仍可正常使用。","အကြံပြုချက် · Browser အလိုက် install အမည်ကွာနိုင်ပါတယ်။ PWA မရရင်တောင် ဝဘ်ဆိုဒ်ကို ပုံမှန်အသုံးပြုနိုင်ပါတယ်။"]});
+
   const LANG_KEY = 'beauty_studio_language';
   let currentLang = localStorage.getItem(LANG_KEY) || 'en';
   if(!['en','zh','my'].includes(currentLang)) currentLang='en';
@@ -3410,4 +3416,207 @@ document.addEventListener("DOMContentLoaded", () => {
   function bindOpenRefresh(){document.querySelectorAll('.service-card[data-service]').forEach(card=>{if(card.dataset.v85LangBound==='1')return;card.dataset.v85LangBound='1';card.addEventListener('click',()=>setTimeout(renderModal,0))});document.getElementById('work-grid')?.addEventListener('click',event=>{const card=event.target.closest('.work-item');if(card){card.classList.add('is-active-work');setTimeout(renderGalleryModal,0)}})}
   function apply(){renderServices();renderGallery();renderModal();bindOpenRefresh();renderGalleryModal()}
   window.__beautyStudioLocalizedDynamic=apply;window.addEventListener('beautyStudioLanguageChanged',apply);window.addEventListener('beautyStudioD1ContentReady',apply);[500,1200,2500,5000].forEach(t=>setTimeout(apply,t));
+})();
+
+/* V86 — complete trilingual rendering for static + D1-created content */
+(function(){
+  const getLang=()=>window.__beautyStudioGetLanguage?.()||'en';
+  const tr=v=>window.__beautyStudioTranslateText?.(String(v??''))||null;
+  const clean=v=>String(v??'').trim();
+  const pick=(o,base,fallback='')=>{
+    if(!o) return fallback;
+    const l=getLang();
+    if(l==='en') return clean(o[base] ?? fallback);
+    const suffixes=l==='zh'?['Zh','_zh','CN','_cn']:['My','_my','Mm','_mm'];
+    for(const suffix of suffixes){
+      const key=`${base}${suffix}`;
+      if(o[key]!=null && clean(o[key])) return clean(o[key]);
+    }
+    const raw=clean(o[base] ?? fallback);
+    return tr(raw)||raw||fallback;
+  };
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const services=()=>window.BEAUTY_STUDIO_CONTENT?.services||{};
+  const gallery=()=>Array.isArray(window.BEAUTY_STUDIO_CONTENT?.gallery)?window.BEAUTY_STUDIO_CONTENT.gallery:[];
+
+  function localizeValue(v){return tr(v)||v||'';}
+  function localizeArray(o,base){
+    const l=getLang();
+    if(l==='zh' && Array.isArray(o?.[base+'Zh'])) return o[base+'Zh'];
+    if(l==='my' && Array.isArray(o?.[base+'My'])) return o[base+'My'];
+    return Array.isArray(o?.[base]) ? o[base].map(localizeValue) : [];
+  }
+
+  function refreshServices(){
+    const list=services();
+    document.querySelectorAll('.service-card[data-service]').forEach(card=>{
+      const s=list[card.dataset.service]; if(!s) return;
+      const title=pick(s,'title',pick(s,'name','Beauty Service'));
+      const description=pick(s,'description','');
+      const kicker=pick(s,'kicker','Service');
+      const tags=pick(s,'tags','');
+      const photoLabel=tr(s.kicker ? `THE ${String(s.kicker).toUpperCase()} EDIT` : '') || (getLang()==='zh'?'服务精选':getLang()==='my'?'ဝန်ဆောင်မှုရွေးချယ်မှု':'BEAUTY EDIT');
+      const q=sel=>card.querySelector(sel);
+      if(q('.service-kicker span:first-child')) q('.service-kicker span:first-child').textContent=kicker;
+      if(q('h3')) q('h3').textContent=title;
+      if(q('.service-info > p')) q('.service-info > p').textContent=description;
+      if(q('.service-bottom > span')) q('.service-bottom > span').textContent=tags ? localizeValue(tags) : '';
+      if(q('.service-photo-label')) q('.service-photo-label').textContent=photoLabel;
+      const meta=card.querySelectorAll('.service-meta span');
+      if(meta[0]) meta[0].textContent=s.price||'';
+      if(meta[1]) meta[1].textContent=s.duration ? `${s.duration} min` : '';
+      if(q('.service-photo small')) q('.service-photo small').textContent=s.durationShort|| (s.duration?`${s.duration} MIN`:'');
+      const choices=document.querySelectorAll(`[data-service-choice][data-service-key="${CSS.escape(card.dataset.service)}"]`);
+      choices.forEach(btn=>{
+        btn.dataset.serviceChoice=title;
+        btn.dataset.serviceDisplay=title;
+        btn.dataset.servicePrice=s.price||'';
+        btn.dataset.serviceDuration=s.duration||'';
+        const sp=btn.querySelector('span'), sm=btn.querySelector('small');
+        if(sp) sp.textContent=title;
+        if(sm) sm.textContent=`${s.price||''} · ${s.duration||''} min`;
+      });
+    });
+
+    // The booking step may contain buttons created before D1 finishes loading.
+    document.querySelectorAll('[data-service-choice][data-service-key]').forEach(btn=>{
+      const s=list[btn.dataset.serviceKey]; if(!s) return;
+      const title=pick(s,'title',pick(s,'name','Beauty Service'));
+      btn.dataset.serviceChoice=title;
+      const sp=btn.querySelector('span'), sm=btn.querySelector('small');
+      if(sp) sp.textContent=title;
+      if(sm) sm.textContent=`${s.price||''} · ${s.duration||''} min`;
+    });
+  }
+
+  function refreshGallery(){
+    const items=gallery();
+    const grid=document.getElementById('work-grid');
+    if(!grid) return;
+    [...grid.querySelectorAll('.work-item')].forEach((card,index)=>{
+      const item=items[index]; if(!item) return;
+      const title=pick(item,'title','Beauty Style');
+      const style=pick(item,'style',pick(item,'category',''));
+      const desc=pick(item,'description','');
+      const category=pick(item,'category','Simple').toLowerCase();
+      card.dataset.title=title;
+      card.dataset.style=style;
+      card.dataset.description=desc;
+      card.dataset.styleName=pick(item,'styleName',title);
+      const info=card.querySelector('div:last-child');
+      if(info?.querySelector('strong')) info.querySelector('strong').textContent=title;
+      if(info?.querySelector('span')) info.querySelector('span').textContent=style;
+      const img=card.querySelector('.gallery-photo');
+      if(img) img.alt=pick(item,'alt',title||'Beauty Studio nail design');
+      card.dataset.category=category;
+    });
+    const count=document.getElementById('galleryCount');
+    if(count){
+      const n=items.length;
+      const word=getLang()==='zh'?'款式':getLang()==='my'?'ဒီဇိုင်း':(n===1?'style':'styles');
+      count.textContent=`${n} ${word}`;
+    }
+  }
+
+  function refreshServiceModal(){
+    const key=document.getElementById('chooseServiceButton')?.dataset.bookService;
+    const s=key?services()[key]:null;
+    if(!s) return;
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v??''};
+    const tags=pick(s,'tags','').split(',').map(x=>x.trim()).filter(Boolean);
+    set('serviceModalNumber',s.number||'');
+    set('serviceModalDuration',s.duration?`${s.duration} MIN`:'');
+    set('serviceModalTitle',pick(s,'title',pick(s,'name','Beauty Service')));
+    set('serviceModalPrice',s.price|| (getLang()==='zh'?'价格待定':getLang()==='my'?'စျေးနှုန်းမသတ်မှတ်ရသေး':'Price on request'));
+    set('serviceModalDurationText',s.duration?`${s.duration} min`:'');
+    set('serviceModalDescription',pick(s,'description','A personalized service prepared around your preferred look.'));
+    set('serviceModalKicker',pick(s,'kicker','Personalized'));
+    set('serviceModalCaption',pick(s,'caption','Made with care.'));
+    set('serviceIdealFor',pick(s,'idealFor',tags[0]||'Personalized care'));
+    const rawHighlights=Array.isArray(s.highlights)?s.highlights:[];
+    const rows=rawHighlights.length?rawHighlights:[
+      [tags[0]||'Service','Tailored studio service'],
+      [s.duration?`${s.duration} min`:'Flexible','Estimated appointment time'],
+      [tags[1]||'Detail','Personalized finish']
+    ];
+    const hi=document.getElementById('serviceHighlights');
+    if(hi){
+      hi.hidden=false;
+      hi.innerHTML=rows.slice(0,3).map(row=>{
+        const pair=Array.isArray(row)?row:[row,'Studio detail'];
+        return `<div><span>✦</span><strong>${esc(localizeValue(pair[0]))}</strong><small>${esc(localizeValue(pair[1]))}</small></div>`;
+      }).join('');
+    }
+    const points=localizeArray(s,'points');
+    const ul=document.getElementById('servicePoints');
+    if(ul && points.length) ul.innerHTML=points.map(x=>`<li>${esc(x)}</li>`).join('');
+  }
+
+  function refreshGalleryModal(){
+    const modal=document.getElementById('detailModal');
+    const grid=document.getElementById('work-grid');
+    if(!modal||!grid||!modal.classList.contains('open')) return;
+    const cards=[...grid.querySelectorAll('.work-item')];
+    const active=cards.find(c=>c.classList.contains('is-active-work'))||cards[0];
+    if(!active) return;
+    const index=cards.indexOf(active), item=gallery()[index];
+    if(!item) return;
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v??''};
+    set('modalTitle',pick(item,'title','Beauty Style'));
+    set('modalStyle',pick(item,'style',pick(item,'category','')));
+    set('modalDescription',pick(item,'description',''));
+    const cat=String(item.category||'simple').toLowerCase();
+    const moods={
+      simple:['Clean & effortless','干净 · 轻松','သန့်ရှင်း · လွယ်ကူ'],
+      elegant:['Soft & polished','柔和 · 精致','နူးညံ့ · သပ်ရပ်'],
+      trendy:['Modern & expressive','现代 · 有表现力','ခေတ်မီ · ထင်ရှား'],
+      cute:['Sweet & playful','甜美 · 活泼','ချစ်စရာ · ပျော်ရွှင်']
+    };
+    const mood=moods[cat]||moods.simple;
+    set('modalMood',getLang()==='zh'?mood[1]:getLang()==='my'?mood[2]:mood[0]);
+    const reco=item.recommendedService?services()[item.recommendedService]:null;
+    set('modalRecommended',reco?pick(reco,'title',pick(reco,'name','Custom Nail Art')):tr('Custom Nail Art')||'Custom Nail Art');
+  }
+
+  function refreshInstallModal(){
+    const modal=document.getElementById('installModal');
+    if(!modal) return;
+    const translateNode=(node)=>{
+      if(node.nodeType!==Node.TEXT_NODE || !node.nodeValue.trim()) return;
+      const parent=node.parentElement;
+      if(!parent || ['SCRIPT','STYLE','NOSCRIPT'].includes(parent.tagName)) return;
+      const key=node.parentElement?.dataset?.i18nBase || node.nodeValue.trim();
+      const translated=tr(key);
+      if(translated){
+        node.parentElement.dataset.i18nBase=key;
+        const lead=node.nodeValue.match(/^\s*/)?.[0]||'';
+        const trail=node.nodeValue.match(/\s*$/)?.[0]||'';
+        node.nodeValue=lead+translated+trail;
+      }
+    };
+    const walker=document.createTreeWalker(modal,NodeFilter.SHOW_TEXT);const nodes=[];let n;while(n=walker.nextNode())nodes.push(n);nodes.forEach(translateNode);
+    const action=document.getElementById('installModalAction');
+    if(action){const base=action.dataset.i18nBase||action.textContent.trim();action.dataset.i18nBase=base;action.textContent=tr(base)||base;}
+  }
+
+  function refreshAll(){
+    refreshServices();
+    refreshGallery();
+    refreshServiceModal();
+    refreshGalleryModal();
+    refreshInstallModal();
+  }
+
+  window.__beautyStudioRefreshLanguageV86=refreshAll;
+  window.addEventListener('beautyStudioLanguageChanged',refreshAll);
+  window.addEventListener('beautyStudioD1ContentReady',refreshAll);
+  document.addEventListener('click',e=>{
+    if(e.target.closest('.service-card,.work-item,[data-service-choice],#installBtn,#installMain,.device-card,[data-close-install]')) setTimeout(refreshAll,20);
+  },true);
+  const watchIds=['service-grid','work-grid','installModal'];
+  watchIds.forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    new MutationObserver(()=>setTimeout(refreshAll,0)).observe(el,{childList:true,subtree:true});
+  });
+  [100,700,1600,3200,6000].forEach(ms=>setTimeout(refreshAll,ms));
 })();
